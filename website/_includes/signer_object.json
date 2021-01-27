@@ -1,0 +1,20 @@
+{
+    "object_type": "signer",
+    "id": "{{ page.slug }}",
+    "url": "{{ site.url }}/api/v1/signers/{{ page.slug }}.json",
+    "name": "{{ page.signer_name }}",
+    "phone": "{{ page.signer_phone }}",
+    "email": "{{ page.signer_email }}",
+    "website": "{{ page.signer_website }}",
+    "keys": [{% for key in page.signer_keys %}
+        {
+            "pubkey": "{{ key.pubkey }}",
+            "approved_regions": [{% for region in key.approved_regions %}
+                {
+                    "id": "{{ region.region_id }}",
+                    "url": "{{ site.url }}/api/v1/regions/{{ region.region_id }}.json"
+                }{% if forloop.last == false %},{% endif %}{% endfor %}
+            ]
+        }{% if forloop.last == false %},{% endif %}{% endfor %}
+    ]
+}

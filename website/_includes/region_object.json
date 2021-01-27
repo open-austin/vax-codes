@@ -1,0 +1,9 @@
+{
+    "object_type": "region",
+    "id": "{{ page.slug }}",
+    "url": "{{ site.url }}{{ page.url }}",
+    "name": "{{ page.region_name }}",
+    "phone": "{{ page.region_phone }}",
+    "email": "{{ page.region_email }}",
+    "website": "{{ page.region_website }}"
+}

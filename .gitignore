@@ -1,0 +1,9 @@
+# Temporary files
+\#*\#
+*~
+
+# Jekyll website
+website/_site
+website/Gemfile.lock
+
+

@@ -1,0 +1,13 @@
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - CNAME
+
+collections:
+  regions:
+    output: true
+    permalink: /api/v1/regions/:title.json
+  signers:
+    output: true
+    permalink: /api/v1/signers/:title.json

@@ -1,0 +1,16 @@
+---
+layout: null
+slug: test_arc
+signer_name: Test Vaccine Giver
+signer_phone: (512) 555-5555
+signer_email: vaxcodes@example.com
+signer_website: https://example.com/vaxcodes
+signer_keys:
+- pubkey: QQi17MqKMShSmEU7xZbrWl5S70eMnsu3B1d/WgQUmkQ= # Site 1 (downtown)
+  approved_regions:
+  - region_id: test_austin
+- pubkey: C4PSZPRGh5wRFWheArQLee09ssQFS/14+rMjjciJ6T0= # Site 2 (park road)
+  approved_regions:
+  - region_id: test_austin
+---
+{% include signer_object.json %}
