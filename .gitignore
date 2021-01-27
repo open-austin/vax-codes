@@ -3,7 +3,6 @@
 *~
 
 # Jekyll website
-website/_site
-website/Gemfile.lock
-
+docs/_site
+docs/Gemfile.lock
 
