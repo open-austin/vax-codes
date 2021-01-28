@@ -8,7 +8,7 @@
     "website": "{{ page.signer_website }}",
     "keys": [{% for key in page.signer_keys %}
         {
-            "pubkey": "{{ key.pubkey }}",
+            "pubkey": {{ key.pubkey | strip | jsonify }},
             "approved_regions": [{% for region in key.approved_regions %}
                 {
                     "id": "{{ region.region_id }}",

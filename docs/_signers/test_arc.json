@@ -6,11 +6,36 @@ signer_phone: (512) 555-5555
 signer_email: vaxcodes@example.com
 signer_website: https://example.com/vaxcodes
 signer_keys:
-- pubkey: QQi17MqKMShSmEU7xZbrWl5S70eMnsu3B1d/WgQUmkQ= # Site 1 (downtown)
+
+# Site 1 (downtown)
+- pubkey: |
+    -----BEGIN PGP PUBLIC KEY BLOCK-----
+    Version: GnuPG v2
+
+    mFIEYBGjHBMIKoZIzj0DAQcCAwQvc5ikzwmQVGc2wwz2DJ/ShLHMPE+5MyS7YcaX
+    KPbKLRr03U1VxEyM+RG8kSOOMer3y41keNP8RP9ec/L5Ng3ctBVBQUEgQkJCIDxh
+    YWFAYmJiLmNvbT6IeQQTEwgAIQUCYBGjHAIbAwULCQgHAgYVCAkKCwIEFgIDAQIe
+    AQIXgAAKCRCsXouZ2/Z1CFHcAQDyOctXSblYGuyBJy1vd8Z4f3gpFRsLwhkCODya
+    o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
+    =rCqm
+    -----END PGP PUBLIC KEY BLOCK-----
   approved_regions:
   - region_id: test_austin
-- pubkey: C4PSZPRGh5wRFWheArQLee09ssQFS/14+rMjjciJ6T0= # Site 2 (park road)
+
+# Site 2 (park road)
+- pubkey: |
+    -----BEGIN PGP PUBLIC KEY BLOCK-----
+    Version: GnuPG v2
+
+    mFIEYBGjHBMIKoZIzj0DAQcCAwQvc5ikzwmQVGc2wwz2DJ/ShLHMPE+5MyS7YcaX
+    KPbKLRr03U1VxEyM+RG8kSOOMer3y41keNP8RP9ec/L5Ng3ctBVBQUEgQkJCIDxh
+    YWFAYmJiLmNvbT6IeQQTEwgAIQUCYBGjHAIbAwULCQgHAgYVCAkKCwIEFgIDAQIe
+    AQIXgAAKCRCsXouZ2/Z1CFHcAQDyOctXSblYGuyBJy1vd8Z4f3gpFRsLwhkCODya
+    o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
+    =rCqm
+    -----END PGP PUBLIC KEY BLOCK-----
   approved_regions:
   - region_id: test_austin
+
 ---
 {% include signer_object.json %}
