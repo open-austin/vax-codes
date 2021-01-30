@@ -5,9 +5,9 @@ exclude:
   - CNAME
 
 collections:
-  regions:
+  groups:
     output: true
-    permalink: /api/v1/regions/:title.json
-  signers:
+    permalink: /api/v1/groups/:title.json
+  issuers:
     output: true
-    permalink: /api/v1/signers/:title.json
+    permalink: /api/v1/issuers/:title.json

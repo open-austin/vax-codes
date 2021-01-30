@@ -1,0 +1,9 @@
+---
+layout: null
+slug: test_austin
+group_name: Test Austin Health Department
+group_phone: (512) 555-5555
+group_email: vaxcodes@example.com
+group_website: https://example.com/vaxcodes
+---
+{% include group_object.json %}

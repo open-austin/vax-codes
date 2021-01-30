@@ -1,0 +1,11 @@
+---
+layout: null
+permalink: /api/v1/groups.json
+---
+{
+    "object_type": "list",
+    "items": [{% for page in site.groups %}
+{% include group_object.json %}{% if forloop.last == false %},{% endif %}{% endfor %}
+    ],
+    "next": null
+}

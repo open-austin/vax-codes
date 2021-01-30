@@ -1,11 +1,11 @@
 ---
 layout: null
 slug: test_arc
-signer_name: Test Vaccine Giver
-signer_phone: (512) 555-5555
-signer_email: vaxcodes@example.com
-signer_website: https://example.com/vaxcodes
-signer_keys:
+issuer_name: Test Vaccine Giver
+issuer_phone: (512) 555-5555
+issuer_email: vaxcodes@example.com
+issuer_website: https://example.com/vaxcodes
+issuer_keys:
 
 # Site 1 (downtown)
 - pubkey: |
@@ -19,8 +19,8 @@ signer_keys:
     o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
     =rCqm
     -----END PGP PUBLIC KEY BLOCK-----
-  approved_regions:
-  - region_id: test_austin
+  groups:
+  - slug: test_austin
 
 # Site 2 (park road)
 - pubkey: |
@@ -34,8 +34,8 @@ signer_keys:
     o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
     =rCqm
     -----END PGP PUBLIC KEY BLOCK-----
-  approved_regions:
-  - region_id: test_austin
+  groups:
+  - slug: test_austin
 
 ---
-{% include signer_object.json %}
+{% include issuer_object.json %}

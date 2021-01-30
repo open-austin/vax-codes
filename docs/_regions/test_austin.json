@@ -1,9 +1,0 @@
----
-layout: null
-slug: test_austin
-region_name: Test Austin Health Department
-region_phone: (512) 555-5555
-region_email: vaxcodes@example.com
-region_website: https://example.com/vaxcodes
----
-{% include region_object.json %}
