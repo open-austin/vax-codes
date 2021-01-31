@@ -1,0 +1,21 @@
+{
+    "id": {{ page.slug | jsonify }},
+    "listed": {{ page.is_listed | jsonify  }},
+    "url": "{{ site.url }}/api/v1/issuers/{{ page.slug }}.json",
+    "name": {{ page.issuer_name | jsonify }},
+    "phone": {{ page.issuer_phone | jsonify }},
+    "email": {{ page.issuer_email | jsonify }},
+    "website": {{ page.issuer_website | jsonify }},
+    "keys": [{% for key in page.issuer_keys %}
+        {
+            "pubkey": {{ key.pubkey | strip | jsonify }},
+            "groups": [{% for group in key.groups %}
+                { {% for g in site.groups %}{% if g.slug == group.slug %}
+                    "id": {{ g.slug | jsonify }},
+                    "url": "{{ site.url }}{{ g.url }}",
+                    "name": {{ g.group_name | jsonify }}{% endif %}{% endfor %}
+                }{% if forloop.last == false %},{% endif %}{% endfor %}
+            ]
+        }{% if forloop.last == false %},{% endif %}{% endfor %}
+    ]
+}

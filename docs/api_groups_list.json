@@ -1,11 +1,13 @@
 ---
-layout: null
 permalink: /api/v1/groups.json
 ---
-{
-    "object_type": "list",
-    "items": [{% for page in site.groups %}
-{% include group_object.json %}{% if forloop.last == false %},{% endif %}{% endfor %}
+{% assign listed_groups = site.groups | where: "is_listed", true %}{
+    "groups": [{% for group in listed_groups %}
+        {
+            "id": {{ group.slug | jsonify }},
+            "url": "{{ site.url }}{{ group.url }}",
+            "name": {{ group.group_name | jsonify }}
+        }{% if forloop.last == false %},{% endif %}{% endfor %}
     ],
     "next": null
 }

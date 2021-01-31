@@ -1,9 +1,0 @@
-{
-    "object_type": "group",
-    "id": "{{ page.slug }}",
-    "url": "{{ site.url }}{{ page.url }}",
-    "name": "{{ page.group_name }}",
-    "phone": "{{ page.group_phone }}",
-    "email": "{{ page.group_email }}",
-    "website": "{{ page.group_website }}"
-}

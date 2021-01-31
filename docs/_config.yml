@@ -11,3 +11,15 @@ collections:
   issuers:
     output: true
     permalink: /api/v1/issuers/:title.json
+
+defaults:
+  - scope:
+      path: ""
+      type: "groups"
+    values:
+      layout: "group_object"
+  - scope:
+      path: ""
+      type: "issuers"
+    values:
+      layout: "issuer_object"

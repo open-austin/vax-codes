@@ -1,11 +1,13 @@
 ---
-layout: null
 permalink: /api/v1/issuers.json
 ---
-{
-    "object_type": "list",
-    "items": [{% for page in site.issuers %}
-{% include issuer_object.json %}{% if forloop.last == false %},{% endif %}{% endfor %}
+{% assign listed_issuers = site.issuers | where: "is_listed", true %}{
+    "issuers": [{% for issuer in listed_issuers %}
+        {
+            "id": {{ issuer.slug | jsonify }},
+            "url": "{{ site.url }}{{ issuer.url }}",
+            "name": {{ issuer.issuer_name | jsonify }}
+        }{% if forloop.last == false %},{% endif %}{% endfor %}
     ],
     "next": null
 }

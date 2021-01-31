@@ -1,0 +1,9 @@
+{
+    "id": {{ page.slug | jsonify }},
+    "listed": {{ page.is_listed | jsonify  }},
+    "url": "{{ site.url }}{{ page.url }}",
+    "name": {{ page.group_name | jsonify }},
+    "phone": {{ page.group_phone | jsonify  }},
+    "email": {{ page.group_email | jsonify  }},
+    "website": {{ page.group_website | jsonify  }}
+}
