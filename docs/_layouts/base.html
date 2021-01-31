@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Vax.Codes is an easy, free way to verify someone has received a Covid-19 vaccine.">
+        <meta name="robots" content="noindex, nofollow">
+        <link rel="icon" type="image/png" href="{{ '/assets/favicon.png' | relative_url }}">
+        <title>{{ page.title }}</title>
+        <link href="{{ '/assets/bootstrap-5.0.0-beta1/bootstrap.min.css' | relative_url }}" rel="stylesheet">
+        <style>
+            /* Base template styles */
+            .navbar-brand img {
+                width: 39px;
+                height: 39px;
+                image-rendering: auto;
+                image-rendering: crisp-edges;
+                image-rendering: pixelated;
+            }
+        </style>
+        <style>
+            /* SVG icons (based on https://github.com/diafygi/svg-font-to-svg-sprite-converter)
+               Example (put "svgicons: fa-link, fa-plus-circle" in front matter):
+               <svg class="svgicon"><use href="#fa-link"/></svg>
+               <svg class="svgicon"><use href="#fa-plus-circle"/></svg>
+            */
+            #svgicon-defs{
+                display: none;
+            }
+            .svgicon {
+                overflow: visible !important;
+                height: 0.7em;
+                width: 0.7em;
+                fill:currentColor;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- SVG Icons (see comment in css above on how to use) -->
+        <svg id="svgicon-defs" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                {% include fontawesome/fa-external-link.svg %}
+                {% assign additional_svgicons = page.svgicons | split: ',' %}
+                {% for svgicon_name in additional_svgicons %}
+                    {% assign svgicon_file = svgicon_name | strip | prepend: "fontawesome/" | append: ".svg" %}
+                    {% include {{ svgicon_file }} %}
+                {% endfor %}
+            </defs>
+        </svg>
+
+        <div class="pt-2 pb-2 bg-danger text-center text-light">
+            <strong>
+                WARNING: This project is still under development.
+                <a href="https://github.com/open-austin/vax-codes"
+                   class="text-light"><u>Check out the project's repo for progress</u></a>
+            </strong>
+        </div>
+
+        <!-- Header -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ '/' | relative_url }}">
+                    <img src="{{ '/assets/logo_syringe.png' | relative_url }}" alt="Vax.Codes logo">
+                    Vax.Codes
+                </a>
+                <a class="btn btn-outline-light text-nowrap me-auto" href="{{ '/scan' | relative_url }}">
+                    Scan a QR code
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vax-codes-nav" aria-controls="vax-codes-nav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="vax-codes-nav">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link{% if page.url == '/how-it-works' %} active" aria-current="page{% endif %}" href="{{ '/how-it-works' | relative_url }}">How it works</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link{% if page.url == '/about' %} active" aria-current="page{% endif %}" href="{{ '/about' | relative_url }}">About Us</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content -->
+        <div role="main">
+            {{ content }}
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-muted bg-light pt-4 pb-4">
+            <div class="container">
+                <p class="float-sm-end">
+                    <a href="#">Back to top</a>
+                </p>
+                <p>
+                    Vax.Codes is an open-source project run by volunteers at
+                    <a href="https://www.open-austin.org/" target="_blank" rel="noopener noreferrer"
+                        >Open Austin
+                        <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                </p>
+                <div class="row">
+                    <div class="col-sm-auto pe-sm-5">
+                        <ul class="list-unstyled">
+                            <li>
+                                Helpful links:
+                            </li>
+                            <li>
+                                <a href="{{ '/' | relative_url }}">Home</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/how-it-works' | relative_url }}">How it works</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/about' | relative_url }}">About us</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-auto pe-sm-5">
+                        <ul class="list-unstyled">
+                            <li>
+                                QR codes:
+                            </li>
+                            <li>
+                                <a href="{{ '/scan' | relative_url }}">Scan a QR code</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/issuers' | relative_url }}">Browse issuers</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/groups' | relative_url }}">Browse groups</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-auto pe-sm-5">
+                        <ul class="list-unstyled">
+                            <li>
+                                Admin portal:
+                            </li>
+                            <li>
+                                <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/admin/groups' | relative_url }}">Group owners</a>
+                            </li>
+                            <li>
+                                <a href="{{ '/docs' | relative_url }}">API docs</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-auto pe-sm-5">
+                        <ul class="list-unstyled">
+                            <li>
+                                Other links:
+                            </li>
+                            <li>
+                                <a href="{{ '/docs/security' | relative_url }}">Security</a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/open-austin/vax-codes" target="_blank" rel="noopener noreferrer"
+                                    >Github repo
+                                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/open-austin/project-ideas/issues/159" target="_blank" rel="noopener noreferrer"
+                                    >Project idea
+                                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="{{ '/assets/bootstrap-5.0.0-beta1/bootstrap.bundle.min.js' | relative_url }}"></script>
+        {% assign additional_js_list = page.additional_js | split: ',' %}
+        {% for additional_js in additional_js_list %}
+            <script src="{{ additional_js | strip | relative_url }}"></script>
+        {% endfor %}
+    </body>
+</html>
+
