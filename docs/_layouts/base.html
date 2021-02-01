@@ -64,7 +64,7 @@
                     <img src="{{ '/assets/logo_syringe.png' | relative_url }}" alt="Vax.Codes logo">
                     Vax.Codes
                 </a>
-                <a class="btn btn-outline-light text-nowrap me-auto{% if page.url == '/scan' %} d-none{% endif %}" href="{{ '/scan' | relative_url }}">
+                <a class="btn btn-outline-light text-nowrap me-auto{% if page.url == '/scan.html' %} d-none{% endif %}" href="{{ '/scan' | relative_url }}">
                     Scan a QR code
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vax-codes-nav" aria-controls="vax-codes-nav" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,10 +73,10 @@
                 <div class="collapse navbar-collapse" id="vax-codes-nav">
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link{% if page.url == '/how-it-works' %} active" aria-current="page{% endif %}" href="{{ '/how-it-works' | relative_url }}">How it works</a>
+                            <a class="nav-link{% if page.url == '/how-it-works.html' %} active" aria-current="page{% endif %}" href="{{ '/how-it-works' | relative_url }}">How it works</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link{% if page.url == '/about' %} active" aria-current="page{% endif %}" href="{{ '/about' | relative_url }}">About Us</a>
+                            <a class="nav-link{% if page.url == '/about.html' %} active" aria-current="page{% endif %}" href="{{ '/about' | relative_url }}">About Us</a>
                         </li>
                     </ul>
                 </div>
