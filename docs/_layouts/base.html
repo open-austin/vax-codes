@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Vax.Codes is an easy, free way to verify someone has received a Covid-19 vaccine.">
         <meta name="robots" content="noindex, nofollow">
+        <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
         <link rel="icon" type="image/png" href="{{ '/assets/favicon.png' | relative_url }}">
         <title>{{ page.title }}</title>
         <link href="{{ '/assets/bootstrap-5.0.0-beta1/bootstrap.min.css' | relative_url }}" rel="stylesheet">
@@ -48,11 +49,11 @@
             </defs>
         </svg>
 
-        <div class="pt-2 pb-2 bg-danger text-center text-light">
+        <div class="p-2 bg-danger text-center text-light">
             <strong>
                 WARNING: This project is still under development.
                 <a href="https://github.com/open-austin/vax-codes"
-                   class="text-light"><u>Check out the project's repo for progress</u></a>
+                   class="text-light d-inline-block"><u>Check out the project's repo for progress</u></a>
             </strong>
         </div>
 
@@ -63,7 +64,7 @@
                     <img src="{{ '/assets/logo_syringe.png' | relative_url }}" alt="Vax.Codes logo">
                     Vax.Codes
                 </a>
-                <a class="btn btn-outline-light text-nowrap me-auto" href="{{ '/scan' | relative_url }}">
+                <a class="btn btn-outline-light text-nowrap me-auto{% if page.url == '/scan' %} d-none{% endif %}" href="{{ '/scan' | relative_url }}">
                     Scan a QR code
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vax-codes-nav" aria-controls="vax-codes-nav" aria-expanded="false" aria-label="Toggle navigation">
@@ -176,7 +177,7 @@
         <script src="{{ '/assets/bootstrap-5.0.0-beta1/bootstrap.bundle.min.js' | relative_url }}"></script>
         {% assign additional_js_list = page.additional_js | split: ',' %}
         {% for additional_js in additional_js_list %}
-            <script src="{{ additional_js | strip | relative_url }}"></script>
+            <script src="{{ additional_js | strip | relative_url }}" defer></script>
         {% endfor %}
     </body>
 </html>

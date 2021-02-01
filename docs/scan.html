@@ -1,0 +1,245 @@
+---
+layout: base
+permalink: /scan
+title: Vax.Codes - Scan QR code
+svgicons: fa-camera, fa-pencil
+additional_js: /assets/qr-scanner-e8a77de/qr-scanner.umd.min.js, /assets/openpgpjs-v4.10.10/openpgp.min.js
+---
+<style>
+    #results-value {
+        overflow-y: auto;
+        white-space: pre;
+        font-size: 200%;
+    }
+    #start-scan .svgicon {
+        font-size: 500%;
+    }
+    #scanner-wrapper {
+        position: relative;
+    }
+    #scanner-loading {
+        position: absolute;
+        left: 16px;
+        top: 3px;
+    }
+</style>
+<div class="container pt-5 mb-5">
+
+    <!-- Results -->
+    <div id="results" class="row mb-3">
+        <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+            <div class="alert alert-info text-center" role="alert">
+                Verifying...
+            </div>
+            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                This doesn't appear to be a verification QR code
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-danger alert-dismissible fade show text-sm-center" role="alert">
+                <div>
+                    This QR code is no longer valid.
+                </div>
+                <div class="mt-1">
+                    Please request a new QR code from the issuer.
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="alert alert-success text-center" role="alert">
+                Verified vaccine recipient!
+            </div>
+            <div class="alert alert-warning text-sm-center" role="alert">
+                <div class="small">
+                    Verified vaccine, but only trusted within an
+                    <a href="{{ '/how-it-works' | relative_url }}#unlisted-groups" class="alert-link d-inline-block">unlisted group</a>
+                </div>
+                <div class="mt-1">
+                    Please make sure you trust:
+                    <a href="{{ '/groups' | relative_url }}?id=test_austin" class="alert-link d-inline-block">Test Austin</a>
+                </div>
+            </div>
+            <h3>
+                Contents:
+            </h3>
+            <code id="results-value" class="d-block">Anthony Fauci
+DOB: 12/24/1940</code>
+            <div class="small">
+                Issued by:
+                <a href="{{ '/issuers' | relative_url }}?id=test_arg" target="_blank">Test ARC</a><br>
+                (this issuer is trusted by these groups:
+                <a href="{{ '/groups' | relative_url }}?id=test_austin" target="_blank">Test Austin</a>)
+            </div>
+            <div class="small fst-italic mt-3">
+                <div class="text-decoration-underline">
+                    WARNING: QR codes are just pieces of paper!
+                </div>
+                <div class="mt-1">
+                    Always check the above information against a person's
+                    government-issued ID before believing it.
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Scanner -->
+    <div class="row justify-content-center mb-3">
+        <div id="scanner-wrapper" class="col-auto">
+
+            <!-- Scanner icon -->
+            <button id="start-scan" class="btn btn-outline-primary p-5 disabled">
+                <div>
+                    <svg class="svgicon"><use href="#fa-camera"/></svg>
+                </div>
+                <h3 class="text-decoration-underline mt-3">
+                    Scan QR Code
+                </h3>
+            </button>
+
+            <!-- Loading spinner -->
+            <div id="scanner-loading" class="spinner-border text-black-50" role="status" style="position">
+                <span class="visually-hidden">Loading scanner...</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Options below scanner icon -->
+    <div class="row justify-content-center">
+        <div class="col-auto text-center">
+            <p class="fst-italic">
+                Use your phone camera or webcam to scan a QR code<br class="d-none d-sm-inline">
+                to verify someone got their Covid-19 vaccine.
+            </p>
+            <p class="fst-italic">
+                Don't have a camera? No problem!<br>
+                <a data-bs-toggle="modal" data-bs-target="#upload-image-modal" href="#" role="button">Upload an image of the QR code</a><br>
+                or <a data-bs-toggle="modal" data-bs-target="#manual-entry-modal" href="#" role="button">type in the verification URL</a>
+            </p>
+            <p class="fst-italic">
+                Already got your Covid-19 vaccine and want a QR code?<br>
+                <a href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
+            </p>
+            <p class="small mt-5">
+                Current trust configuration:<br>
+                <em>Trusting issuers from within listed groups</em><br>
+                <a class="small" data-bs-toggle="modal" data-bs-target="#edit-groups-modal" href="#" role="button">(edit which groups you trust)</a>
+            </p>
+        </div>
+    </div>
+</div>
+<!-- Modal: Image upload -->
+<div class="modal fade" id="upload-image-modal" tabindex="-1" aria-labelledby="upload-image-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="upload-image-title">Upload an image of a QR code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <code>TODO: add this functionality</code>
+            </div>
+            <div class="modal-footer">
+                <button id="scan-upload" type="button" class="btn btn-primary">Scan Image</button>
+                <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Manual code entry -->
+<div class="modal fade" id="manual-entry-modal" tabindex="-1" aria-labelledby="manual-entry-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manual-entry-title">Manually enter a verification code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <code>TODO: add this functionality</code>
+            </div>
+            <div class="modal-footer">
+                <button id="verify-code" type="button" class="btn btn-primary">Verify Code</button>
+                <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit trusted groups -->
+<div class="modal fade" id="edit-groups-modal" tabindex="-1" aria-labelledby="edit-groups-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="edit-groups-title">Set Trusted Groups</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <code>TODO: add this functionality</code>
+            </div>
+            <div class="modal-footer">
+                <button id="set-groups" type="button" class="btn btn-primary">Set As Trusted Groups</button>
+                <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Javacript functionality -->
+<script>
+    // globals
+    const startScanButton = document.getElementById("start-scan");
+    const scanUploadButton = document.getElementById("scan-upload");
+    const verifyCodeButton = document.getElementById("verify-code");
+    const setGroupsButton = document.getElementById("set-groups");
+    const scannerWrapper = document.getElementById("scanner-wrapper");
+    const scannerLoading = document.getElementById("scanner-loading");
+
+    // start the camera and try to scan for QR codes
+    function startScanner(){
+        // TODO
+        alert("Coming soon!");
+    }
+
+    // try to scan an uploaded image
+    function scanUploadedImage(){
+        // TODO
+        alert("Coming soon!");
+    }
+
+    // try to verify a copy/pasted verification code URL
+    function verifyManualEntry(){
+        // TODO
+        alert("Coming soon!");
+    }
+
+    // try to verify a copy/pasted verification code URL
+    function setTrustedGroups(){
+        // TODO
+        alert("Coming soon!");
+    }
+
+    // initialize all the funcationality
+    async function init() {
+
+        // wait for dependencies to load
+        if (window.QrScanner === undefined || window.openpgp === undefined) {
+            setTimeout(init, 200); // wait 0.2 sec and check again
+            return;
+        }
+
+        // bind web workers
+        QrScanner.WORKER_PATH = "{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}";
+        await openpgp.initWorker({ path: "{{ '/assets/openpgpjs-v4.10.10/openpgp.worker.min.js' | relative_url }}" });
+
+        // bind listeners to buttons
+        startScanButton.addEventListener("click", startScanner);
+        scanUploadButton.addEventListener("click", scanUploadedImage);
+        verifyCodeButton.addEventListener("click", verifyManualEntry);
+        setGroupsButton.addEventListener("click", setTrustedGroups);
+
+        // ready for scanning, so enable the big scan button
+        startScanButton.classList.remove("disabled");
+        scannerLoading.classList.add("d-none");
+    }
+    init(); // start init process on load
+</script>
