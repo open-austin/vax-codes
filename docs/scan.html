@@ -1228,7 +1228,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                     // user didn't allow camera access
                     case "NotAllowedError":
-                        scannerLoadError.textContent = "Video playback denied";
+                        scannerLoadError.textContent = "Video playback denied (" + error.message + ")";
                         break;
 
                     // no devices
