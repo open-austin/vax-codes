@@ -731,6 +731,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
     // show results
     function showResults(results) {
+
+        // scroll to the top of the page
+        window.scrollTo(0, 0);
+
         // hide any existing results
         resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
 
@@ -1174,6 +1178,9 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                                 function(error) {
                                     // hide any existing results
                                     resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
+
+                                    // scroll to the top of the page
+                                    window.scrollTo(0, 0);
 
                                     // code isn't in the right format
                                     if (error['error'] === "invalidFormat") {
