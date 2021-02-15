@@ -2,90 +2,117 @@
 layout: base
 title: Vax.Codes - Scan QR code
 svgicons: fa-camera, fa-pencil
-additional_js: /assets/qr-scanner-e8a77de/qr-scanner.umd.min.js, /assets/openpgpjs-v4.10.10/openpgp.min.js
+additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 ---
 <style>
-    #results-value {
-        overflow-y: auto;
-        white-space: pre;
-        font-size: 200%;
+    #scanner {
+        display: inline-block;
+        position: relative;
+        width: 300px;
+        height: 300px;
+    }
+    #start-scan {
+        width: 100%;
+        height: 100%;
     }
     #start-scan .svgicon {
         font-size: 500%;
     }
-    #scanner-wrapper {
-        position: relative;
+    #scanner-image {
+        border: 1px solid blue;
+        width: 100%;
+        height: 100%;
     }
-    #scanner-loading {
+    #scanner-load-error {
         position: absolute;
         left: 16px;
         top: 3px;
     }
 </style>
-<div class="container pt-5 mb-5">
 
-    <!-- Results -->
-    <div id="results" class="row mb-3">
+<!-- Results -->
+<div id="result-section" class="container pt-5 d-none">
+    <div class="row mb-3">
         <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-            <div class="alert alert-info text-center" role="alert">
+            <div id="scan-pending" class="scan-result alert alert-info text-center d-none" role="alert">
                 Verifying...
             </div>
-            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+            <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show text-center d-none" role="alert">
                 This doesn't appear to be a verification QR code
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="alert alert-danger alert-dismissible fade show text-sm-center" role="alert">
+            <div id="scan-lookupError" class="scan-result alert alert-danger alert-dismissible fade show text-center d-none" role="alert">
+                The QR code issuer (<code id="lookupError-issuer">unknown</code>) isn't recognized
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div id="scan-invalidSignature" class="scan-result alert alert-danger alert-dismissible fade show text-sm-center d-none" role="alert">
                 <div>
-                    This QR code is no longer valid.
+                    This QR code is not valid.
                 </div>
                 <div class="mt-1">
                     Please request a new QR code from the issuer.
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="alert alert-success text-center" role="alert">
+            <div id="scan-success" class="scan-result alert alert-success text-center d-none" role="alert">
                 Verified vaccine recipient!
             </div>
-            <div class="alert alert-warning text-sm-center" role="alert">
+            <div id="scan-unlisted" class="scan-result alert alert-warning text-sm-center d-none" role="alert">
                 <div class="small">
                     Verified vaccine, but only trusted within an
-                    <a href="{{ '/how-it-works' | relative_url }}#unlisted-groups" class="alert-link d-inline-block">unlisted group</a>
+                    <a href="{{ '/how-it-works' | relative_url }}#unlisted-groups" class="alert-link d-inline-block" target="_blank">unlisted group</a>
                 </div>
                 <div class="mt-1">
                     Please make sure you trust:
-                    <a href="{{ '/groups' | relative_url }}?id=test_austin" class="alert-link d-inline-block">Test Austin</a>
+                    <span id="unlisted-groups"></span>
                 </div>
             </div>
-            <h3>
-                Contents:
-            </h3>
-            <code id="results-value" class="d-block">Anthony Fauci
+            <div id="results-wrapper" class="scan-result d-none">
+                <h3>
+                    Contents:
+                </h3>
+                <code id="results-value" class="d-block" style="overflow-y: auto; white-space: pre; font-size: 200%;">Anthony Fauci
 DOB: 12/24/1940</code>
-            <div class="small">
-                Issued by:
-                <a href="{{ '/issuers' | relative_url }}?id=test_arg" target="_blank">Test ARC</a><br>
-                (this issuer is trusted by these groups:
-                <a href="{{ '/groups' | relative_url }}?id=test_austin" target="_blank">Test Austin</a>)
-            </div>
-            <div class="small fst-italic mt-3">
-                <div class="text-decoration-underline">
-                    WARNING: QR codes are just pieces of paper!
+                <div class="small">
+                    Issued by:
+                    <a id="results-issuer" href="{{ '/issuers' | relative_url }}?id=test_arg" target="_blank">Test ARC</a>
+                    <br>
+                    This issuer is trusted by these groups:
+                    <span id="results-groups"></span>
                 </div>
-                <div class="mt-1">
-                    Always check the above information against a person's
-                    government-issued ID before believing it.
+                <div class="small fst-italic mt-3">
+                    <div class="text-decoration-underline">
+                        WARNING: QR codes are just pieces of paper!
+                    </div>
+                    <div class="mt-1">
+                        Always check the above information against a person's
+                        government-issued ID before believing it.
+                    </div>
                 </div>
+                <hr>
             </div>
-            <hr>
+            <div id="scan-another-wrapper" class="scan-result text-center">
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#input-options"
+                    aria-expanded="false"
+                    aria-controls="input-options"
+                >Scan Another QR Code</button>
+            </div>
         </div>
     </div>
+</div>
+
+<!-- Input Options -->
+<div id="input-options" class="container collapse show pt-4 mb-5">
 
     <!-- Scanner -->
-    <div class="row justify-content-center mb-3">
-        <div id="scanner-wrapper" class="col-auto">
-
+    <div id="scanner-wrapper" class="text-center mb-3">
+        <div id="scanner">
             <!-- Scanner icon -->
-            <button id="start-scan" class="btn btn-outline-primary p-5 disabled">
+            <button id="start-scan" class="scanner-piece btn btn-outline-primary p-5">
                 <div>
                     <svg class="svgicon"><use href="#fa-camera"/></svg>
                 </div>
@@ -94,9 +121,12 @@ DOB: 12/24/1940</code>
                 </h3>
             </button>
 
-            <!-- Loading spinner -->
-            <div id="scanner-loading" class="spinner-border text-black-50" role="status" style="position">
-                <span class="visually-hidden">Loading scanner...</span>
+            <!-- Scanner image -->
+            <canvas id="scanner-image" class="scanner-piece d-none"></canvas>
+
+            <!-- Error detecting camera -->
+            <div id="scanner-load-error" class="scanner-piece text-danger d-none" role="status">
+                No camera or webcam detected
             </div>
 
         </div>
@@ -126,6 +156,7 @@ DOB: 12/24/1940</code>
         </div>
     </div>
 </div>
+
 <!-- Modal: Image upload -->
 <div class="modal fade" id="upload-image-modal" tabindex="-1" aria-labelledby="upload-image-title" aria-hidden="true">
     <div class="modal-dialog">
@@ -148,19 +179,30 @@ DOB: 12/24/1940</code>
 <!-- Modal: Manual code entry -->
 <div class="modal fade" id="manual-entry-modal" tabindex="-1" aria-labelledby="manual-entry-title" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <form id="manual-entry-form" class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="manual-entry-title">Manually enter a verification code</h5>
+                <h5 class="modal-title" id="manual-entry-title">Manually enter a verification URL</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <code>TODO: add this functionality</code>
+                <label for="manual-code-entry" class="form-label">Verification URL</label>
+                <input
+                    class="form-control"
+                    id="manual-code-entry"
+                    aria-describedby="code-entry-help"
+                    placeholder="(e.g. https://vax.codes/scan#v1/abc123...)">
+                <div id="code-entry-error" class="invalid-feedback d-block">
+                    &nbsp;
+                </div>
+                <div id="code-entry-help" class="form-text">
+                    If you have a link instead of a QR code, copy-paste it above.
+                </div>
             </div>
             <div class="modal-footer">
-                <button id="verify-code" type="button" class="btn btn-primary">Verify Code</button>
+                <button id="verify-code" type="submit" class="btn btn-primary">Verify Code</button>
                 <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -185,60 +227,642 @@ DOB: 12/24/1940</code>
 
 <!-- Javacript functionality -->
 <script>
-    // globals
-    const startScanButton = document.getElementById("start-scan");
-    const scanUploadButton = document.getElementById("scan-upload");
-    const verifyCodeButton = document.getElementById("verify-code");
-    const setGroupsButton = document.getElementById("set-groups");
-    const scannerWrapper = document.getElementById("scanner-wrapper");
-    const scannerLoading = document.getElementById("scanner-loading");
 
-    // start the camera and try to scan for QR codes
-    function startScanner(){
-        // TODO
-        alert("Coming soon!");
+    /**********************/
+    /** Helper functions **/
+    /**********************/
+
+    // convert base64 (url-safe or not) to Uint8Array
+    function fromB64(b64) {
+        // convert url-safe base64 strings to normal base64 strings
+        b64 = b64.replace(/-/g, "+").replace(/_/g, "/") + "==".slice(2 - (b64.length & 3));
+        // convert base64 to binary string
+        let bStr = window.atob(b64);
+        // create byte array from binary string
+        let bArr = new Uint8Array(bStr.length);
+        for (let i = 0; i < bStr.length; i++) {
+            bArr[i] = bStr.charCodeAt(i);
+        }
+        return bArr;
     }
 
-    // try to scan an uploaded image
-    function scanUploadedImage(){
-        // TODO
-        alert("Coming soon!");
+    // convert a Uint8Array to url-safe base64 string
+    function toB64(bArr) {
+        // convert to binary string
+        let bStr = String.fromCharCode.apply(null, bArr);
+        // convert to normal base64
+        let b64 = window.btoa(bStr);
+        // make url-safe
+        b64 = b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+        return b64;
     }
 
-    // try to verify a copy/pasted verification code URL
-    function verifyManualEntry(){
-        // TODO
-        alert("Coming soon!");
-    }
+    // verify an openpgp signature
+    //  callback argument has the format: {
+    //      "valid": true|false,
+    //      "verifyResult": <obj>, // optional, if was able to read pubkey+signature
+    //      "verifyError", <obj>, // optional, if something else went wrong
+    //  }
+    function openpgpVerify(numLoops, pubkey, sig, txt, callback) {
 
-    // try to verify a copy/pasted verification code URL
-    function setTrustedGroups(){
-        // TODO
-        alert("Coming soon!");
-    }
-
-    // initialize all the funcationality
-    async function init() {
-
-        // wait for dependencies to load
-        if (window.QrScanner === undefined || window.openpgp === undefined) {
-            setTimeout(init, 200); // wait 0.2 sec and check again
+        // fail if waiting too long for openpgp to load
+        if (numLoops > 1000) {
+            callback({
+                "valid": false,
+                "verifyError": {"msg": "timeout waiting for openpgp.js to load"},
+            });
             return;
         }
 
-        // bind web workers
-        QrScanner.WORKER_PATH = "{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}";
-        await openpgp.initWorker({ path: "{{ '/assets/openpgpjs-v4.10.10/openpgp.worker.min.js' | relative_url }}" });
+        // wait for openpgp to load
+        if (window.openpgp === undefined) {
+            setTimeout(openpgpVerify, 200, numLoops + 1, pubkey, sig, txt, callback); // wait 0.2 sec and check again
+            return;
+        }
 
-        // bind listeners to buttons
-        startScanButton.addEventListener("click", startScanner);
-        scanUploadButton.addEventListener("click", scanUploadedImage);
-        verifyCodeButton.addEventListener("click", verifyManualEntry);
-        setGroupsButton.addEventListener("click", setTrustedGroups);
+        // openpgp.js objects to keep track of
+        let msg = openpgp.cleartext.fromText(txt);
+        let keys = undefined;
 
-        // ready for scanning, so enable the big scan button
-        startScanButton.classList.remove("disabled");
-        scannerLoading.classList.add("d-none");
+        // ingest the public key
+        openpgp.key.readArmored(pubkey)
+
+        // ingest the detached signature
+        .then(function(pkObj) {
+            keys = pkObj.keys;
+            return openpgp.signature.read(sig);
+        })
+
+        // verify the signature
+        .then(function(sigObj) {
+            return openpgp.verify({
+                "message": msg,
+                "signature": sigObj,
+                "publicKeys": keys,
+            });
+        })
+
+        // return verification results
+        .then(function(verifyResult){
+
+            // valid signature, hooray!
+            let sigs = verifyResult.signatures;
+            if (sigs && sigs.length === 1 && sigs[0].valid) {
+                callback({
+                    "valid": true,
+                    "verifyResult": verifyResult,
+                });
+            }
+
+            // invalid signature
+            else {
+                callback({
+                    "valid": false,
+                    "verifyResult": verifyResult,
+                });
+            }
+        })
+
+        // catchall
+        .catch(function(verifyError) {
+            callback({
+                "valid": false,
+                "verifyError": verifyError,
+            });
+        });
     }
-    init(); // start init process on load
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let LANG = "en";
+    // TODO: allow different languages
+
+
+    /************************/
+    /** Core Functionality **/
+    /************************/
+
+    /*
+     *  These are the functions that take a code and verify it. Supported code types are listed in
+     *  the master SUPPORTED_CODE_FORMATS list, and when a code is passed to the verifyCode()
+     *  function, we try to match the code to the supported code type and then pass it to that
+     *  code type's sub-function (e.g. verifyV1Code()).
+     *
+     *  Code type sub-functions need to expect 3 arguments (code, successCallback, errorCallback)
+     *  and follow the expected callback argument formats (see below).
+     *
+     *  Success callback passed argument: {
+     *      "codeType": "<code_type>",
+     *      ...other key-values specific to the code type
+     *  }
+     *
+     *  Success callback passed argument: {
+     *      "error": "invalidFormat|lookupError|invalidSignature",
+     *      "codeType": undefined|"<code_type>", // undefined if couldn't find what type of code it was
+     *      ...other key-values specific to the code type
+     *  }
+     */
+
+    // Vax.Codes v1 format verifications
+    // Format:
+    //  {optional_url_and_settings}{version}/{issuer}/{signature_url_safe_b64}/{signed_value_percent_encoded}
+    // Examples:
+    //  v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    //  https://vax.codes/scan#v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    //  https://vax.codes/scan#api=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    //  https://vax.codes/scan#groups=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    //  https://vax.codes/scan#pubkey=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    const vaxCodesV1MatchRegex = new RegExp("^(.*)v1/([^/#]+)/([a-zA-Z0-9-_]+)/([^/#]+)$");
+    const vaxCodesV1CodeType = "vax-codes-v1";
+    function vaxCodesV1Verify(code, successCallback, errorCallback) {
+
+        // break out the code into groups
+        const codeGroups = code.match(vaxCodesV1MatchRegex);
+        if (codeGroups === null) {
+            errorCallback({
+                "error": "invalidFormat",
+                "codeType": vaxCodesV1CodeType,
+                "errorType": "regexMismatch",
+            });
+            return;
+        }
+
+        // define the verification parameters
+        let urlAndSettings = codeGroups[1];
+        let issuerId = codeGroups[2];
+        let signatureB64 = codeGroups[3];
+        let unverifiedContent = decodeURIComponent(codeGroups[4]);
+
+        // convert the base64 signature to bytes
+        let signature = undefined;
+        try {
+            signature = fromB64(signatureB64);
+        } catch(err) {
+            errorCallback({
+                "error": "invalidFormat",
+                "codeType": vaxCodesV1CodeType,
+                "errorType": "sigDecodeError",
+                "b64DecodeError": err,
+            });
+            return;
+        }
+
+        // determine trust settings
+        let vaxCodesV1IssuersAPI = "api/v1/issuers/"; // default api endpoint root
+        let vaxCodesV1TrustedPubkey = undefined;
+        // TODO: allow overriding issuers api endpoint
+        // TODO: allow setting default trusted groups
+        // TODO: allow setting specific pubkey to verify against
+
+        // verify against the specifically provided key
+        if (vaxCodesV1TrustedPubkey !== undefined) {
+            openpgpVerify(0, vaxCodesV1TrustedPubkey, signature, unverifiedContent, function(sigResult) {
+                if (sigResult['valid']) {
+                    successCallback({
+                        "codeType": vaxCodesV1CodeType,
+                        "sigResult": sigResult,
+                        //"keyIndex": 0,    // no issuer details for specifically provided pubkeys
+                        //"issuer": {...},  // no issuer details for specifically provided pubkeys
+                    });
+                }
+                else {
+                    errorCallback({
+                        "error": "invalidSignature",
+                        "codeType": vaxCodesV1CodeType,
+                        "errorType": "manualVerifyFail",
+                        "sigResult": sigResult,
+                    });
+                }
+            });
+        }
+        // look up the issuer's public keys from the api
+        else {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", vaxCodesV1IssuersAPI + issuerId + ".json");
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                    // request error (non-2XX response (or 0 for local filesystems))
+                    if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
+                        errorCallback({
+                            "error": "lookupError",
+                            "codeType": vaxCodesV1CodeType,
+                            "errorType": "issuerLookupFailure",
+                            "responseStatus": xhr.status,
+                            "responseText": xhr.responseText,
+                        });
+                        return;
+                    }
+
+                    // load issuer
+                    let issuer = undefined;
+                    try {
+                        issuer = JSON.parse(xhr.responseText);
+                    }
+                    catch(err) {
+                        errorCallback({
+                            "error": "lookupError",
+                            "codeType": vaxCodesV1CodeType,
+                            "errorType": "jsonDecodeError",
+                            "errorObj": err,
+                            "responseStatus": xhr.status,
+                            "responseText": xhr.responseText,
+                        });
+                        return;
+                    }
+
+                    // start scanning keys for valid signature
+                    function _tryIssuerKey(curIndex) {
+
+                        // no more public keys, so give up
+                        if (issuer['keys'][curIndex] === undefined || curIndex > 100) {
+                            errorCallback({
+                                "error": "invalidSignature",
+                                "codeType": vaxCodesV1CodeType,
+                                "errorType": "triedAllPublicKeys",
+                                "issuer": issuer,
+                            });
+                        }
+
+                        // found another public key to try
+                        else {
+                            openpgpVerify(0, issuer['keys'][curIndex]['pubkey'], signature, unverifiedContent, function(sigResult){
+                                // good signature
+                                if (sigResult['valid']) {
+                                    successCallback({
+                                        "codeType": vaxCodesV1CodeType,
+                                        "sigResult": sigResult,
+                                        "keyIndex": curIndex,
+                                        "issuer": issuer,
+                                    });
+                                }
+                                // invalid signature, so try the next public key
+                                else {
+                                    _tryIssuerKey(curIndex + 1);
+                                }
+                            });
+                        }
+                    }
+                    _tryIssuerKey(0);
+                }
+            };
+            xhr.send();
+        }
+    }
+
+    // ...add more verification sub-functions for more code types here
+
+    // supported vaccine verification code formats
+    const SUPPORTED_CODE_FORMATS = [
+
+        // Vax.Codes v1
+        {
+            "format": vaxCodesV1MatchRegex,
+            "verifyFunction": vaxCodesV1Verify,
+        },
+
+        // ...add more supported verification code formats here
+    ]
+
+    // starting point to verify a code or url
+    function verifyCode(code, successCallback, errorCallback) {
+
+        // determine what version/type of code to verify
+        for (i = 0; i < SUPPORTED_CODE_FORMATS.length; i++) {
+            let versionMatch = code.match(SUPPORTED_CODE_FORMATS[i]['format']);
+            if (versionMatch !== null) {
+                SUPPORTED_CODE_FORMATS[i]['verifyFunction'](code, successCallback, errorCallback);
+                return;
+            }
+        }
+
+        // didn't match any versions, so not a supported code
+        errorCallback({"error": "invalidFormat"});
+    }
+
+    /********************/
+    /** Trust Settings **/
+    /********************/
+
+    // trust settings components
+    const setGroupsButton = document.getElementById("set-groups");
+
+    // try to verify a copy/pasted verification code URL
+    setGroupsButton.addEventListener("click", function(event) {
+        // TODO
+        alert("Coming soon!");
+    });
+
+    /*********************/
+    /** Results Display **/
+    /*********************/
+
+    // results components
+    const resultSection = document.getElementById("result-section");
+    const resultsPieces = document.querySelectorAll(".scan-result");
+    const alertInvalidFormat = document.getElementById("scan-invalidFormat");
+    const alertLookupError = document.getElementById("scan-lookupError");
+    const lookupErrorIssuer = document.getElementById("lookupError-issuer");
+    const alertinvalidSignature = document.getElementById("scan-invalidSignature");
+    const alertSuccess = document.getElementById("scan-success");
+    const alertUnlisted = document.getElementById("scan-unlisted");
+    const unlistedGroupsWrapper = document.getElementById("unlisted-groups");
+    const resultsWrapper = document.getElementById("results-wrapper");
+    const resultsValue = document.getElementById("results-value");
+    const resultsIssuer = document.getElementById("results-issuer");
+    const resultsGroupsWrapper = document.getElementById("results-groups");
+    const scanAnotherWrapper = document.getElementById("scan-another-wrapper");
+    const inputOptions = document.getElementById("input-options");
+
+    // show results
+    function showResults(results) {
+        // hide any existing results
+        resultsPieces.forEach(function(el) { el.classList.add("d-none"); })
+
+        // Vax.Codes v1 results
+        if (results['codeType'] === vaxCodesV1CodeType) {
+            // show results for a manually provided public key
+            // TODO
+
+            // see what groups support the issuer's public key
+            const key = results['issuer']['keys'][results['keyIndex']];
+            let trustedGroups = [];
+            let untrustedGroups = [];
+            for (var g = 0; g < key['groups'].length; g++) {
+                let group = key['groups'][g];
+
+                // in a trusted group
+                // TODO: handle manually trusted groups
+                if (group['listed']) {
+                    trustedGroups.push(group);
+                }
+
+                // default is to assume the group is untrusted
+                else {
+                    untrustedGroups.push(group);
+                }
+            }
+
+            // issuer in a trusted group, so show a successful result
+            if (trustedGroups.length > 0) {
+
+                // populate content
+                resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+
+                // populate issuer
+                resultsIssuer.textContent = results['issuer']['name'];
+                resultsIssuer.href = "{{ '/issuers' | relative_url }}?id=" + encodeURIComponent(results['issuer']['id']);
+
+                // populate groups
+                resultsGroupsWrapper.innerHTML = "";
+                for (var g = 0; g < trustedGroups.length; g++) {
+                    let group = trustedGroups[g];
+
+                    // add group links
+                    let groupLink = document.createElement("a");
+                    groupLink.textContent = group['name'];
+                    groupLink.href = "{{ '/groups' | relative_url }}?id=" + encodeURIComponent(group['id']);
+                    groupLink.setAttribute("target", "_blank");
+                    resultsGroupsWrapper.appendChild(groupLink);
+                    if (g < (trustedGroups.length - 1)) {
+                        resultsGroupsWrapper.appendChild(document.createTextNode(", "));
+                    }
+                }
+
+                // show rendered results
+                resultSection.classList.remove("d-none");
+                alertSuccess.classList.remove("d-none");
+                resultsWrapper.classList.remove("d-none");
+                scanAnotherWrapper.classList.remove("d-none");
+                inputOptions.classList.remove("show");
+            }
+
+            // issuer in an untrusted group, so show a warning
+            else if (untrustedGroups.length > 0) {
+
+                // populate content
+                resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+
+                // populate issuer
+                resultsIssuer.textContent = results['issuer']['name'];
+                resultsIssuer.href = "{{ '/issuers' | relative_url }}?id=" + encodeURIComponent(results['issuer']['id']);
+
+                // populate groups
+                unlistedGroupsWrapper.innerHTML = "";
+                resultsGroupsWrapper.innerHTML = "";
+                for (var g = 0; g < untrustedGroups.length; g++) {
+                    let group = untrustedGroups[g];
+
+                    // add alert links
+                    let alertLink = document.createElement("a");
+                    alertLink.textContent = group['name'];
+                    alertLink.href = "{{ '/groups' | relative_url }}?id=" + encodeURIComponent(group['id']);
+                    alertLink.classList.add("alert-link");
+                    alertLink.classList.add("d-inline-block");
+                    alertLink.setAttribute("target", "_blank");
+                    unlistedGroupsWrapper.appendChild(alertLink);
+                    if (g < (untrustedGroups.length - 1)) {
+                        unlistedGroupsWrapper.appendChild(document.createTextNode(" or "));
+                    }
+
+                    // add unlisted group links
+                    let groupLink = document.createElement("a");
+                    groupLink.textContent = group['name'];
+                    groupLink.href = "{{ '/groups' | relative_url }}?id=" + encodeURIComponent(group['id']);
+                    groupLink.setAttribute("target", "_blank");
+                    resultsGroupsWrapper.appendChild(groupLink);
+                    if (g < (untrustedGroups.length - 1)) {
+                        resultsGroupsWrapper.appendChild(document.createTextNode(", "));
+                    }
+                }
+
+                // show rendered results
+                resultSection.classList.remove("d-none");
+                alertUnlisted.classList.remove("d-none");
+                resultsWrapper.classList.remove("d-none");
+                scanAnotherWrapper.classList.remove("d-none");
+                inputOptions.classList.remove("show");
+            }
+        }
+    }
+
+    /***********************/
+    /** Manual Code Entry **/
+    /***********************/
+
+    // manual entry components
+    const manualEntryModal = document.getElementById("manual-entry-modal");
+    const manualEntryForm = document.getElementById("manual-entry-form");
+    const manualEntryInput = document.getElementById("manual-code-entry");
+    const manualEntryError = document.getElementById("code-entry-error");
+    const manualEntrySubmit = document.getElementById("verify-code");
+
+    // try to verify a copy/pasted verification code URL
+    function verifyManualEntry(event) {
+        event.preventDefault();
+
+        // switch to verifying state
+        manualEntrySubmit.textContent = "Verifying...";
+        manualEntrySubmit.classList.add("disabled");
+
+        // hide any previous errors
+        manualEntryInput.classList.remove("is-invalid");
+        manualEntryError.classList.add("invisible");
+
+        // verify the url entered
+        verifyCode(manualEntryInput.value,
+
+            // success
+            function(results) {
+                console.log("success!", results); // TODO: remove
+                // show the result
+                showResults(results);
+
+                // close the modal
+                bootstrap.Modal.getInstance(manualEntryModal).hide();
+            },
+
+            // error
+            function(error) {
+                console.log("error", error); // TODO: remove
+                // code isn't in the right format
+                if (error['error'] === "invalidFormat") {
+                    manualEntryError.textContent = "This doesn't look like a verification URL.";
+                }
+                // couldn't find the issuer
+                else if (error['error'] === "lookupError") {
+                    manualEntryError.textContent = "The issuer of this verification couldn't be found.";
+                }
+                // code signature verification failed
+                else if (error['error'] === "invalidSignature") {
+                    manualEntryError.textContent = "This url is not valid. Please request a new one from the issuer.";
+                }
+                // catch-all for unknown errors
+                else {
+                    manualEntryError.textContent = "Unfortunately, something went wrong :(";
+                }
+
+                // show the error
+                manualEntryInput.classList.add("is-invalid");
+                manualEntryError.classList.remove("invisible");
+
+                // switch back to ready-to-submit
+                manualEntrySubmit.textContent = "Verify Code";
+                manualEntrySubmit.classList.remove("disabled");
+            }
+        );
+    }
+    // submit triggers
+    manualEntrySubmit.addEventListener("click", verifyManualEntry);
+    manualEntryForm.addEventListener("submit", verifyManualEntry);
+    // reset model when it opens
+    manualEntryModal.addEventListener("show.bs.modal", function(event) {
+
+        // clear the text input
+        manualEntryInput.value = "";
+
+        // reset any errors
+        manualEntryInput.classList.remove("is-invalid");
+        manualEntryError.classList.add("invisible");
+        manualEntryError.textContent = "";
+
+        // reset submit button
+        manualEntrySubmit.textContent = "Verify Code";
+        manualEntrySubmit.classList.remove("disabled");
+    })
+
+    /*************************/
+    /** Manual Image Upload **/
+    /*************************/
+
+    // manual upload components
+    const scanUploadButton = document.getElementById("scan-upload");
+
+    // try to scan an uploaded image
+    scanUploadButton.addEventListener("click", function(event) {
+        // TODO
+        alert("Coming soon!");
+    });
+
+    /*************/
+    /** Scanner **/
+    /*************/
+
+    // various page elements
+    const scannerPieces = document.querySelectorAll(".scanner-piece")
+    const startScanButton = document.getElementById("start-scan");
+    const scannerImage = document.getElementById("scanner-image");
+    const scannerLoadError = document.getElementById("scanner-load-error");
+
+    // barcode scanner worker
+    const qrEngineWorker = new Worker("{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}");
+
+    // scanner image
+    const cameraVideo = document.createElement("video");
+    const scannerImageCtx = scannerImage.getContext("2d", {"alpha": false});
+    scannerImageCtx.imageSmoothingEnabled = false;
+
+    // update scanner image
+    function drawImage() {
+        const minDimension = Math.floor(Math.min(cameraVideo.videoWidth, cameraVideo.videoHeight));
+        scannerImageCtx.drawImage(cameraVideo, 0, 0, minDimension, minDimension);
+        const imageData = scannerImageCtx.getImageData(0, 0, scannerImage.width, scannerImage.height);
+        qrEngineWorker.postMessage({
+            "type": "decode",
+            "data": imageData
+        }, [imageData.data.buffer]);//#################TODO
+
+
+
+
+        setTimeout(drawImage, 200);
+    }
+
+    // start the camera and try to scan for QR codes
+    startScanButton.addEventListener("click", function() {
+
+        // no media devices support at all
+        if (!navigator.mediaDevices) {
+            scannerLoadError.textContent = "Browser is incompatible"
+            scannerLoadError.classList.remove("d-none");
+            return;
+        }
+
+        // ask permission to access the camera
+        navigator.mediaDevices.getUserMedia({"video": true})
+        .then(function(stream) {
+            cameraVideo.srcObject = stream;
+            cameraVideo.play();
+            scannerPieces.forEach(function(el) { el.classList.add("d-none"); })
+            scannerImage.classList.remove("d-none");
+            drawImage();
+        })
+
+        // error loading camera
+        .catch(function(error) {
+
+            // different error messages based on what went wrong
+            switch(error.name) {
+
+                // user didn't allow camera access
+                case "NotAllowedError":
+                    scannerLoadError.textContent = "Permission denied";
+                    break;
+
+                // no devices
+                case "NotFoundError":
+                    scannerLoadError.textContent = "No cameras found";
+                    break;
+
+                // catchall
+                default:
+                    scannerLoadError.textContent = "Error loading camera";
+                    console.log("error!!!", error);
+            }
+            // show the error
+            scannerLoadError.classList.remove("d-none");
+        });
+    });
 </script>

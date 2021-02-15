@@ -13,7 +13,8 @@
                 { {% for g in site.groups %}{% if g.slug == group.slug %}
                     "id": {{ g.slug | jsonify }},
                     "url": "{{ site.url }}{{ g.url }}",
-                    "name": {{ g.group_name | jsonify }}{% endif %}{% endfor %}
+                    "name": {{ g.group_name | jsonify }},
+                    "listed": {{ g.is_listed | jsonify }}{% endif %}{% endfor %}
                 }{% if forloop.last == false %},{% endif %}{% endfor %}
             ]
         }{% if forloop.last == false %},{% endif %}{% endfor %}

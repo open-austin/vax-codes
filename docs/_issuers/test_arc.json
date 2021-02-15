@@ -25,16 +25,20 @@ issuer_keys:
     - slug: test_austin
 
   # Site 2 (park road)
+  # Example good signature
+  #     https://vax.codes/scan#v1/test_arc/iF4EABMIAAYFAmApt2gACgkQ0ldpWsVGpsTl8QD_cnfQCpJC2QZaLDT7i8o_uXu7pCWVuNI7n5hvwcxRAf4A_3fwIqNIcEZZ-O3lsSVubq2yccUskpgeXqTU0DcDsfG8/Hello%20World
+  # Example bad signature
+  #     https://vax.codes/scan#v1/test_arc/iF4EABMIAAYFAmApt2gACgkQ0ldpWsVGpsTl8QD_cnfQCpJC2QZaLDT7i8o_uXu7pCWVuNI7n5hvwcxRAf4A_3fwIqNIcEZZ-O3lsSVubq2yccUskpgeXqTU0DcDsfG7/Hello%20World
   - pubkey: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
       Version: GnuPG v2
 
-      mFIEYBGjHBMIKoZIzj0DAQcCAwQvc5ikzwmQVGc2wwz2DJ/ShLHMPE+5MyS7YcaX
-      KPbKLRr03U1VxEyM+RG8kSOOMer3y41keNP8RP9ec/L5Ng3ctBVBQUEgQkJCIDxh
-      YWFAYmJiLmNvbT6IeQQTEwgAIQUCYBGjHAIbAwULCQgHAgYVCAkKCwIEFgIDAQIe
-      AQIXgAAKCRCsXouZ2/Z1CFHcAQDyOctXSblYGuyBJy1vd8Z4f3gpFRsLwhkCODya
-      o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
-      =rCqm
+      mFIEYCm3CRMIKoZIzj0DAQcCAwS0FbUnnBxDsYeGFjWdk6c9wcV27TiFdNVfWuta
+      B21mhylzsdXwFUfhiXQRtA4LkUuakoktZ8Ns7qi2XOgBvk6/tBVBQUEgQkJCIDxh
+      YWFAYmJiLmNvbT6IeQQTEwgAIQUCYCm3CQIbAwULCQgHAgYVCAkKCwIEFgIDAQIe
+      AQIXgAAKCRDSV2laxUamxEAyAQDoPz9/NxK+cvT8BY0XArYO2ZbC83MiY4XNvTjb
+      IOwv6AEAqTpVu5bLWiIerj7BBRJNL7l7Ul1OwdoosYj31svsx7Q=
+      =0vE/
       -----END PGP PUBLIC KEY BLOCK-----
     groups:
     - slug: test_austin
