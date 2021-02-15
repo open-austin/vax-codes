@@ -171,6 +171,21 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
 </div>
 
+<!-- Modal: Edit trusted groups -->
+<div class="modal fade" id="play-video-modal" tabindex="-1" aria-labelledby="image-upload-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="image-upload-title">Start QR Code Scanner</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <button id="play-video" type="button" class="btn btn-primary btn-lg">Start QR Code Scanner</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal: Image upload -->
 <div class="modal fade" id="image-upload-modal" tabindex="-1" aria-labelledby="image-upload-title" aria-hidden="true">
     <div class="modal-dialog">
@@ -1090,43 +1105,27 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const scannerToggles = document.getElementById("scanner-toggles");
     const scannerStopButton = document.getElementById("scanner-stop-toggle");
     const scannerStartButton = document.getElementById("scanner-start-toggle");
+    const playVideoModal = document.getElementById("play-video-modal");
+    const playVideoButton = document.getElementById("play-video");
 
     // camera scanner image
     const cameraVideo = document.createElement("video");
     cameraVideo.muted = true; // mute so don't need user gesture to play on iOS
+    cameraVideo.disablePictureInPicture = true; // disable PnP for some reason
     const scannerImage = document.getElementById("scanner-image");
     const scannerImageCtx = scannerImage.getContext("2d", {"alpha": false});
     scannerImageCtx.imageSmoothingEnabled = false;
 
-    // start the camera and try to scan for QR codes
-    function useCameraScanner(event) {
-        event.preventDefault();
+    // take a shared camera stream video and start scanning it for QR codes
+    function startVideoScan(event) {
 
-        // no media devices support at all
-        if (!navigator.mediaDevices) {
-            scannerLoadError.textContent = "Browser is incompatible"
-            scannerSettingsWrapper.classList.remove("d-none");
-            scannerLoadError.classList.remove("d-none");
-            return;
-        }
+        // hide the manual playback toggle (if shown)
+        let playModal = bootstrap.Modal.getInstance(playVideoModal) || (new bootstrap.Modal(playVideoModal));
+        playModal.hide();
 
-        // ask permission to access the camera
-        navigator.mediaDevices.getUserMedia({
-            "video": {
-                "facingMode": "environment",
-                "width": { "ideal": 1920 },
-                "height": { "ideal": 1080 },
-            },
-        })
-
-        // access granted
-        .then(function(stream) {
-
-            // set the shared camera to virtual video element
-            cameraVideo.srcObject = stream;
-
-            // try to play the camera as video (returns a promise)
-            cameraVideo.play()
+        // try to play the camera as video
+        if (cameraVideo.paused) {
+            cameraVideo.play() // returns a Promise
 
             // playback successful
             .then(function() {
@@ -1226,9 +1225,20 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // different error messages based on what went wrong
                 switch(error.name) {
 
-                    // user didn't allow camera access
+                    // video playback prevented
                     case "NotAllowedError":
-                        scannerLoadError.textContent = "Video playback denied (" + error.message + ")";
+
+                        // user gesture required, so show modal asking for permission
+                        let playModal = bootstrap.Modal.getInstance(playVideoModal) || (new bootstrap.Modal(playVideoModal));
+                        playModal.show();
+
+                        // show error text
+                        scannerLoadError.innerHTML = `
+                            <a data-bs-toggle="modal" data-bs-target="#play-video-modal" href="#" role="button">Click here to show scanner</a><br>
+                            <small>(Debug: <span id="play-video-error"></span>)</small>
+                        `;
+                        scannerLoadError.querySelector("#play-video-error").textContent = error.message;
+
                         break;
 
                     // no devices
@@ -1245,6 +1255,39 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 scannerSettingsWrapper.classList.remove("d-none");
                 scannerLoadError.classList.remove("d-none");
             });
+        }
+    }
+    playVideoButton.addEventListener("click", startVideoScan); // for user-gesture required situations (e.g. iOS)
+
+    // start the camera and try to scan for QR codes
+    function useCameraScanner(event) {
+        event.preventDefault();
+
+        // no media devices support at all
+        if (!navigator.mediaDevices) {
+            scannerLoadError.textContent = "Browser is incompatible"
+            scannerSettingsWrapper.classList.remove("d-none");
+            scannerLoadError.classList.remove("d-none");
+            return;
+        }
+
+        // ask permission to access the camera
+        navigator.mediaDevices.getUserMedia({
+            "video": {
+                "facingMode": "environment",
+                "width": { "ideal": 1920 },
+                "height": { "ideal": 1080 },
+            },
+        })
+
+        // access granted
+        .then(function(stream) {
+
+            // set the shared camera to virtual video element
+            cameraVideo.srcObject = stream;
+
+            // start scanning
+            startVideoScan();
         })
 
         // error loading camera
