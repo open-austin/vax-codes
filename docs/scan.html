@@ -1110,11 +1110,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
     // camera scanner image
     const cameraVideo = document.createElement("video");
-    cameraVideo.muted = true; // mute so don't need user gesture to play on iOS
-    cameraVideo.disablePictureInPicture = true; // disable PnP for some reason
     const scannerImage = document.getElementById("scanner-image");
     const scannerImageCtx = scannerImage.getContext("2d", {"alpha": false});
     scannerImageCtx.imageSmoothingEnabled = false;
+
+    // iOS compatibility for auto-playing
+    cameraVideo.muted = true; // mute so don't need user gesture to play on iOS
+    cameraVideo.disablePictureInPicture = true; // disable PnP for some reason
+    cameraVideo.playsInline = true; // disable fullscreen
 
     // take a shared camera stream video and start scanning it for QR codes
     function startVideoScan(event) {
