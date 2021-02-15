@@ -1092,7 +1092,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const scannerStartButton = document.getElementById("scanner-start-toggle");
 
     // camera scanner image
-    let cameraVideo = document.createElement("video");
+    const cameraVideo = document.createElement("video");
+    cameraVideo.muted = true; // mute so don't need user gesture to play on iOS
     const scannerImage = document.getElementById("scanner-image");
     const scannerImageCtx = scannerImage.getContext("2d", {"alpha": false});
     scannerImageCtx.imageSmoothingEnabled = false;
@@ -1121,8 +1122,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         // access granted
         .then(function(stream) {
 
-            // try to play the camera as video (so we can capture images from it)
+            // set the shared camera to virtual video element
             cameraVideo.srcObject = stream;
+
+            // try to play the camera as video (returns a promise)
             cameraVideo.play()
 
             // playback successful
