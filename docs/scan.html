@@ -7,7 +7,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 <style>
     #scanner {
         display: inline-block;
-        position: relative;
         width: 300px;
         height: 300px;
     }
@@ -23,29 +22,30 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         width: 100%;
         height: 100%;
     }
-    #scanner-load-error {
-        position: absolute;
-        left: 16px;
-        top: 3px;
+    #scanner-settings {
+        display: inline-block;
+        width: 100%;
+        max-width: 300px;
     }
 </style>
 
-<!-- Results -->
-<div id="result-section" class="container pt-5 d-none">
+<div class="container">
+
+    <!-- Results -->
     <div class="row mb-3">
         <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-            <div id="scan-pending" class="scan-result alert alert-info text-center d-none" role="alert">
+            <div id="scan-pending" class="scan-result alert alert-info mt-4 text-center d-none" role="alert">
                 Verifying...
             </div>
-            <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show text-center d-none" role="alert">
+            <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 This doesn't appear to be a verification QR code
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div id="scan-lookupError" class="scan-result alert alert-danger alert-dismissible fade show text-center d-none" role="alert">
+            <div id="scan-lookupError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 The QR code issuer (<code id="lookupError-issuer">unknown</code>) isn't recognized
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div id="scan-invalidSignature" class="scan-result alert alert-danger alert-dismissible fade show text-sm-center d-none" role="alert">
+            <div id="scan-invalidSignature" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-sm-center d-none" role="alert">
                 <div>
                     This QR code is not valid.
                 </div>
@@ -54,10 +54,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div id="scan-success" class="scan-result alert alert-success text-center d-none" role="alert">
+            <div id="scan-unknownError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
+                Something went wrong! Please try again later.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div id="scan-success" class="scan-result alert alert-success mt-4 text-center d-none" role="alert">
                 Verified vaccine recipient!
             </div>
-            <div id="scan-unlisted" class="scan-result alert alert-warning text-sm-center d-none" role="alert">
+            <div id="scan-unlisted" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
                     Verified vaccine, but only trusted within an
                     <a href="{{ '/how-it-works' | relative_url }}#unlisted-groups" class="alert-link d-inline-block" target="_blank">unlisted group</a>
@@ -71,8 +75,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <h3>
                     Contents:
                 </h3>
-                <code id="results-value" class="d-block" style="overflow-y: auto; white-space: pre; font-size: 200%;">Anthony Fauci
-DOB: 12/24/1940</code>
+                <code id="results-value" class="d-block" style="overflow-y: auto; white-space: pre; font-size: 200%;"></code>
                 <div class="small">
                     Issued by:
                     <a id="results-issuer" href="{{ '/issuers' | relative_url }}?id=test_arg" target="_blank">Test ARC</a>
@@ -91,7 +94,7 @@ DOB: 12/24/1940</code>
                 </div>
                 <hr>
             </div>
-            <div id="scan-another-wrapper" class="scan-result text-center">
+            <div id="scan-another-wrapper" class="scan-result mb-3 text-center d-none">
                 <button
                     type="button"
                     class="btn btn-outline-primary"
@@ -103,76 +106,99 @@ DOB: 12/24/1940</code>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Input Options -->
-<div id="input-options" class="container collapse show pt-4 mb-5">
+    <!-- Input Options -->
+    <div id="input-options" class="collapse show">
 
-    <!-- Scanner -->
-    <div id="scanner-wrapper" class="text-center mb-3">
-        <div id="scanner">
-            <!-- Scanner icon -->
-            <button id="start-scan" class="scanner-piece btn btn-outline-primary p-5">
-                <div>
-                    <svg class="svgicon"><use href="#fa-camera"/></svg>
-                </div>
-                <h3 class="text-decoration-underline mt-3">
-                    Scan QR Code
-                </h3>
-            </button>
+        <!-- Scanner -->
+        <div class="text-center pt-4">
+            <div id="scanner">
+                <!-- Scanner icon -->
+                <button id="start-scan" type="button" class="scanner-piece btn btn-outline-primary p-5">
+                    <div>
+                        <svg class="svgicon"><use href="#fa-camera"/></svg>
+                    </div>
+                    <h3 class="text-decoration-underline mt-3">
+                        Scan QR Code
+                    </h3>
+                </button>
 
-            <!-- Scanner image -->
-            <canvas id="scanner-image" class="scanner-piece d-none"></canvas>
-
-            <!-- Error detecting camera -->
-            <div id="scanner-load-error" class="scanner-piece text-danger d-none" role="status">
-                No camera or webcam detected
+                <!-- Scanner image -->
+                <canvas id="scanner-image" class="scanner-piece d-none"></canvas>
             </div>
+        </div>
+        <!-- Scanner Settings -->
+        <div id="scanner-settings-wrapper" class="text-center mt-1 mb-3 d-none">
+            <div id="scanner-settings">
+                <!-- Camera errors (detecting, loading, permissions, etc.) -->
+                <div id="scanner-load-error" class="scanner-piece text-danger d-none" role="status">
+                    No camera or webcam detected
+                </div>
 
+                <!-- Camera toggles (stop, gain, etc.) -->
+                <div id="scanner-toggles" class="scanner-piece text-danger d-none" role="status">
+                    <button id="scanner-stop-toggle" type="button" class="btn btn-link btn-sm">Click here to stop scanner</button>
+                    <button id="scanner-start-toggle" type="button" class="btn btn-link btn-sm">Click here to start scanner again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options below scanner icon -->
+        <div class="row justify-content-center mt-2 mb-4">
+            <div class="col-auto text-center">
+                <p class="fst-italic">
+                    Use your phone camera or webcam to scan a QR code<br class="d-none d-sm-inline">
+                    to verify someone got their Covid-19 vaccine.
+                </p>
+                <p class="fst-italic">
+                    Don't have a camera? No problem!<br>
+                    <a data-bs-toggle="modal" data-bs-target="#image-upload-modal" href="#" role="button">Upload an image of the QR code</a><br>
+                    or <a data-bs-toggle="modal" data-bs-target="#manual-entry-modal" href="#" role="button">type in the verification URL</a>
+                </p>
+                <p class="fst-italic">
+                    Already got your Covid-19 vaccine and want a QR code?<br>
+                    <a href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
+                </p>
+                <!-- TODO: add trust settings -->
+                <p class="small mt-5">
+                    Current trust configuration:<br>
+                    <em>Trusting issuers from within listed groups</em><br>
+                    <a class="small" data-bs-toggle="modal" data-bs-target="#edit-groups-modal" href="#" role="button">(edit which groups you trust)</a>
+                </p>
+            </div>
         </div>
     </div>
 
-    <!-- Options below scanner icon -->
-    <div class="row justify-content-center">
-        <div class="col-auto text-center">
-            <p class="fst-italic">
-                Use your phone camera or webcam to scan a QR code<br class="d-none d-sm-inline">
-                to verify someone got their Covid-19 vaccine.
-            </p>
-            <p class="fst-italic">
-                Don't have a camera? No problem!<br>
-                <a data-bs-toggle="modal" data-bs-target="#upload-image-modal" href="#" role="button">Upload an image of the QR code</a><br>
-                or <a data-bs-toggle="modal" data-bs-target="#manual-entry-modal" href="#" role="button">type in the verification URL</a>
-            </p>
-            <p class="fst-italic">
-                Already got your Covid-19 vaccine and want a QR code?<br>
-                <a href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
-            </p>
-            <p class="small mt-5">
-                Current trust configuration:<br>
-                <em>Trusting issuers from within listed groups</em><br>
-                <a class="small" data-bs-toggle="modal" data-bs-target="#edit-groups-modal" href="#" role="button">(edit which groups you trust)</a>
-            </p>
-        </div>
-    </div>
 </div>
 
 <!-- Modal: Image upload -->
-<div class="modal fade" id="upload-image-modal" tabindex="-1" aria-labelledby="upload-image-title" aria-hidden="true">
+<div class="modal fade" id="image-upload-modal" tabindex="-1" aria-labelledby="image-upload-title" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <form id="image-upload-form" class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="upload-image-title">Upload an image of a QR code</h5>
+                <h5 class="modal-title" id="image-upload-title">Upload an image of a QR code</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <code>TODO: add this functionality</code>
+                <label for="image-upload" class="form-label">Select image file:</label>
+                <input
+                    type="file"
+                    class="form-control"
+                    id="image-upload"
+                    aria-describedby="image-upload-help">
+                <div id="image-upload-error" class="invalid-feedback d-block">
+                    &nbsp;
+                </div>
+                <div id="image-upload-help" class="form-text">
+                    Most common image formats work (png, jpg, gif),
+                    as long as there's a clear view of the QR code.
+                </div>
             </div>
             <div class="modal-footer">
-                <button id="scan-upload" type="button" class="btn btn-primary">Scan Image</button>
+                <button id="image-upload-submit" type="submit" class="btn btn-primary">Scan Image</button>
                 <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -227,6 +253,7 @@ DOB: 12/24/1940</code>
 
 <!-- Javacript functionality -->
 <script>
+    "use strict";
 
     /**********************/
     /** Helper functions **/
@@ -331,6 +358,129 @@ DOB: 12/24/1940</code>
             });
         });
     }
+
+    // image scanning
+    //  callback argument has the format: {
+    //      "result": "locked|success|error",
+    //      "qrCode": null|"somedata",
+    //  }
+    let qrCallback = undefined; // set/unset each call
+    function qrScan(numLoops, imageData, callback) {
+
+        // fail if waiting too long for scanner to load
+        if (numLoops > 1000) {
+            callback({
+                "result": "error",
+                "qrCode": null,
+                "timeout": "Waited too long for either built-in scanner or web worker scanner to load",
+            });
+            return;
+        }
+
+        // wait for either built-in scanner or web worker to load
+        if (qrBuiltIn === undefined && qrWorker === undefined) {
+            setTimeout(qrScan, 200, numLoops + 1, imageData, callback); // wait 0.2 sec and check again
+            return;
+        }
+
+        // use browswer built-in barcode detector if possible
+        if (qrBuiltIn !== undefined) {
+            qrBuiltIn.detect(imageData)
+            // successful scan of image
+            .then(function(barcodes) {
+                console.log("qrBuiltIn barcodes", barcodes);
+                callback({
+                    "result": "success",
+                    "qrCode": (barcodes.length ? barcodes[0].rawData : null),
+                });
+            })
+            // error scanning image
+            .catch(function(err) {
+                console.log("qrBuiltIn err", err);
+                callback({
+                    "result": "error",
+                    "qrCode": null,
+                    "builtInError": err,
+                });
+            });
+        }
+
+        // no built-in, so use web worker to scan for qr codes
+        else {
+            // only allow one scan at a time
+            if (qrCallback !== undefined) {
+                callback({
+                    "result": "locked",
+                    "qrCode": null,
+                });
+                return;
+            }
+            qrCallback = callback;
+
+            // send the image data to the worker to scan for QR codes
+            qrWorker.postMessage({
+                "type": "decode",
+                "data": imageData,
+            }, [imageData.data.buffer]);
+        }
+    }
+    // receive messages from the scanner worker
+    function qrScanMessage(msg) {
+        //console.log("qrWorker msg", msg);
+
+        // skip if no callback set
+        if (qrCallback === undefined) {
+            return;
+        }
+
+        // successfully scanned the image for QR codes
+        if (msg.data['type'] === "qrResult") {
+            qrCallback({
+                "result": "success",
+                "qrCode": msg.data['data'],
+            });
+        }
+
+        // catchall error response
+        else {
+            qrCallback({
+                "result": "error",
+                "qrCode": null,
+                "workerData": msg.data,
+            });
+        }
+
+        // reset callback so another scan attempt can be made
+        qrCallback = undefined;
+    }
+
+    // load the browser's built-in QR code scanner, or load
+    // web worker scanner if built-in scanner not available
+    let qrBuiltIn = undefined; // set if available
+    let qrWorker = undefined; // set as fallback if built-in scanner not available
+    function qrPrep() {
+        if (window.BarcodeDetector) {
+            BarcodeDetector.getSupportedFormats()
+            .then(function(fmts) {
+                console.log("fmts", fmts);
+                if (fmts.indexOf('qr_code') !== -1) {
+                    qrBuiltIn = new BarcodeDetector({"formats": ["qr_code"]});
+                }
+                else {
+                    throw "Built-in QR scanner not available";
+                }
+            })
+            .catch(function(err) {
+                qrWorker = new Worker("{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}");
+                qrWorker.addEventListener("message", qrScanMessage);
+            });
+        }
+        else {
+            qrWorker = new Worker("{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}");
+            qrWorker.addEventListener("message", qrScanMessage);
+        }
+    }
+    qrPrep();
 
     /**************************/
     /** Internationalization **/
@@ -450,6 +600,7 @@ DOB: 12/24/1940</code>
                             "error": "lookupError",
                             "codeType": vaxCodesV1CodeType,
                             "errorType": "issuerLookupFailure",
+                            "issuerId": issuerId,
                             "responseStatus": xhr.status,
                             "responseText": xhr.responseText,
                         });
@@ -466,6 +617,7 @@ DOB: 12/24/1940</code>
                             "error": "lookupError",
                             "codeType": vaxCodesV1CodeType,
                             "errorType": "jsonDecodeError",
+                            "issuerId": issuerId,
                             "errorObj": err,
                             "responseStatus": xhr.status,
                             "responseText": xhr.responseText,
@@ -530,7 +682,7 @@ DOB: 12/24/1940</code>
     function verifyCode(code, successCallback, errorCallback) {
 
         // determine what version/type of code to verify
-        for (i = 0; i < SUPPORTED_CODE_FORMATS.length; i++) {
+        for (let i = 0; i < SUPPORTED_CODE_FORMATS.length; i++) {
             let versionMatch = code.match(SUPPORTED_CODE_FORMATS[i]['format']);
             if (versionMatch !== null) {
                 SUPPORTED_CODE_FORMATS[i]['verifyFunction'](code, successCallback, errorCallback);
@@ -560,12 +712,13 @@ DOB: 12/24/1940</code>
     /*********************/
 
     // results components
-    const resultSection = document.getElementById("result-section");
     const resultsPieces = document.querySelectorAll(".scan-result");
+    const alertPending = document.getElementById("scan-pending");
     const alertInvalidFormat = document.getElementById("scan-invalidFormat");
     const alertLookupError = document.getElementById("scan-lookupError");
     const lookupErrorIssuer = document.getElementById("lookupError-issuer");
     const alertinvalidSignature = document.getElementById("scan-invalidSignature");
+    const alertUnknownError = document.getElementById("scan-unknownError");
     const alertSuccess = document.getElementById("scan-success");
     const alertUnlisted = document.getElementById("scan-unlisted");
     const unlistedGroupsWrapper = document.getElementById("unlisted-groups");
@@ -579,7 +732,7 @@ DOB: 12/24/1940</code>
     // show results
     function showResults(results) {
         // hide any existing results
-        resultsPieces.forEach(function(el) { el.classList.add("d-none"); })
+        resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
 
         // Vax.Codes v1 results
         if (results['codeType'] === vaxCodesV1CodeType) {
@@ -590,7 +743,7 @@ DOB: 12/24/1940</code>
             const key = results['issuer']['keys'][results['keyIndex']];
             let trustedGroups = [];
             let untrustedGroups = [];
-            for (var g = 0; g < key['groups'].length; g++) {
+            for (let g = 0; g < key['groups'].length; g++) {
                 let group = key['groups'][g];
 
                 // in a trusted group
@@ -617,7 +770,7 @@ DOB: 12/24/1940</code>
 
                 // populate groups
                 resultsGroupsWrapper.innerHTML = "";
-                for (var g = 0; g < trustedGroups.length; g++) {
+                for (let g = 0; g < trustedGroups.length; g++) {
                     let group = trustedGroups[g];
 
                     // add group links
@@ -632,7 +785,6 @@ DOB: 12/24/1940</code>
                 }
 
                 // show rendered results
-                resultSection.classList.remove("d-none");
                 alertSuccess.classList.remove("d-none");
                 resultsWrapper.classList.remove("d-none");
                 scanAnotherWrapper.classList.remove("d-none");
@@ -652,7 +804,7 @@ DOB: 12/24/1940</code>
                 // populate groups
                 unlistedGroupsWrapper.innerHTML = "";
                 resultsGroupsWrapper.innerHTML = "";
-                for (var g = 0; g < untrustedGroups.length; g++) {
+                for (let g = 0; g < untrustedGroups.length; g++) {
                     let group = untrustedGroups[g];
 
                     // add alert links
@@ -679,7 +831,6 @@ DOB: 12/24/1940</code>
                 }
 
                 // show rendered results
-                resultSection.classList.remove("d-none");
                 alertUnlisted.classList.remove("d-none");
                 resultsWrapper.classList.remove("d-none");
                 scanAnotherWrapper.classList.remove("d-none");
@@ -716,7 +867,6 @@ DOB: 12/24/1940</code>
 
             // success
             function(results) {
-                console.log("success!", results); // TODO: remove
                 // show the result
                 showResults(results);
 
@@ -726,7 +876,6 @@ DOB: 12/24/1940</code>
 
             // error
             function(error) {
-                console.log("error", error); // TODO: remove
                 // code isn't in the right format
                 if (error['error'] === "invalidFormat") {
                     manualEntryError.textContent = "This doesn't look like a verification URL.";
@@ -778,66 +927,313 @@ DOB: 12/24/1940</code>
     /*************************/
 
     // manual upload components
-    const scanUploadButton = document.getElementById("scan-upload");
+    const imageUploadModal = document.getElementById("image-upload-modal");
+    const imageUploadForm = document.getElementById("image-upload-form");
+    const imageUploadInput = document.getElementById("image-upload");
+    const imageUploadError = document.getElementById("image-upload-error");
+    const imageUploadSubmit = document.getElementById("image-upload-submit");
 
     // try to scan an uploaded image
-    scanUploadButton.addEventListener("click", function(event) {
-        // TODO
-        alert("Coming soon!");
-    });
+    function verifyImageUpload(event) {
+        event.preventDefault();
+
+        // switch to verifying state
+        imageUploadSubmit.textContent = "Verifying...";
+        imageUploadSubmit.classList.add("disabled");
+
+        // hide any previous errors
+        imageUploadInput.classList.remove("is-invalid");
+        imageUploadError.classList.add("invisible");
+
+        // error handling
+        function _handleErrors(error) {
+            // no file selected
+            if (error['error'] === "noFile") {
+                imageUploadError.textContent = "Please select an image file.";
+            }
+            // locked processing another image
+            else if (error['error'] === "lockedScanner") {
+                imageUploadError.textContent = "We're still processing another image.";
+            }
+            // not an image file
+            else if (error['error'] === "notAnImageFile") {
+                imageUploadError.textContent = "This file type isn't supported.";
+            }
+            // scanned image doesn't contain a QR code
+            else if (error['error'] === "noCodeInImage") {
+                imageUploadError.textContent = "This image doesn't appear to contain a QR code.";
+            }
+            // code isn't in the right format
+            else if (error['error'] === "invalidFormat") {
+                imageUploadError.textContent = "This doesn't look like a verification QR code.";
+            }
+            // couldn't find the issuer
+            else if (error['error'] === "lookupError") {
+                imageUploadError.textContent = "The issuer of this verification couldn't be found.";
+            }
+            // code signature verification failed
+            else if (error['error'] === "invalidSignature") {
+                imageUploadError.textContent = "This QR code is not valid. Please request a new one from the issuer.";
+            }
+            // catch-all for unknown errors
+            else {
+                imageUploadError.textContent = "Unfortunately, something went wrong :(";
+            }
+
+            // show the error
+            imageUploadInput.classList.add("is-invalid");
+            imageUploadError.classList.remove("invisible");
+
+            // switch back to ready-to-submit
+            imageUploadSubmit.textContent = "Scan Image";
+            imageUploadSubmit.classList.remove("disabled");
+        }
+
+        // success handling
+        function _handleSuccess(results) {
+            // show the result
+            showResults(results);
+
+            // close the modal
+            bootstrap.Modal.getInstance(imageUploadModal).hide();
+        }
+
+        // read in the image
+        const imgReader = new FileReader();
+        imgReader.addEventListener("load", function () {
+            let img = new Image();
+            img.src = imgReader.result;
+            img.onerror = function() {
+                _handleErrors({"error": "notAnImageFile"});
+            }
+            img.onload = function() {
+
+                // create an ImageData object from the file
+                let qrCanvas = document.createElement("canvas");
+                qrCanvas.width = img.width;
+                qrCanvas.height = img.height;
+                let qrCtx = qrCanvas.getContext("2d", {"alpha": false});
+                qrCtx.imageSmoothingEnabled = false;
+                qrCtx.drawImage(img, 0, 0, img.width, img.height);
+                let imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+
+                // see if there's a QR code in the image
+                qrScan(0, imageData, function(scanResult) {
+
+                    // known errors
+                    if (scanResult['result'] === "locked") {
+                        _handleErrors({"error": "lockedScanner"});
+                    }
+                    else if (scanResult['result'] === "error") {
+                        _handleErrors({"error": "notAnImageFile"});
+                    }
+                    else if (scanResult['result'] === "success" && scanResult['qrCode'] === null) {
+                        _handleErrors({"error": "noCodeInImage"});
+                    }
+
+                    // successful read, so pass it along for verification
+                    else if (scanResult['result'] === "success" && scanResult['qrCode'] !== null) {
+                        verifyCode(scanResult['qrCode'], _handleSuccess, _handleErrors);
+                    }
+
+                    // catchall
+                    else {
+                        _handleErrors({"error": "notAnImageFile"});
+                    }
+                });
+            }
+
+        }, false);
+
+        // file was selected
+        if (imageUploadInput.files[0]) {
+            imgReader.readAsDataURL(imageUploadInput.files[0]);
+        }
+
+        // no file selected
+        else {
+            _handleErrors({"error": "noFile"});
+        }
+    }
+    // submit triggers
+    imageUploadSubmit.addEventListener("click", verifyImageUpload);
+    imageUploadForm.addEventListener("submit", verifyImageUpload);
+    // reset model when it opens
+    imageUploadModal.addEventListener("show.bs.modal", function(event) {
+
+        // clear the file selection
+        imageUploadInput.value = "";
+
+        // reset any errors
+        imageUploadInput.classList.remove("is-invalid");
+        imageUploadError.classList.add("invisible");
+        imageUploadError.textContent = "";
+
+        // reset submit button
+        imageUploadSubmit.textContent = "Scan Image";
+        imageUploadSubmit.classList.remove("disabled");
+    })
 
     /*************/
     /** Scanner **/
     /*************/
 
     // various page elements
-    const scannerPieces = document.querySelectorAll(".scanner-piece")
-    const startScanButton = document.getElementById("start-scan");
-    const scannerImage = document.getElementById("scanner-image");
+    const scannerPieces = document.querySelectorAll(".scanner-piece");
+    const startScanIcon = document.getElementById("start-scan");
+    const scannerSettingsWrapper = document.getElementById("scanner-settings-wrapper");
     const scannerLoadError = document.getElementById("scanner-load-error");
+    const scannerToggles = document.getElementById("scanner-toggles");
+    const scannerStopButton = document.getElementById("scanner-stop-toggle");
+    const scannerStartButton = document.getElementById("scanner-start-toggle");
 
-    // barcode scanner worker
-    const qrEngineWorker = new Worker("{{ '/assets/qr-scanner-e8a77de/qr-scanner-worker.min.js' | relative_url }}");
-
-    // scanner image
-    const cameraVideo = document.createElement("video");
+    // camera scanner image
+    let cameraVideo = document.createElement("video");
+    const scannerImage = document.getElementById("scanner-image");
     const scannerImageCtx = scannerImage.getContext("2d", {"alpha": false});
     scannerImageCtx.imageSmoothingEnabled = false;
 
-    // update scanner image
-    function drawImage() {
-        const minDimension = Math.floor(Math.min(cameraVideo.videoWidth, cameraVideo.videoHeight));
-        scannerImageCtx.drawImage(cameraVideo, 0, 0, minDimension, minDimension);
-        const imageData = scannerImageCtx.getImageData(0, 0, scannerImage.width, scannerImage.height);
-        qrEngineWorker.postMessage({
-            "type": "decode",
-            "data": imageData
-        }, [imageData.data.buffer]);//#################TODO
-
-
-
-
-        setTimeout(drawImage, 200);
-    }
-
     // start the camera and try to scan for QR codes
-    startScanButton.addEventListener("click", function() {
+    function useCameraScanner(event) {
+        event.preventDefault();
 
         // no media devices support at all
         if (!navigator.mediaDevices) {
             scannerLoadError.textContent = "Browser is incompatible"
+            scannerSettingsWrapper.classList.remove("d-none");
             scannerLoadError.classList.remove("d-none");
             return;
         }
 
         // ask permission to access the camera
-        navigator.mediaDevices.getUserMedia({"video": true})
+        navigator.mediaDevices.getUserMedia({
+            "video": {
+                "width": { "ideal": 1920 },
+                "height": { "ideal": 1080 },
+            },
+        })
+
+        // access granted
         .then(function(stream) {
+
+            // try to play the camera as video (so we can capture images from it)
             cameraVideo.srcObject = stream;
-            cameraVideo.play();
-            scannerPieces.forEach(function(el) { el.classList.add("d-none"); })
-            scannerImage.classList.remove("d-none");
-            drawImage();
+            cameraVideo.play()
+
+            // playback successful
+            .then(function() {
+
+                // show image playback controls
+                scannerPieces.forEach(function(el) { el.classList.add("d-none"); });
+                scannerImage.classList.remove("d-none");
+                scannerSettingsWrapper.classList.remove("d-none");
+                scannerToggles.classList.remove("d-none");
+                scannerStopButton.classList.remove("d-none"); // show stop toggle
+                scannerStartButton.classList.add("d-none"); // hide start toggle
+
+                // start rendering and trying to scan images
+                function _drawImage() {
+
+                    // don't continue if video has stopped playing
+                    if (!(cameraVideo.srcObject && cameraVideo.srcObject.getTracks() && cameraVideo.srcObject.getTracks()[0].readyState === "live")) {
+                        return;
+                    }
+
+                    // draw the latest video frame
+                    let minDimension = Math.min(cameraVideo.videoWidth, cameraVideo.videoHeight, 500); // 500x500 max capture area
+                    let xOffset = Math.floor((cameraVideo.videoWidth - minDimension) / 2);
+                    let yOffset = Math.floor((cameraVideo.videoHeight - minDimension) / 2);
+                    scannerImageCtx.drawImage(cameraVideo, xOffset, yOffset, minDimension, minDimension, 0, 0, scannerImage.width, scannerImage.height);
+                    let imageData = scannerImageCtx.getImageData(0, 0, scannerImage.width, scannerImage.height);
+
+                    // see if there's a QR code in the frame
+                    qrScan(0, imageData, function(scanResult) {
+
+                        // successful read, so pass it along for verification
+                        if (scanResult['result'] === "success" && scanResult['qrCode'] !== null) {
+
+                            // show the verifying state
+                            resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
+                            alertPending.classList.remove("d-none");
+
+                            // try to verify the scanned code
+                            verifyCode(scanResult['qrCode'],
+
+                                // success
+                                function(results) {
+                                    // show the result
+                                    showResults(results);
+
+                                    // switch to play video toggle under captured image
+                                    scannerStopButton.classList.add("d-none"); // hide stop toggle
+                                    scannerStartButton.classList.remove("d-none"); // show start toggle
+                                },
+
+                                // error
+                                function(error) {
+                                    // hide any existing results
+                                    resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
+
+                                    // code isn't in the right format
+                                    if (error['error'] === "invalidFormat") {
+                                        alertInvalidFormat.classList.remove("d-none");
+                                    }
+                                    // couldn't find the issuer
+                                    else if (error['error'] === "lookupError") {
+                                        lookupErrorIssuer.textContent = error['issuerId'];
+                                        alertLookupError.classList.remove("d-none");
+                                    }
+                                    // code signature verification failed
+                                    else if (error['error'] === "invalidSignature") {
+                                        alertinvalidSignature.classList.remove("d-none");
+                                    }
+                                    // catch-all for unknown errors
+                                    else {
+                                        alertUnknownError.classList.remove("d-none");
+                                    }
+
+                                    // switch to play video toggle under captured image
+                                    scannerStopButton.classList.add("d-none"); // hide stop toggle
+                                    scannerStartButton.classList.remove("d-none"); // show start toggle
+                                },
+                            );
+
+                        }
+
+                        // ignore scan errors, wait a few moments, and try again
+                        else {
+                            setTimeout(_drawImage, 100);
+                        }
+                    });
+                }
+                _drawImage();
+            })
+
+            // playback error
+            .catch(function(error) {
+
+                // different error messages based on what went wrong
+                switch(error.name) {
+
+                    // user didn't allow camera access
+                    case "NotAllowedError":
+                        scannerLoadError.textContent = "Video playback denied";
+                        break;
+
+                    // no devices
+                    case "NotSupportedError":
+                        scannerLoadError.textContent = "Video format unsupported";
+                        break;
+
+                    // catchall
+                    default:
+                        scannerLoadError.textContent = "Error loading video";
+                        console.log("error!!!", error);
+                }
+                // show the error
+                scannerSettingsWrapper.classList.remove("d-none");
+                scannerLoadError.classList.remove("d-none");
+            });
         })
 
         // error loading camera
@@ -861,8 +1257,28 @@ DOB: 12/24/1940</code>
                     scannerLoadError.textContent = "Error loading camera";
                     console.log("error!!!", error);
             }
+
             // show the error
+            scannerSettingsWrapper.classList.remove("d-none");
             scannerLoadError.classList.remove("d-none");
         });
+    }
+    startScanIcon.addEventListener("click", useCameraScanner);
+    scannerStartButton.addEventListener("click", useCameraScanner);
+
+    // stop playing video and trying to scan images
+    scannerStopButton.addEventListener("click", function() {
+
+        // show the start camera icon
+        startScanIcon.classList.remove("d-none");
+        scannerImage.classList.add("d-none");
+        scannerSettingsWrapper.classList.add("d-none");
+        scannerToggles.classList.add("d-none");
+
+        // stop the currently running video stream
+        if (cameraVideo.srcObject) {
+            cameraVideo.srcObject.getTracks().forEach(function(t) { t.stop(); });
+        }
     });
+
 </script>
