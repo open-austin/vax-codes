@@ -18,7 +18,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         font-size: 500%;
     }
     #scanner-image {
-        border: 1px solid blue;
+        border: 2px solid blue;
         width: 100%;
         height: 100%;
     }
@@ -1108,6 +1108,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         // ask permission to access the camera
         navigator.mediaDevices.getUserMedia({
             "video": {
+                "facingMode": "environment",
                 "width": { "ideal": 1920 },
                 "height": { "ideal": 1080 },
             },
