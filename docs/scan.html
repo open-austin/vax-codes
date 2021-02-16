@@ -386,7 +386,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     //      "qrCode": null|"somedata",
     //  }
     let qrCallback = undefined; // set/unset each call
-    function qrScan(numLoops, imageData, callback) {
+    function qrScan(numLoops, imageDataOrVideo, callback) {
 
         // fail if waiting too long for scanner to load
         if (numLoops > 1000) {
@@ -400,13 +400,13 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
         // wait for either built-in scanner or web worker to load
         if (qrBuiltIn === undefined && qrWorker === undefined) {
-            setTimeout(qrScan, 200, numLoops + 1, imageData, callback); // wait 0.2 sec and check again
+            setTimeout(qrScan, 200, numLoops + 1, imageDataOrVideo, callback); // wait 0.2 sec and check again
             return;
         }
 
         // use browswer built-in barcode detector if possible
         if (qrBuiltIn !== undefined) {
-            qrBuiltIn.detect(imageData)
+            qrBuiltIn.detect(imageDataOrVideo)
             // successful scan of image
             .then(function(barcodes) {
                 console.log("qrBuiltIn barcodes", barcodes);
@@ -441,8 +441,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             // send the image data to the worker to scan for QR codes
             qrWorker.postMessage({
                 "type": "decode",
-                "data": imageData,
-            }, [imageData.data.buffer]);
+                "data": imageDataOrVideo, // assumed to be ImageData, not video
+            }, [imageDataOrVideo.data.buffer]);
         }
     }
     // receive messages from the scanner worker
@@ -1161,10 +1161,16 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     let xOffset = Math.floor((cameraVideo.videoWidth - minDimension) / 2);
                     let yOffset = Math.floor((cameraVideo.videoHeight - minDimension) / 2);
                     scannerImageCtx.drawImage(cameraVideo, xOffset, yOffset, minDimension, minDimension, 0, 0, scannerImage.width, scannerImage.height);
-                    let imageData = scannerImageCtx.getImageData(0, 0, scannerImage.width, scannerImage.height);
+
+                    // built-in barcode detectors accept video as input
+                    let imageDataOrVideo = cameraVideo;
+                    // worker-based detectors take image dumps from the canvas
+                    if (qrBuiltIn === undefined) {
+                        imageDataOrVideo = scannerImageCtx.getImageData(0, 0, scannerImage.width, scannerImage.height);
+                    }
 
                     // see if there's a QR code in the frame
-                    qrScan(0, imageData, function(scanResult) {
+                    qrScan(0, imageDataOrVideo, function(scanResult) {
 
                         // successful read, so pass it along for verification
                         if (scanResult['result'] === "success" && scanResult['qrCode'] !== null) {
