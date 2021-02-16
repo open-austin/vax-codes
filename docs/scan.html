@@ -1237,8 +1237,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                         // show error text
                         scannerLoadError.innerHTML = `
-                            <a data-bs-toggle="modal" data-bs-target="#play-video-modal" href="#" role="button">Click here to show scanner</a><br>
-                            <small>(Debug: <span id="play-video-error"></span>)</small>
+                            <a data-bs-toggle="modal" data-bs-target="#play-video-modal" href="#" role="button">Tap here to start scanner</a><br>
+                            <small>(Need user gesture: <span id="play-video-error"></span>)</small>
                         `;
                         scannerLoadError.querySelector("#play-video-error").textContent = error.message;
 
