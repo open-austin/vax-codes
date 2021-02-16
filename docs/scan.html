@@ -480,7 +480,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     let qrBuiltIn = undefined; // set if available
     let qrWorker = undefined; // set as fallback if built-in scanner not available
     function qrPrep() {
-        if (window.BarcodeDetector) {
+        // only try using native barcode detector if has special URL parameter
+        if (window.location.href.indexOf("BarcodeDetector=1") !== -1 && window.BarcodeDetector) {
             BarcodeDetector.getSupportedFormats()
             .then(function(fmts) {
                 console.log("fmts", fmts);
