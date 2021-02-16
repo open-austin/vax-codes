@@ -412,7 +412,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 console.log("qrBuiltIn barcodes", barcodes);
                 callback({
                     "result": "success",
-                    "qrCode": (barcodes.length ? barcodes[0].rawData : null),
+                    "qrCode": (barcodes.length ? barcodes[0].rawValue : null),
                 });
             })
             // error scanning image
