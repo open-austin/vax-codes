@@ -39,11 +39,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             </div>
             <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 This doesn't appear to be a verification QR code
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-lookupError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 The QR code issuer (<code id="lookupError-issuer">unknown</code>) isn't recognized
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-invalidSignature" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-sm-center d-none" role="alert">
                 <div>
@@ -52,11 +52,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <div class="mt-1">
                     Please request a new QR code from the issuer.
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-unknownError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 Something went wrong! Please try again later.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-success" class="scan-result alert alert-success mt-4 text-center d-none" role="alert">
                 Verified vaccine recipient!
@@ -863,6 +863,17 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             }
         }
     }
+
+    // non-destructive alert dismissal instead of using bootstrap's 'data-bs-dismiss="alert"' since it destroys the alert
+    document.querySelectorAll(".alert > .btn-close").forEach(function(el) {
+        el.addEventListener("click", function(e) {
+            this.parentNode.classList.remove("show");
+            setTimeout(function(alertNode) {
+                alertNode.classList.add("d-none");
+                alertNode.classList.add("show");
+            }, 150, this.parentNode);
+        });
+    });
 
     /***********************/
     /** Manual Code Entry **/
