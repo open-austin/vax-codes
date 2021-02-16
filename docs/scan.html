@@ -95,7 +95,13 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <hr>
             </div>
             <div id="scan-another-wrapper" class="scan-result mb-3 text-center d-none">
+                <a
+                    id="scan-another-page-refresh"
+                    href="{{ '/scan' | relative_url }}"
+                    class="btn btn-outline-primary d-none"
+                >Scan Another QR Code</a>
                 <button
+                    id="scan-another"
                     type="button"
                     class="btn btn-outline-primary"
                     data-bs-toggle="collapse"
@@ -1337,5 +1343,55 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             cameraVideo.srcObject.getTracks().forEach(function(t) { t.stop(); });
         }
     });
+
+    /***************************/
+    /** Auto-Scan on Pageload **/
+    /***************************/
+
+    // the page's url looks like a verification code, so try to verify it
+    if (window.location.href.match(vaxCodesV1MatchRegex) !== null) {
+
+        // clicking to scan another code will cause a page refresh instead of showing the collapse area
+        document.getElementById("scan-another-page-refresh").classList.remove("d-none");
+        document.getElementById("scan-another").classList.add("d-none");
+
+        // show the verifying state
+        resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
+        alertPending.classList.remove("d-none");
+
+        // try to verify the scanned code
+        verifyCode(window.location.href,
+
+            // success
+            function(results) {
+                // show the result
+                showResults(results);
+            },
+
+            // error
+            function(error) {
+                // hide any existing results
+                resultsPieces.forEach(function(el) { el.classList.add("d-none"); });
+
+                // code isn't in the right format
+                if (error['error'] === "invalidFormat") {
+                    alertInvalidFormat.classList.remove("d-none");
+                }
+                // couldn't find the issuer
+                else if (error['error'] === "lookupError") {
+                    lookupErrorIssuer.textContent = error['issuerId'];
+                    alertLookupError.classList.remove("d-none");
+                }
+                // code signature verification failed
+                else if (error['error'] === "invalidSignature") {
+                    alertinvalidSignature.classList.remove("d-none");
+                }
+                // catch-all for unknown errors
+                else {
+                    alertUnknownError.classList.remove("d-none");
+                }
+            },
+        );
+    }
 
 </script>
