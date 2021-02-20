@@ -71,6 +71,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     <span id="unlisted-groups"></span>
                 </div>
             </div>
+            <div id="scan-manual-pubkey" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
+                <div class="small">
+                    Verified vaccine (for internal purposes only)
+                </div>
+                <div class="mt-1">
+                    If you didn't generate this QR code, DO NOT TRUST IT
+                </div>
+            </div>
             <div id="results-wrapper" class="scan-result d-none">
                 <h3>
                     Contents:
@@ -409,7 +417,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             qrBuiltIn.detect(imageDataOrVideo)
             // successful scan of image
             .then(function(barcodes) {
-                console.log("qrBuiltIn barcodes", barcodes);
                 callback({
                     "result": "success",
                     "qrCode": (barcodes.length ? barcodes[0].rawValue : null),
@@ -417,7 +424,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             })
             // error scanning image
             .catch(function(err) {
-                console.log("qrBuiltIn err", err);
                 callback({
                     "result": "error",
                     "qrCode": null,
@@ -447,7 +453,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     }
     // receive messages from the scanner worker
     function qrScanMessage(msg) {
-        //console.log("qrWorker msg", msg);
 
         // skip if no callback set
         if (qrCallback === undefined) {
@@ -483,7 +488,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         if (window.BarcodeDetector) {
             BarcodeDetector.getSupportedFormats()
             .then(function(fmts) {
-                console.log("fmts", fmts);
                 if (fmts.indexOf('qr_code') !== -1) {
                     qrBuiltIn = new BarcodeDetector({"formats": ["qr_code"]});
                 }
@@ -525,12 +529,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
      *  and follow the expected callback argument formats (see below).
      *
      *  Success callback passed argument: {
+     *      "code": "<code>",
      *      "codeType": "<code_type>",
      *      ...other key-values specific to the code type
      *  }
      *
      *  Success callback passed argument: {
      *      "error": "invalidFormat|lookupError|invalidSignature",
+     *      "code": "<code>",
      *      "codeType": undefined|"<code_type>", // undefined if couldn't find what type of code it was
      *      ...other key-values specific to the code type
      *  }
@@ -542,9 +548,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     // Examples:
     //  v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
     //  https://vax.codes/scan#v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
-    //  https://vax.codes/scan#api=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
-    //  https://vax.codes/scan#groups=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
-    //  https://vax.codes/scan#pubkey=.../v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
     const vaxCodesV1MatchRegex = new RegExp("^(.*)v1/([^/#]+)/([a-zA-Z0-9-_]+)/([^/#]+)$");
     const vaxCodesV1CodeType = "vax-codes-v1";
     function vaxCodesV1Verify(code, successCallback, errorCallback) {
@@ -554,6 +557,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         if (codeGroups === null) {
             errorCallback({
                 "error": "invalidFormat",
+                "code": code,
                 "codeType": vaxCodesV1CodeType,
                 "errorType": "regexMismatch",
             });
@@ -573,6 +577,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         } catch(err) {
             errorCallback({
                 "error": "invalidFormat",
+                "code": code,
                 "codeType": vaxCodesV1CodeType,
                 "errorType": "sigDecodeError",
                 "b64DecodeError": err,
@@ -580,18 +585,28 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             return;
         }
 
-        // determine trust settings
+        // see if we should use a non-default API
+        // e.g. "https://vax.codes/scan#api=<api_endpoint>"
         let vaxCodesV1IssuersAPI = "api/v1/issuers/"; // default api endpoint root
-        let vaxCodesV1TrustedPubkey = undefined;
-        // TODO: allow overriding issuers api endpoint
-        // TODO: allow setting default trusted groups
-        // TODO: allow setting specific pubkey to verify against
+        let overrideAPI = window.location.href.match(/#(?:[^#]+\/|)api=([^#=\/]+)/);
+        if (overrideAPI !== null) {
+            vaxCodesV1IssuersAPI = overrideAPI[1];
+        }
+
+        // see if we should only trust a specific public key
+        // e.g. "https://vax.codes/scan#pubkey=<percent_encoded_pgp_key>"
+        let vaxCodesV1TrustedPubkey = undefined; // default is no override public key
+        let overridePubkey = window.location.href.match(/#(?:[^#]+\/|)pubkey=([^#=\/]+)/);
+        if (overridePubkey !== null) {
+            vaxCodesV1TrustedPubkey = decodeURIComponent(overridePubkey[1]);
+        }
 
         // verify against the specifically provided key
         if (vaxCodesV1TrustedPubkey !== undefined) {
             openpgpVerify(0, vaxCodesV1TrustedPubkey, signature, unverifiedContent, function(sigResult) {
                 if (sigResult['valid']) {
                     successCallback({
+                        "code": code,
                         "codeType": vaxCodesV1CodeType,
                         "sigResult": sigResult,
                         //"keyIndex": 0,    // no issuer details for specifically provided pubkeys
@@ -601,6 +616,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 else {
                     errorCallback({
                         "error": "invalidSignature",
+                        "code": code,
                         "codeType": vaxCodesV1CodeType,
                         "errorType": "manualVerifyFail",
                         "sigResult": sigResult,
@@ -619,6 +635,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
                         errorCallback({
                             "error": "lookupError",
+                            "code": code,
                             "codeType": vaxCodesV1CodeType,
                             "errorType": "issuerLookupFailure",
                             "issuerId": issuerId,
@@ -636,6 +653,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     catch(err) {
                         errorCallback({
                             "error": "lookupError",
+                            "code": code,
                             "codeType": vaxCodesV1CodeType,
                             "errorType": "jsonDecodeError",
                             "issuerId": issuerId,
@@ -653,6 +671,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                         if (issuer['keys'][curIndex] === undefined || curIndex > 100) {
                             errorCallback({
                                 "error": "invalidSignature",
+                                "code": code,
                                 "codeType": vaxCodesV1CodeType,
                                 "errorType": "triedAllPublicKeys",
                                 "issuer": issuer,
@@ -665,6 +684,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                                 // good signature
                                 if (sigResult['valid']) {
                                     successCallback({
+                                        "code": code,
                                         "codeType": vaxCodesV1CodeType,
                                         "sigResult": sigResult,
                                         "keyIndex": curIndex,
@@ -712,7 +732,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         }
 
         // didn't match any versions, so not a supported code
-        errorCallback({"error": "invalidFormat"});
+        errorCallback({"error": "invalidFormat", "code": code});
     }
 
     /********************/
@@ -742,6 +762,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const alertUnknownError = document.getElementById("scan-unknownError");
     const alertSuccess = document.getElementById("scan-success");
     const alertUnlisted = document.getElementById("scan-unlisted");
+    const alertManualPubkey = document.getElementById("scan-manual-pubkey");
     const unlistedGroupsWrapper = document.getElementById("unlisted-groups");
     const resultsWrapper = document.getElementById("results-wrapper");
     const resultsValue = document.getElementById("results-value");
@@ -761,8 +782,33 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
         // Vax.Codes v1 results
         if (results['codeType'] === vaxCodesV1CodeType) {
-            // show results for a manually provided public key
-            // TODO
+
+            // no issuer, so must be trusting a public key in the url
+            if (results['issuer'] === undefined) {
+
+                // populate content
+                resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+
+                // populate issuer and groups with nothing
+                resultsIssuer.textContent = "FOR_INTERNAL_USE_ONLY";
+                resultsIssuer.href = window.location.href;
+                resultsGroupsWrapper.innerHTML = "N/A";
+
+                // show rendered results
+                alertManualPubkey.classList.remove("d-none");
+                resultsWrapper.classList.remove("d-none");
+                scanAnotherWrapper.classList.remove("d-none");
+                inputOptions.classList.remove("show");
+                return;
+            }
+
+            // see if we should trust a specific set of groups
+            // e.g. "https://vax.codes/scan#groups=<group_id>,<group_id>,..."
+            let trustedGroupsRef = undefined; // default is only trust listed groups
+            let overrideGroups = window.location.href.match(/#(?:[^#]+\/|)groups=([^#=\/]+)/);
+            if (overrideGroups !== null) {
+                trustedGroupsRef = overrideGroups[1].split(",");
+            }
 
             // see what groups support the issuer's public key
             const key = results['issuer']['keys'][results['keyIndex']];
@@ -771,9 +817,13 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             for (let g = 0; g < key['groups'].length; g++) {
                 let group = key['groups'][g];
 
-                // in a trusted group
-                // TODO: handle manually trusted groups
-                if (group['listed']) {
+                // in a listed group, and only trusting listed groups (default)
+                if (trustedGroupsRef === undefined && group['listed']) {
+                    trustedGroups.push(group);
+                }
+
+                // in a specifically trusted group
+                else if (trustedGroupsRef !== undefined && trustedGroupsRef.indexOf(group['id']) !== -1) {
                     trustedGroups.push(group);
                 }
 
@@ -1275,7 +1325,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     // catchall
                     default:
                         scannerLoadError.textContent = "Error loading video";
-                        console.log("error!!!", error);
                 }
                 // show the error
                 scannerSettingsWrapper.classList.remove("d-none");
@@ -1335,7 +1384,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // catchall
                 default:
                     scannerLoadError.textContent = "Error loading camera";
-                    console.log("error!!!", error);
             }
 
             // show the error
