@@ -1,0 +1,703 @@
+---
+layout: base
+title: Vax.Codes - Issue QR code
+svgicons: fa-download, fa-print
+additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js, /assets/qrenc/qrenc_reorganize.js
+---
+<style>
+    @media (max-width: 767px) {
+        #qr-code-header { margin-top: 2em; }
+    }
+    .feedback-spacer {
+        margin-top: .25rem;
+        font-size: .875em;
+        visibility: hidden;
+    }
+    #qr-img {
+        width: 220px;
+        height: 220px;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: -webkit-crisp-edges;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Issue QR code
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3">
+        <div class="col-sm-12">
+            <h1>
+                Issue QR Code
+            </h1>
+            <p>
+                Follow the steps below to issue a QR code.
+            </p>
+            <hr>
+        </div>
+    </div>
+    <div class="row gx-5 mb-5">
+        <div class="col-md-6 col-xl-5">
+            <form id="overall-form">
+                <div class="mt-2">
+                    <label for="keyfile" class="h3 form-label">
+                        Step 1: Provide keyfile
+                    </label>
+                    <input class="form-control" type="file" id="keyfile" aria-describedby="issuer-id-help">
+                    <div id="passphrase-wrapper" class="collapse row align-items-center g-1 mt-1">
+                        <div class="col-sm-auto">
+                            <label for="passphrase">Passphrase:</label>
+                        </div>
+                        <div class="col">
+                            <input type="password" class="form-control" id="passphrase" placeholder="Type keyfile decrypt passphrase here">
+                        </div>
+                    </div>
+                    <div id="keyfile-error" class="invalid-feedback"></div>
+                    <div id="keyfile-valid" class="valid-feedback"></div>
+                    <div id="keyfile-help" class="form-text">
+                        This is the keyfile you previously
+                        <a href="{{ '/issuers/generate' | relative_url }}">generated</a>.
+                    </div>
+                    <div id="keyfile-spacer" class="feedback-spacer">&nbsp;</div>
+                </div>
+
+                <div class="mt-4">
+                    <label for="issuer-id" class="h3 form-label">
+                        Step 2: Issuer ID
+                        <small class="text-muted d-inline-block">(if registered)</small>
+                    </label>
+                    <input type="text" class="form-control" id="issuer-id" placeholder="(e.g. my_issuer_id)" aria-describedby="issuer-id-help">
+                    <div id="issuer-id-error" class="invalid-feedback"></div>
+                    <div id="issuer-id-valid" class="valid-feedback"></div>
+                    <div id="issuer-id-help" class="form-text">
+                        If you've
+                        <a href="{{ '/issuers/register' | relative_url }}">registered</a>
+                        and been assigned an Issuer ID, put it here.
+                        <br>
+                        If not, you can leave this blank.
+                    </div>
+                    <div id="issuer-id-spacer" class="feedback-spacer">&nbsp;</div>
+                </div>
+
+                <div class="mt-4">
+                    <label for="qr-contents" class="h3 form-label">
+                        Step 3: Set contents
+                    </label>
+                    <textarea
+                        class="form-control"
+                        id="qr-contents"
+                        rows="3"
+                        aria-describedby="qr-contents-help"
+                        placeholder="John Doe
+DOB: YYYY-MM-DD"
+                        ></textarea>
+                    <div id="qr-contents-error" class="invalid-feedback"></div>
+                    <div id="qr-contents-valid" class="valid-feedback"></div>
+                    <div id="qr-contents-help" class="form-text">
+                        What you want to display when someone scans the QR code
+                    </div>
+                    <div id="qr-contents-spacer" class="feedback-spacer">&nbsp;</div>
+                </div>
+                <div class="mt-4">
+                    <div id="overall-buttons">
+                        <button id="overall-submit" type="submit" class="btn btn-primary btn-lg me-3">Generate QR Code</button>
+                        <button id="overall-reset" type="reset" class="btn btn-link btn-lg">Reset</button>
+                    </div>
+                    <div id="overall-error" class="invalid-feedback"></div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6 offset-xl-1">
+            <h3 id="qr-code-header">
+                QR Code:
+            </h3>
+            <div id="qr-img-blank">
+                <code>Not generated yet</code>
+            </div>
+            <div id="qr-img-wrapper" class="d-none">
+                <img id="qr-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJwAAACcAQAAAACiw//gAAABbUlEQVRIx7WXYbKCQAyDe4Pe/5a5QU1S1DfzfqY6ILsfDoW0zWLN/w8qhKiq6UYXwJmmOeSF8Vx8qj2NobjicCd6yAE0Gwc5g7OCSJgTaAUUSoLgj0oBVKb2s/f+zmYAXVGKMxb5W3URRJEMZeaBwnA/gOPCtdL7KDGUEhKXIaCW6AO4UlSP8taMVzG0HNsM0AkNUjgK09gxf6HHiCHF0K3zphXSRpBClRZncNZ0DjncS7Nc1VszK08MnS23QrmEDyC7v62E0ucHOICtTRNu/AUOoLxfrSBtSW0uKWR9SQ7pq6TB3RFCDVcO1RjmiRhBN77LQA74qZAIugQ8ckeUjSWDsCL0PQksD7CxZHCcOb9N8CA76BzaU3pXkvHrRAy1MttP115rBcngNqsEdjt4+Ush1vc0lAu4C2K4keC+auuTQ237GP6u91tQCDeW28COeAK1mPYnfzkcvzjOVqwq+ACqB2AbwLOcxPAH/zteNqdmKrOMjaEAAAAASUVORK5CYII=">
+            </div>
+            <div id="qr-download-wrapper" class="d-none">
+                <a id="qr-download-png" href="#" class="fs-5 d-inline-block pe-3"
+                    ><svg class="svgicon fs-3"><use href="#fa-download"/></svg>
+                    Download .png</a>
+                <!--TODO add print ability
+                <a id="qr-download-pdf" href="#" class="fs-5 d-inline-block"
+                    ><svg class="svgicon fs-3"><use href="#fa-print"/></svg>
+                    Print .pdf</a>
+                -->
+            </div>
+            <div id="internal-only-wrapper" class="mt-3 d-none">
+                <div class="row">
+                    <div class="col-md-12 col-lg-10 col-xl-8">
+                        <div class="alert alert-warning">
+                            <strong>INTERNAL ONLY!</strong>
+                            <br>
+                            This QR code will only work when scanned from
+                            your
+                            <a id="internal-only-link" href="#" class="alert-link">internal scan page</a>
+                            because you have not yet
+                            <a href="{{ '/issuers/register' | relative_url }}" class="alert-link">registered</a>
+                            as an issuer.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col">
+            <hr>
+            <p class="mt-3 small">
+                <em>
+                    Want to create a QR code locally on your computer instead of on this website?
+                    <a href="{{ '/admin/issuers/issue-local-qr-code' | relative_url }}">See instructions here</a>
+                </em>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    /*******************/
+    /** Error classes **/
+    /*******************/
+
+    // validation errors
+    function XhrException(message, xhrObj) {
+        this.name = "XhrException";
+        this.message = message;
+        this.xhr = xhrObj;
+    }
+
+    function DependencyException(message) {
+        this.name = "DependencyException";
+        this.message = message;
+    }
+
+    function KeyfileException(message, keyData, loadError) {
+        this.name = "KeyfileException";
+        this.message = message;
+        this.keyData = keyData;
+        this.loadError = loadError;
+    }
+
+    function PassphraseException(message, decryptError) {
+        this.name = "PassphraseException";
+        this.message = message;
+        this.decryptError = decryptError;
+    }
+
+    function IssuerIDException(message) {
+        this.name = "IssuerIDException";
+        this.message = message;
+    }
+
+    function SignatureException(message, signError) {
+        this.name = "SignatureException";
+        this.message = message;
+        this.signError = signError;
+    }
+
+    function VerifyException(message, verifyError) {
+        this.name = "VerifyException";
+        this.message = message;
+        this.verifyError = verifyError;
+    }
+
+    function QRCodeException(message, qrCodeError) {
+        this.name = "QRCodeException";
+        this.message = message;
+        this.qrCodeError = qrCodeError;
+    }
+
+
+    /**********************/
+    /** Helper functions **/
+    /**********************/
+
+    // iso timestamp in local timezone (adapted from https://stackoverflow.com/a/17415677)
+    // returns "YYYYMMDD_HHMMSS(_|-)ZZZZ" (underscore for positive timezone, dash for negative timezone)
+    function toFilenameIsoString(dt) {
+        const tzo = -1 * dt.getTimezoneOffset();
+        function _pad(num) {
+            const norm = Math.floor(Math.abs(num));
+            return (norm < 10 ? '0' : '') + norm;
+        };
+        return dt.getFullYear() + _pad(dt.getMonth() + 1) + _pad(dt.getDate()) +
+            '_' +
+            _pad(dt.getHours()) + _pad(dt.getMinutes()) + _pad(dt.getSeconds()) +
+            (tzo >= 0 ? '_' : '-') +
+            _pad(tzo / 60) + _pad(tzo % 60);
+    }
+
+    // convert base64 (url-safe or not) to Uint8Array
+    function fromB64(b64) {
+        // convert url-safe base64 strings to normal base64 strings
+        b64 = b64.replace(/-/g, "+").replace(/_/g, "/") + "==".slice(2 - (b64.length & 3));
+        // convert base64 to binary string
+        let bStr = window.atob(b64);
+        // create byte array from binary string
+        let bArr = new Uint8Array(bStr.length);
+        for (let i = 0; i < bStr.length; i++) {
+            bArr[i] = bStr.charCodeAt(i);
+        }
+        return bArr;
+    }
+
+    // convert a Uint8Array to url-safe base64 string
+    function toB64(bArr) {
+        // convert to binary string
+        let bStr = String.fromCharCode.apply(null, bArr);
+        // convert to normal base64
+        let b64 = window.btoa(bStr);
+        // make url-safe
+        b64 = b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+        return b64;
+    }
+
+    // promise-based requests (adapted from https://stackoverflow.com/a/48969580)
+    function xhrRequest(method, url) {
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url);
+            xhr.onload = function() {
+                if (this.status === 0 || (this.status >= 200 && this.status < 300)) {
+                    resolve(this);
+                }
+                else {
+                    reject(new XhrException("Bad status (" + this.status + ")", this));
+                }
+            };
+            xhr.onerror = function() {
+                reject(new XhrException("Error during request", this));
+            };
+            xhr.send();
+        });
+    }
+
+    // promise-based delays (adapted from https://stackoverflow.com/a/48969580)
+    function delay(ms) {
+        return new Promise(function (resolve) { return setTimeout(resolve, ms); });
+    };
+
+    // extract and load public and private keys from keyfile
+    // returns [pubkeyObj, privkeyObj]
+    async function keyfileToKeypair(keyfileStr) {
+
+        // parse the keyfile for public keys
+        const pubKeyFmt = new RegExp("-----BEGIN PGP PUBLIC KEY BLOCK-----.+-----END PGP PUBLIC KEY BLOCK-----", "s");
+        const publicKeyArmoredMatch = keyfileStr.match(pubKeyFmt);
+        if (publicKeyArmoredMatch === null) {
+            throw new KeyfileException("No public key in the keyfile");
+        }
+        const pubAsc = publicKeyArmoredMatch[0];
+
+        // load and validate this is a public key
+        let pubData = undefined;
+        try {
+            pubData = await openpgp.key.readArmored(pubAsc);
+        } catch (err) {
+            throw new KeyfileException("Wasn't able to load public key", pubData, err);
+        }
+        if (pubData.keys === undefined || pubData.keys.length !== 1 || pubData.keys[0].keyPacket.tag !== 6) {
+            throw new KeyfileException("Public key isn't formatted correctly", pubData);
+        }
+        const pubKey = pubData.keys[0];
+
+        // parse the keyfile for private keys
+        const privKeyFmt = new RegExp("-----BEGIN PGP PRIVATE KEY BLOCK-----.+-----END PGP PRIVATE KEY BLOCK-----", "s");
+        const privateKeyArmoredMatch = keyfileStr.match(privKeyFmt);
+        if (privateKeyArmoredMatch === null) {
+            throw new KeyfileException("No private key in the keyfile");
+        }
+        const privAsc = privateKeyArmoredMatch[0];
+
+        // load and validate this is a private key
+        let privData = undefined;
+        try {
+            privData = await openpgp.key.readArmored(privAsc);
+        } catch (err) {
+            throw new KeyfileException("Wasn't able to load private key", privData, err);
+        }
+        if (privData.keys === undefined || privData.keys.length !== 1 || privData.keys[0].keyPacket.tag !== 5) {
+            throw new KeyfileException("Private key isn't formatted correctly", privData);
+        }
+        const privKey = privData.keys[0];
+
+        return [pubKey, privKey];
+    }
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let PAGE_LANG = "en";
+    // TODO: allow different languages
+
+
+    /************************/
+    /** Core Functionality **/
+    /************************/
+
+    // issueQRCode() - generate a qr code (returns a promise)
+    //
+    // args:
+    //  issuerId - <str> - issuer to look up on the API to see if the registered key matches the keyfile
+    //  keyfileStr - <str> - generated keyfile that contains the issuer's private key
+    //  passphrase - <str> or undefined - private key decrypt passphrase (if any)
+    //  content - <str> - contents to sign
+    //
+    // returns: {
+    //  "image": "data:image/png;base64,iVBORw0K...",
+    //  "code": "https://vax.codes/scan#v1/...",
+    //  "issuer": {...}, // undefined if internal only
+    //  "pubkey": "-----BEGIN PGP PUBLIC KEY BLOCK-----...",
+    // }
+    async function issueQRCode(issuerId, keyfileStr, passphrase, content) {
+
+        // wait for dependencies to load
+        let numLoops = 0;
+        while (numLoops < 1000) {
+            if (window.openpgp !== undefined && window.genQRImage !== undefined) {
+                break;
+            }
+            numLoops += 1;
+            await delay(200);
+        }
+        if (numLoops === 1000) {
+            throw new DependencyException("Loading dependencies timed out :(");
+        }
+
+        const keypair = await keyfileToKeypair(keyfileStr);
+        const pubKey = keypair[0];
+        const privKey = keypair[1];
+
+        // require passphrase if one is needed
+        if (privKey.keyPacket.isEncrypted && passphrase === undefined) {
+            throw new PassphraseException("Passphrase needed to decrypt private key");
+        }
+
+        // invalid passphrase
+        else if (privKey.keyPacket.isEncrypted) {
+            try {
+                await privKey.decrypt(passphrase);
+            } catch (err) {
+                throw new PassphraseException("Invalid passphrase", err);
+            }
+        }
+
+        // look up issuer id and get their possible public keys
+        let issuer = undefined;
+        //TODO
+
+        // sign the contents
+        let sig64 = undefined;
+        try {
+            const sig = await openpgp.sign({
+                "message": openpgp.cleartext.fromText(content),
+                "privateKeys": [privKey],
+                "detached": true,
+            });
+            const sigData = await openpgp.signature.readArmored(sig.signature);
+            sig64 = toB64(sigData.packets.write());
+        } catch (err) {
+            throw new SignatureException("Signing content failed", err);
+        }
+
+        // verify the signature against the keyfile's public key
+        let verifyResult = undefined;
+        try {
+            const signature = fromB64(sig64);
+            const sigObj = await openpgp.signature.read(signature);
+            verifyResult = await openpgp.verify({
+                "message": openpgp.cleartext.fromText(content),
+                "signature": sigObj,
+                "publicKeys": [pubKey],
+            });
+        } catch (err) {
+            throw new VerifyException("Couldn't verify keyfile's public key", err);
+        }
+        const sigs = verifyResult.signatures;
+        console.log(verifyResult);
+        if (!(sigs && sigs.length === 1 && sigs[0].valid)) {
+            throw new VerifyException("Couldn't verify public key in keyfile");
+        }
+
+        // verify the signature against the issuer's public keys
+        if (issuer !== undefined) {
+            //TODO
+        }
+
+        // make into a Vax.Codes v1 format
+        const vaxCode = "" +
+            "https://vax.codes/scan#v1" +
+            "/" + (issuer ? issuer['id'] : "INTERNAL_ONLY") +
+            "/" + sig64 +
+            "/" + encodeURIComponent(content);
+
+        // generate a qr code image
+        // (4 pixel width per bit, with 2 bit white border)
+        let qrImage = undefined;
+        try {
+            qrImage = genQRImage(vaxCode, 4, 2);
+        } catch (err) {
+            throw new QRCodeException("Failed to generate QR code", err);
+        }
+
+        return {
+            "image": qrImage,
+            "code": vaxCode,
+            "issuer": issuer,
+            "pubkey": pubKey.armor(),
+        };
+    }
+
+    /***********************/
+    /** Page Interactions **/
+    /***********************/
+
+    // various page elements
+    const keyfileInput = document.getElementById("keyfile");
+    const keyfileError = document.getElementById("keyfile-error");
+    const keyfileValid = document.getElementById("keyfile-valid");
+    const keyfileSpacer = document.getElementById("keyfile-spacer");
+
+    const passphraseInput = document.getElementById("passphrase");
+    const passphraseWrapper = document.getElementById("passphrase-wrapper");
+
+    const issuerIdInput = document.getElementById("issuer-id");
+    const issuerIdError = document.getElementById("issuer-id-error");
+    const issuerIdValid = document.getElementById("issuer-id-valid");
+    const issuerIdSpacer = document.getElementById("issuer-id-spacer");
+
+    const qrContentsInput = document.getElementById("qr-contents");
+    const qrContentsError = document.getElementById("qr-contents-error");
+    const qrContentsValid = document.getElementById("qr-contents-valid");
+    const qrContentsSpacer = document.getElementById("qr-contents-spacer");
+
+    const overallForm = document.getElementById("overall-form");
+    const overallButtons = document.getElementById("overall-buttons");
+    const overallSubmit = document.getElementById("overall-submit");
+    const overallReset = document.getElementById("overall-reset");
+    const overallError = document.getElementById("overall-error");
+
+    const qrImgBlank = document.getElementById("qr-img-blank");
+    const qrImgWrapper = document.getElementById("qr-img-wrapper");
+    const qrImg = document.getElementById("qr-img");
+    const qrDownloadWrapper = document.getElementById("qr-download-wrapper");
+    const qrDownloadPng = document.getElementById("qr-download-png");
+    const internalOnlyWrapper = document.getElementById("internal-only-wrapper");
+    const internalOnlyLink = document.getElementById("internal-only-link");
+
+    // submit trigger
+    overallForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        // generating state
+        overallSubmit.classList.add("disabled");
+        overallSubmit.textContent = "Generating...";
+
+        // reset error states
+        keyfileInput.classList.remove("is-invalid");
+        keyfileInput.classList.remove("is-valid");
+        passphraseInput.classList.remove("is-invalid");
+        passphraseInput.classList.remove("is-valid");
+        keyfileSpacer.classList.remove("d-none");
+
+        issuerIdInput.classList.remove("is-invalid");
+        issuerIdInput.classList.remove("is-valid");
+        issuerIdSpacer.classList.remove("d-none");
+
+        qrContentsInput.classList.remove("is-invalid");
+        qrContentsInput.classList.remove("is-valid");
+        qrContentsSpacer.classList.remove("d-none");
+
+        overallButtons.classList.remove("is-invalid");
+
+        // hide qr image result
+        qrImgBlank.classList.add("d-none");
+        qrImgWrapper.classList.add("d-none");
+        qrDownloadWrapper.classList.add("d-none");
+        internalOnlyWrapper.classList.add("d-none");
+
+        // missing keyfile
+        const missingKeyfile = keyfileInput.files.length !== 1;
+        if (missingKeyfile) {
+            keyfileError.textContent = "You need to provide a keyfile";
+            keyfileInput.classList.add("is-invalid");
+            keyfileSpacer.classList.add("d-none");
+        }
+
+        // missing contents
+        const missingContents = qrContentsInput.value.trim() === "";
+        if (missingContents) {
+            qrContentsError.textContent = "This field is required";
+            qrContentsInput.classList.add("is-invalid");
+            qrContentsSpacer.classList.add("d-none");
+        }
+
+        // bail out if missing items
+        if (missingKeyfile || missingContents) {
+            // undo generating state
+            overallSubmit.classList.remove("disabled");
+            overallSubmit.textContent = "Generate QR Code";
+            return;
+        }
+
+        // error loading the file
+        var reader = new FileReader();
+        reader.onerror = function(errorEvent) {
+            keyfileError.textContent = reader.error;
+            keyfileInput.classList.add("is-invalid");
+            keyfileSpacer.classList.add("d-none");
+        };
+
+        // successfully read file
+        reader.onload = function(loadEvent) {
+
+            // try to generate a signed QR code
+            const keyfileStr = loadEvent.target.result;
+            const issuerId = issuerIdInput.value.trim();
+            const passphrase = passphraseWrapper.classList.contains("show") ? passphraseInput.value || undefined : undefined;
+            const content = qrContentsInput.value.trim();
+            issueQRCode(issuerId, keyfileStr, passphrase, content)
+
+            // success in generating the code!
+            .then(function(result) {
+                //console.log("issueQRCode success!", result);
+
+                // filename for download ("vax_codes_qrcode_{issuer}_YYYYMMDD_HHMMSS-ZZZZ.png")
+                const downloadName = "vax_codes_qrcode_" +
+                    (result['issuer'] === undefined ? "INTERNAL" : result['issuer']) +
+                    "_" + toFilenameIsoString(new Date()) + ".png";
+
+                // set image results
+                qrImg.src = result['image'];
+                qrDownloadPng.href = result['image'];
+                qrDownloadPng.setAttribute("download", downloadName);
+
+                // show results
+                qrImgBlank.classList.add("d-none");
+                qrImgWrapper.classList.remove("d-none");
+                qrDownloadWrapper.classList.remove("d-none");
+
+                // show internal only disclaimer for non-registered issuers
+                if (result['issuer'] === undefined) {
+                    internalOnlyLink.href = "/scan#pubkey=" + encodeURIComponent(result['pubkey']);
+                    internalOnlyWrapper.classList.remove("d-none");
+                }
+
+                // undo generating state
+                overallSubmit.classList.remove("disabled");
+                overallSubmit.textContent = "Generate QR Code";
+            })
+
+            // something went wrong when trying to generate the code
+            .catch(function(err) {
+                //console.log("issueQRCode err", err);
+
+                // error states
+                switch(err.name) {
+
+                    // couldn't read keyfile
+                    case "KeyfileException":
+                        keyfileInput.classList.add("is-invalid");
+                        keyfileError.textContent = err.message;
+                        keyfileSpacer.classList.add("d-none");
+                        break;
+
+                    // a password was required
+                    case "PassphraseException":
+                        // show the password input
+                        if (!passphraseWrapper.classList.contains("show")) {
+                            let passphraseCollapse = bootstrap.Collapse.getInstance(passphraseWrapper) || (new bootstrap.Collapse(passphraseWrapper));
+                            passphraseCollapse.show();
+                        }
+                        // differentiate between no password and bad password
+                        keyfileInput.classList.add("is-valid");
+                        passphraseInput.classList.add("is-invalid");
+                        if (err.decryptError === undefined) {
+                            keyfileValid.textContent = "Keyfile is valid, but needs passphrase";
+                        }
+                        else {
+                            keyfileInput.classList.add("is-valid");
+                            keyfileValid.textContent = "Keyfile is valid, but passphrase didn't work";
+                        }
+                        keyfileSpacer.classList.add("d-none");
+                        break;
+
+                    // catchall
+                    default:
+                        overallError.textContent = err.message;
+                        overallButtons.classList.add("is-invalid");
+                }
+
+                // undo generating state
+                qrImgBlank.classList.remove("d-none");
+                overallSubmit.classList.remove("disabled");
+                overallSubmit.textContent = "Generate QR Code";
+            });
+        };
+        reader.readAsText(keyfileInput.files[0]);
+
+    });
+
+    // reset trigger
+    overallForm.addEventListener("reset", function(e) {
+        //e.preventDefault(); // let bubble to reset input fields automatically
+
+        // resetting state
+        overallReset.classList.add("disabled");
+        overallReset.textContent = "Resetting...";
+
+        // if in the middle of generating, just reload the page to reset it
+        if (overallSubmit.classList.contains("disabled")) {
+            location.reload();
+            return;
+        }
+
+        // reset error states
+        keyfileInput.classList.remove("is-invalid");
+        keyfileInput.classList.remove("is-valid");
+        keyfileSpacer.classList.remove("d-none");
+
+        issuerIdInput.classList.remove("is-invalid");
+        issuerIdInput.classList.remove("is-valid");
+        issuerIdSpacer.classList.remove("d-none");
+
+        qrContentsInput.classList.remove("is-invalid");
+        qrContentsInput.classList.remove("is-valid");
+        qrContentsSpacer.classList.remove("d-none");
+
+        overallButtons.classList.remove("is-invalid");
+
+        // reset qr image result
+        qrImgBlank.classList.remove("d-none");
+        qrImgWrapper.classList.add("d-none");
+        qrDownloadWrapper.classList.add("d-none");
+        internalOnlyWrapper.classList.add("d-none");
+
+        // hide the passphrase input (since the keyfile is cleared)
+        passphraseWrapper.classList.remove("show");
+    });
+
+</script>
+

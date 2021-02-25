@@ -179,6 +179,12 @@
         {% for additional_js in additional_js_list %}
             <script src="{{ additional_js | strip | relative_url }}" defer></script>
         {% endfor %}
+
+        <!-- Internationalization -->
+        <script>
+            let BASE_LANG = "en";
+            // TODO: allow different languages
+        </script>
     </body>
 </html>
 

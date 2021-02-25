@@ -1,0 +1,225 @@
+---
+layout: base
+title: Vax.Codes - Generate issuer keyfile
+svgicons: fa-download
+additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
+---
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Generate new keyfile
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3 mb-2">
+        <div class="col">
+            <h1>
+                Generate Issuer Keyfile
+            </h1>
+            <p>
+                Do you want to issue QR codes to people who have been vaccinated against Covid-19?
+                <br>
+                Great! All you need to do is generate an "issuer keyfile" that you will use to
+                issue QR codes.
+            </p>
+            <p>
+                <strong>NOTE:</strong>
+                When you first generate your issuer keyfile,
+                <em>you'll only be able to use it for internal purposes</em>
+                (i.e. it won't be trusted anywhere).
+                <br>
+                To start to be trusted as an issuer by others,
+                <a href="{{ '/admin/issuers/register' | relative_url }}" >ask that your keyfile be included</a>
+                in the official issuers list.
+            </p>
+            <div>
+                <button id="generate-keyfile" class="btn btn-primary btn-lg">Generate Keyfile</button>
+            </div>
+            <div class="mt-3">
+                <div id="generating" class="text-muted fs-4 d-none">
+                    Generating...
+                </div>
+                <div id="generation-error" class="text-danger fs-4 d-none">
+                    Error generating keyfile :(
+                </div>
+                <div id="generated" class="d-none">
+                    <div>
+                        <span class="fs-4">Generated!</span>
+                        <a id="save-keyfile" href="#" class="fs-4 d-inline-block"
+                            ><svg class="svgicon fs-2"><use href="#fa-download"/></svg>
+                            Save keyfile to computer</a>
+                    </div>
+                    <div class="mt-3 small">
+                        <div class="alert alert-warning d-inline-block">
+                            <strong>DO NOT SHARE YOUR KEYFILE WITH ANYONE!</strong>
+                            <br>
+                            Anyone can use your keyfile to issue QR codes under your name.
+                            <br>
+                            Save it in a safe location and never share it with anyone.
+                            <br>
+                            <small class="text-muted">
+                                (key id: <span id="key-id"></span>)
+                            </small>
+                        </div>
+                    </div>
+                    <p class="mt-2">
+                        <strong>Next:</strong>
+                        Return to the
+                        <a href="{{ '/admin/issuers' | relative_url }}">Issuer Admin</a>
+                        and proceed to the next step.
+                    </p>
+                </div>
+            </div>
+            <hr class="mt-5">
+            <p class="mt-3 small">
+                <em>
+                    Want to generate a keyfile locally on your computer instead of on this website?
+                    <a href="{{ '/admin/issuers/generate-local-keyfile' | relative_url }}">See instructions here</a>
+                </em>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    // generate an openpgp keypair
+    //  successCallback argument has the format: {
+    //      "publicKey": "-----BEGIN PGP PUBLIC ...",
+    //      "privateKey": "------BEGIN PGP PRIVATE ...",
+    //      "keyId": "288f3338e50007c3",
+    //  }
+    //  errorCallback argument has the format: {
+    //      "error": {
+    //          "name": "...",
+    //          "message": "...",
+    //      },
+    //  }
+    function openpgpGenerate(numLoops, successCallback, errorCallback) {
+
+        // fail if waiting too long for openpgp to load
+        if (numLoops > 1000) {
+            errorCallback({
+                "error": {
+                    "name": "DependencyTimeout",
+                    "message": "OpenPGP.js failed to load after several minutes",
+                },
+            });
+            return;
+        }
+
+        // wait for openpgp to load
+        if (window.openpgp === undefined) {
+            setTimeout(openpgpGenerate, 200, numLoops + 1, successCallback, errorCallback); // wait 0.2 sec and check again
+            return;
+        }
+
+        // generate an empty signing keypair
+        openpgp.generateKey({
+            "userIds": [{}],
+            "curve": 'ed25519',
+            "subkeys": [],
+        })
+        .then(function(key){
+
+            // hex version of fingerprint
+            let fingerprintArr = key['key']['keyPacket']['fingerprint'];
+            let fingerprint = "";
+            for (let i = 0; i < fingerprintArr.length; i++) {
+                fingerprint += ('00' + fingerprintArr[i].toString(16)).slice(-2);
+            }
+
+            // key id
+            let keyIdStr = key['key']['keyPacket']['keyid']['bytes'];
+            let keyId = "";
+            for (let i = 0; i < keyIdStr.length; i++) {
+                keyId += ('00' + keyIdStr.charCodeAt(i).toString(16)).slice(-2);
+            }
+
+            // build result
+            let result = {
+                "publicKey": key.publicKeyArmored,
+                "privateKey": key.privateKeyArmored,
+                "fingerprint": fingerprint,
+                "keyId": keyId,
+            }
+
+            // simulate thinking a bit for better UX
+            setTimeout(successCallback, 300, result);
+        })
+        .catch(function(err){
+            errorCallback({
+                "error": {
+                    "name": err.name,
+                    "message": err.message,
+                },
+            });
+        });
+    }
+
+    // various page elements
+    const generateButton = document.getElementById("generate-keyfile");
+    const generatingPlaceholder = document.getElementById("generating");
+    const generatedWrapper = document.getElementById("generated");
+    const keyIdSpan = document.getElementById("key-id");
+    const downloadLink = document.getElementById("save-keyfile");
+    const generationError = document.getElementById("generation-error");
+
+    // generate keypair on button click
+    generateButton.addEventListener("click", function(e) {
+
+        // switch to generating state
+        generateButton.classList.add("disabled");
+        generatingPlaceholder.classList.remove("d-none");
+        generatedWrapper.classList.add("d-none");
+        generationError.classList.add("d-none");
+
+        // generate a new keypair
+        openpgpGenerate(0,
+
+            // successCallback
+            function(result) {
+
+                // construct keyfile (just a concatination of pub and priv keys)
+                let keyfile = result['publicKey'] + "\n" + result['privateKey'];
+
+                // set keyfile to download link
+                downloadLink.href = "data:application/octet-stream;base64," + window.btoa(keyfile);
+                downloadLink.setAttribute("download", "vax_codes_issuer_keyfile_" + result['keyId'] + ".asc");
+                keyIdSpan.textContent = result['keyId'];
+
+                // show results
+                generateButton.classList.remove("disabled");
+                generatingPlaceholder.classList.add("d-none");
+                generatedWrapper.classList.remove("d-none");
+                generationError.classList.add("d-none");
+            },
+
+            // errorCallback
+            function(error) {
+
+                // set error message text
+                generationError.textContent = "{" + error['error']['name'] + "} " + error['error']['message'];
+
+                // show error message
+                generateButton.classList.remove("disabled");
+                generatingPlaceholder.classList.add("d-none");
+                generatedWrapper.classList.add("d-none");
+                generationError.classList.remove("d-none");
+            },
+        )
+    });
+
+</script>

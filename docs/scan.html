@@ -37,6 +37,9 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             <div id="scan-pending" class="scan-result alert alert-info mt-4 text-center d-none" role="alert">
                 Verifying...
             </div>
+            <!--
+                TODO INTERNAL_ONLY issuer error
+            -->
             <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 This doesn't appear to be a verification QR code
                 <button type="button" class="btn-close" aria-label="Close"></button>
@@ -511,7 +514,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     /** Internationalization **/
     /**************************/
 
-    let LANG = "en";
+    let PAGE_LANG = "en";
     // TODO: allow different languages
 
 
@@ -912,6 +915,9 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 inputOptions.classList.remove("show");
             }
         }
+
+        // issuer isn't in any groups
+        // TODO
     }
 
     // non-destructive alert dismissal instead of using bootstrap's 'data-bs-dismiss="alert"' since it destroys the alert
