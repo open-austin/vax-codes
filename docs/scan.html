@@ -37,11 +37,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             <div id="scan-pending" class="scan-result alert alert-info mt-4 text-center d-none" role="alert">
                 Verifying...
             </div>
-            <!--
-                TODO INTERNAL_ONLY issuer error
-            -->
             <div id="scan-invalidFormat" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 This doesn't appear to be a verification QR code
+                <button type="button" class="btn-close" aria-label="Close"></button>
+            </div>
+            <div id="scan-internalOnlyError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
+                This QR code is for INTERNAL USE ONLY.
+                <br>
+                It must be scanned from the issuer's internal scan page.
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-lookupError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
@@ -74,6 +77,16 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     <span id="unlisted-groups"></span>
                 </div>
             </div>
+            <div id="scan-no-groups" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
+                <div class="small">
+                    Verified vaccine, but is not part of any trusted
+                    <a href="{{ '/groups' | relative_url }}" class="alert-link d-inline-block" target="_blank">groups</a>
+                </div>
+                <div class="mt-1">
+                    Please make sure you trust:
+                    <a id="no-groups-issuer" href="#" class="alert-link d-inline-block" target="_blank"></a>
+                </div>
+            </div>
             <div id="scan-manual-pubkey" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
                     Verified vaccine (for internal purposes only)
@@ -87,7 +100,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     Contents:
                 </h3>
                 <code id="results-value" class="d-block" style="overflow-y: auto; white-space: pre; font-size: 200%;"></code>
-                <div class="small">
+                <div class="small mt-5">
                     Issued by:
                     <a id="results-issuer" href="{{ '/issuers' | relative_url }}?id=test_arg" target="_blank">Test ARC</a>
                     <br>
@@ -538,7 +551,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
      *  }
      *
      *  Success callback passed argument: {
-     *      "error": "invalidFormat|lookupError|invalidSignature",
+     *      "error": "invalidFormat|internalOnlyError|lookupError|invalidSignature",
      *      "code": "<code>",
      *      "codeType": undefined|"<code_type>", // undefined if couldn't find what type of code it was
      *      ...other key-values specific to the code type
@@ -625,6 +638,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                         "sigResult": sigResult,
                     });
                 }
+            });
+        }
+        // marked for internal-only use
+        else if (issuerId === "INTERNAL_ONLY") {
+            errorCallback({
+                "error": "internalOnlyError",
+                "code": code,
+                "codeType": vaxCodesV1CodeType,
             });
         }
         // look up the issuer's public keys from the api
@@ -759,14 +780,17 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const resultsPieces = document.querySelectorAll(".scan-result");
     const alertPending = document.getElementById("scan-pending");
     const alertInvalidFormat = document.getElementById("scan-invalidFormat");
+    const alertInternalError = document.getElementById("scan-internalOnlyError");
     const alertLookupError = document.getElementById("scan-lookupError");
     const lookupErrorIssuer = document.getElementById("lookupError-issuer");
     const alertinvalidSignature = document.getElementById("scan-invalidSignature");
     const alertUnknownError = document.getElementById("scan-unknownError");
     const alertSuccess = document.getElementById("scan-success");
     const alertUnlisted = document.getElementById("scan-unlisted");
+    const alertNoGroups = document.getElementById("scan-no-groups");
     const alertManualPubkey = document.getElementById("scan-manual-pubkey");
     const unlistedGroupsWrapper = document.getElementById("unlisted-groups");
+    const noGroupsIssuerLink = document.getElementById("no-groups-issuer");
     const resultsWrapper = document.getElementById("results-wrapper");
     const resultsValue = document.getElementById("results-value");
     const resultsIssuer = document.getElementById("results-issuer");
@@ -819,6 +843,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             let untrustedGroups = [];
             for (let g = 0; g < key['groups'].length; g++) {
                 let group = key['groups'][g];
+
+                // skip empty groups (sometimes happens for issuers not part of any groups)
+                if (group['id'] === undefined) {
+                    continue;
+                }
 
                 // in a listed group, and only trusting listed groups (default)
                 if (trustedGroupsRef === undefined && group['listed']) {
@@ -914,10 +943,28 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 scanAnotherWrapper.classList.remove("d-none");
                 inputOptions.classList.remove("show");
             }
-        }
 
-        // issuer isn't in any groups
-        // TODO
+            // issuer isn't in any groups
+            else {
+                // populate content
+                resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+
+                // populate issuer
+                resultsIssuer.textContent = results['issuer']['name'];
+                resultsIssuer.href = "{{ '/issuers' | relative_url }}?id=" + encodeURIComponent(results['issuer']['id']);
+                noGroupsIssuerLink.textContent = results['issuer']['name'];
+                noGroupsIssuerLink.href = resultsIssuer.href;
+
+                // populate groups
+                resultsGroupsWrapper.innerHTML = "None";
+
+                // show rendered results
+                alertNoGroups.classList.remove("d-none");
+                resultsWrapper.classList.remove("d-none");
+                scanAnotherWrapper.classList.remove("d-none");
+                inputOptions.classList.remove("show");
+            }
+        }
     }
 
     // non-destructive alert dismissal instead of using bootstrap's 'data-bs-dismiss="alert"' since it destroys the alert
@@ -971,6 +1018,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // code isn't in the right format
                 if (error['error'] === "invalidFormat") {
                     manualEntryError.textContent = "This doesn't look like a verification URL.";
+                }
+                // internal only issuer
+                else if (error['error'] === "internalOnlyError") {
+                    manualEntryError.textContent = "This code is meant for internal use only.";
                 }
                 // couldn't find the issuer
                 else if (error['error'] === "lookupError") {
@@ -1058,6 +1109,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             // code isn't in the right format
             else if (error['error'] === "invalidFormat") {
                 imageUploadError.textContent = "This doesn't look like a verification QR code.";
+            }
+            // internal only issuer
+            else if (error['error'] === "internalOnlyError") {
+                imageUploadError.textContent = "This code is meant for internal use only.";
             }
             // couldn't find the issuer
             else if (error['error'] === "lookupError") {
@@ -1270,6 +1325,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                                     if (error['error'] === "invalidFormat") {
                                         alertInvalidFormat.classList.remove("d-none");
                                     }
+                                    // internal only issuer
+                                    else if (error['error'] === "internalOnlyError") {
+                                        alertInternalError.classList.remove("d-none");
+                                    }
                                     // couldn't find the issuer
                                     else if (error['error'] === "lookupError") {
                                         lookupErrorIssuer.textContent = error['issuerId'];
@@ -1447,6 +1506,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // code isn't in the right format
                 if (error['error'] === "invalidFormat") {
                     alertInvalidFormat.classList.remove("d-none");
+                }
+                // internal only issuer
+                else if (error['error'] === "internalOnlyError") {
+                    alertInternalError.classList.remove("d-none");
                 }
                 // couldn't find the issuer
                 else if (error['error'] === "lookupError") {
