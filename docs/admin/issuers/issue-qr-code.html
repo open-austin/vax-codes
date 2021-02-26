@@ -71,7 +71,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js, /assets/qrenc/qrenc_re
                     <div id="keyfile-valid" class="valid-feedback"></div>
                     <div id="keyfile-help" class="form-text">
                         This is the keyfile you previously
-                        <a href="{{ '/issuers/generate' | relative_url }}">generated</a>.
+                        <a href="{{ '/admin/issuers/generate' | relative_url }}" tabindex="-1">generated</a>.
                     </div>
                     <div id="keyfile-spacer" class="feedback-spacer">&nbsp;</div>
                 </div>
@@ -86,7 +86,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js, /assets/qrenc/qrenc_re
                     <div id="issuer-id-valid" class="valid-feedback"></div>
                     <div id="issuer-id-help" class="form-text">
                         If you've
-                        <a href="{{ '/issuers/register' | relative_url }}">registered</a>
+                        <a href="{{ '/admin/issuers/register' | relative_url }}" tabindex="-1">registered</a>
                         and been assigned an Issuer ID, put it here.
                         <br>
                         If not, you can leave this blank.
@@ -154,6 +154,31 @@ DOB: YYYY-MM-DD"
                             because you have not yet
                             <a href="{{ '/issuers/register' | relative_url }}" class="alert-link">registered</a>
                             as an issuer.
+                            <br>
+                            <small class="d-inline-block">
+                                <a id="internal-scan-link" href="#" target="_blank"
+                                    >See what happens when scanned
+                                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="scan-link-wrapper" class="mt-3 d-none">
+                <div class="row">
+                    <div class="col-md-12 col-lg-10 col-xl-8">
+                        <div class="alert alert-success">
+                            <strong>SUCCESS!</strong>
+                            <br>
+                            This QR code can be
+                            <a href="{{ '/scan' | relative_url }}" class="alert-link">scanned</a>
+                            by anyone and will verify to have been issued by you.
+                            <br>
+                            <small class="d-inline-block">
+                                <a id="scan-link" href="#" target="_blank"
+                                    >See what happens when scanned
+                                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -205,9 +230,10 @@ DOB: YYYY-MM-DD"
         this.decryptError = decryptError;
     }
 
-    function IssuerIDException(message) {
+    function IssuerIDException(message, loadError) {
         this.name = "IssuerIDException";
         this.message = message;
+        this.loadError = loadError;
     }
 
     function SignatureException(message, signError) {
@@ -406,7 +432,23 @@ DOB: YYYY-MM-DD"
 
         // look up issuer id and get their possible public keys
         let issuer = undefined;
-        //TODO
+        if (issuerId) {
+
+            // see if issuer API is overridden
+            let issuerAPI = "/api/v1/issuers/"; // default api endpoint root
+            let overrideAPI = window.location.href.match(/#(?:[^#]+\/|)api=([^#=\/]+)/);
+            if (overrideAPI !== null) {
+                issuerAPI = overrideAPI[1];
+            }
+
+            // try to find the issuer
+            const xhr = await xhrRequest("GET", issuerAPI + issuerId + ".json"); // can throw XhrException
+            try {
+                issuer = JSON.parse(xhr.responseText);
+            } catch(err) {
+                throw new IssuerIDException("Issuer lookup wasn't formatted correctly", err);
+            }
+        }
 
         // sign the contents
         let sig64 = undefined;
@@ -421,12 +463,12 @@ DOB: YYYY-MM-DD"
         } catch (err) {
             throw new SignatureException("Signing content failed", err);
         }
+        const sigArr = fromB64(sig64);
+        const sigObj = await openpgp.signature.read(sigArr);
 
         // verify the signature against the keyfile's public key
         let verifyResult = undefined;
         try {
-            const signature = fromB64(sig64);
-            const sigObj = await openpgp.signature.read(signature);
             verifyResult = await openpgp.verify({
                 "message": openpgp.cleartext.fromText(content),
                 "signature": sigObj,
@@ -436,14 +478,35 @@ DOB: YYYY-MM-DD"
             throw new VerifyException("Couldn't verify keyfile's public key", err);
         }
         const sigs = verifyResult.signatures;
-        console.log(verifyResult);
         if (!(sigs && sigs.length === 1 && sigs[0].valid)) {
             throw new VerifyException("Couldn't verify public key in keyfile");
         }
 
         // verify the signature against the issuer's public keys
         if (issuer !== undefined) {
-            //TODO
+            let foundKey = false;
+            for (let k = 0; k < issuer['keys'].length; k++) {
+                const issuerKeyAsc = issuer['keys'][k]['pubkey'];
+                const sigObj = await openpgp.signature.read(sigArr);
+                try {
+                    const issuerPubData = await openpgp.key.readArmored(issuerKeyAsc);
+                    verifyResult = await openpgp.verify({
+                        "message": openpgp.cleartext.fromText(content),
+                        "signature": sigObj,
+                        "publicKeys": issuerPubData.keys,
+                    });
+                } catch (err) {
+                    throw new VerifyException("Something is wrong with this issuer's public keys", err);
+                }
+                const sigs = verifyResult.signatures;
+                if (sigs && sigs.length === 1 && sigs[0].valid) {
+                    foundKey = true;
+                    break;
+                }
+            }
+            if (!foundKey) {
+                throw new IssuerIDException("Couldn't verify issuer uses the above keyfile");
+            }
         }
 
         // make into a Vax.Codes v1 format
@@ -506,6 +569,9 @@ DOB: YYYY-MM-DD"
     const qrDownloadPng = document.getElementById("qr-download-png");
     const internalOnlyWrapper = document.getElementById("internal-only-wrapper");
     const internalOnlyLink = document.getElementById("internal-only-link");
+    const internalScanLink = document.getElementById("internal-scan-link");
+    const scanLinkWrapper = document.getElementById("scan-link-wrapper");
+    const scanLink = document.getElementById("scan-link");
 
     // submit trigger
     overallForm.addEventListener("submit", function(e) {
@@ -537,6 +603,7 @@ DOB: YYYY-MM-DD"
         qrImgWrapper.classList.add("d-none");
         qrDownloadWrapper.classList.add("d-none");
         internalOnlyWrapper.classList.add("d-none");
+        scanLinkWrapper.classList.add("d-none");
 
         // missing keyfile
         const missingKeyfile = keyfileInput.files.length !== 1;
@@ -563,7 +630,7 @@ DOB: YYYY-MM-DD"
         }
 
         // error loading the file
-        var reader = new FileReader();
+        const reader = new FileReader();
         reader.onerror = function(errorEvent) {
             keyfileError.textContent = reader.error;
             keyfileInput.classList.add("is-invalid");
@@ -586,7 +653,7 @@ DOB: YYYY-MM-DD"
 
                 // filename for download ("vax_codes_qrcode_{issuer}_YYYYMMDD_HHMMSS-ZZZZ.png")
                 const downloadName = "vax_codes_qrcode_" +
-                    (result['issuer'] === undefined ? "INTERNAL" : result['issuer']) +
+                    (result['issuer'] === undefined ? "INTERNAL" : result['issuer']['id']) +
                     "_" + toFilenameIsoString(new Date()) + ".png";
 
                 // set image results
@@ -602,7 +669,13 @@ DOB: YYYY-MM-DD"
                 // show internal only disclaimer for non-registered issuers
                 if (result['issuer'] === undefined) {
                     internalOnlyLink.href = "/scan#pubkey=" + encodeURIComponent(result['pubkey']);
+                    internalScanLink.href = internalOnlyLink.href + "/" + result['code'].split("#", 2)[1];
                     internalOnlyWrapper.classList.remove("d-none");
+                }
+                // show success link for registered issuers
+                else {
+                    scanLink.href = "/scan#" + result['code'].split("#", 2)[1];
+                    scanLinkWrapper.classList.remove("d-none");
                 }
 
                 // undo generating state
@@ -642,6 +715,26 @@ DOB: YYYY-MM-DD"
                             keyfileValid.textContent = "Keyfile is valid, but passphrase didn't work";
                         }
                         keyfileSpacer.classList.add("d-none");
+                        break;
+
+                    // issuer lookup failed
+                    case "XhrException":
+                        // 404 Not Found
+                        if (err.xhr.status === 404) {
+                            issuerIdError.textContent = "Couldn't find this issuer";
+                        }
+                        else {
+                            issuerIdError.textContent = "Problem loading this issuer (" + err.message + ")";
+                        }
+                        issuerIdInput.classList.add("is-invalid");
+                        issuerIdSpacer.classList.add("d-none");
+                        break;
+
+                    // issuer parsing failed
+                    case "IssuerIDException":
+                        issuerIdInput.classList.add("is-invalid");
+                        issuerIdError.textContent = err.message;
+                        issuerIdSpacer.classList.add("d-none");
                         break;
 
                     // catchall
@@ -694,10 +787,18 @@ DOB: YYYY-MM-DD"
         qrImgWrapper.classList.add("d-none");
         qrDownloadWrapper.classList.add("d-none");
         internalOnlyWrapper.classList.add("d-none");
+        scanLinkWrapper.classList.add("d-none");
 
         // hide the passphrase input (since the keyfile is cleared)
         passphraseWrapper.classList.remove("show");
     });
+
+    // auto-populate the issuer id when provided in url parameters
+    const issuerParam = new RegExp("[\?&#\/]issuer=([^&?\/]+)");
+    const issuerMatch = window.location.href.match(issuerParam);
+    if (issuerMatch !== null) {
+        issuerIdInput.value = issuerMatch[1];
+    }
 
 </script>
 
