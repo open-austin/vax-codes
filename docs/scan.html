@@ -34,6 +34,15 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     <!-- Results -->
     <div class="row mb-3">
         <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+            <div id="scan-internalOnly" class="scan-result alert alert-warning mt-4 text-center d-none" role="alert">
+                <strong>WARNING:</strong>
+                You are on an internal scan page.
+                <br>
+                Only QR codes you issued will scan correctly.
+                <br>
+                To go to the public scan page,
+                <a href="{{ '/scan' | relative_url }}">click here</a>.
+            </div>
             <div id="scan-pending" class="scan-result alert alert-info mt-4 text-center d-none" role="alert">
                 Verifying...
             </div>
@@ -610,11 +619,15 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         }
 
         // see if we should only trust a specific public key
-        // e.g. "https://vax.codes/scan#pubkey=<percent_encoded_pgp_key>"
+        // e.g. "https://vax.codes/scan#pubkey=<base64_encoded_pgp_key>"
         let vaxCodesV1TrustedPubkey = undefined; // default is no override public key
         let overridePubkey = window.location.href.match(/#(?:[^#]+\/|)pubkey=([^#=\/]+)/);
         if (overridePubkey !== null) {
-            vaxCodesV1TrustedPubkey = decodeURIComponent(overridePubkey[1]);
+            try {
+                vaxCodesV1TrustedPubkey = window.atob(overridePubkey[1]);
+            } catch (err) {
+                // do nothing
+            }
         }
 
         // verify against the specifically provided key
@@ -778,6 +791,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
     // results components
     const resultsPieces = document.querySelectorAll(".scan-result");
+    const alertInternalOnly = document.getElementById("scan-internalOnly");
     const alertPending = document.getElementById("scan-pending");
     const alertInvalidFormat = document.getElementById("scan-invalidFormat");
     const alertInternalError = document.getElementById("scan-internalOnlyError");
@@ -1526,6 +1540,22 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 }
             },
         );
+    }
+
+    // the page's url looks like an internal scan page, so display a warning
+    const pubKeyParam = new RegExp("#(?:[^#]+\/|)pubkey=([^#=\/]+)");
+    const pubKeyParamMatch = window.location.href.match(pubKeyParam);
+    if (pubKeyParamMatch !== null) {
+        try {
+            let pubkeyAsc = window.atob(pubKeyParamMatch[1]);
+            const pubKeyFmt = new RegExp("-----BEGIN PGP PUBLIC KEY BLOCK-----.+-----END PGP PUBLIC KEY BLOCK-----", "s");
+            if (pubkeyAsc.match(pubKeyFmt) !== null) {
+                // show warning
+                alertInternalOnly.classList.remove("d-none");
+            }
+        } catch (err) {
+            // do nothing if errored out
+        }
     }
 
 </script>

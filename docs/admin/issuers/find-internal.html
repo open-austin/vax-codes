@@ -1,5 +1,204 @@
 ---
 layout: base
+svgicons: fa-clipboard
 title: Vax.Codes - Find your internal scan page
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Find internal scan page
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3 mb-5">
+        <div class="col">
+            <h1>
+                Find your internal scan page
+            </h1>
+            <p>
+                If you want to issue QR codes for internal purposes only (i.e. you
+                <a href="{{ '/admin/issuers/generate' | relative_url }}">generated</a>
+                a keyfile, but didn't register it), the QR codes you issue will only
+                scan on your "internal scan page".
+            </p>
+            <p>
+                Your internal scan page is just a special version of our default
+                <a href="{{ '/scan' | relative_url }}">scan</a>
+                page, with your public key from your keyfile in the url,
+                so that it recognizes your internally issued QR codes.
+            </p>
+            <p>
+                If you didn't save or bookmark this internal scan page, you
+                can simply provide your keyfile below and we'll link
+                you to it.
+            </p>
+
+            <label for="keyfile" class="h3 form-label mt-5">
+                Step 1: Provide keyfile
+            </label>
+            <div class="row">
+                <div class="col-sm-8 col-md-6 col-lg-4">
+                    <input type="file" class="form-control" id="keyfile" aria-describedby="keyfile-help">
+                </div>
+                <div id="keyfile-error" class="col-sm-12 col-md-6 col-lg-8 d-none">
+                    <div class="mt-2 invalid-feedback d-block"></div>
+                </div>
+                <div id="keyfile-valid" class="col-sm-12 col-md-6 col-lg-8 d-none">
+                    <div class="mt-2 valid-feedback d-block"></div>
+                </div>
+            </div>
+            <div id="keyfile-help" class="form-text">
+                This is the keyfile you previously
+                <a href="{{ '/admin/issuers/generate' | relative_url }}" tabindex="-1">generated</a>
+                and saved to your computer.
+            </div>
+
+            <label for="internal-url" class="h3 form-label mt-5">
+                Step 2: Copy or open internal scan page
+            </label>
+            <div class="row">
+                <div class="col-sm-8 col-md-6 col-lg-4">
+                    <input id="internal-url" type="text" class="form-control" readonly value="...waiting on keyfile">
+                </div>
+                <div id="keyfile-valid" class="col-sm-12 col-md-6 col-lg-8">
+                    <button id="copy" class="btn btn-primary disabled me-2"><svg class="svgicon fs-4"><use href="#fa-clipboard"/></svg> <span>Copy to clipboard</span></button>
+                    <a id="scan-link" href="#" class="btn btn-link disabled" target="_blank">Open in new window <svg class="svgicon fs-4"><use href="#fa-external-link"/></svg></a>
+                </div>
+            </div>
+            <p class="mt-5 small">
+                NOTE: We don't save any keyfiles or internal scan pages, so we can't recover your keyfile
+                or internal scan page if you lose your keyfile.
+            </p>
+
+
+            <hr class="mt-3">
+            <p class="mt-3 small">
+                <em>
+                    Have questions? Email <a href="mailto:support@vax.codes">support@vax.codes</a> for assistance.
+                </em>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    /**********************/
+    /** Global Variables **/
+    /**********************/
+
+    // relevant elements
+    const keyfileInput = document.getElementById("keyfile");
+    const keyfileValid = document.getElementById("keyfile-valid");
+    const keyfileError = document.getElementById("keyfile-error");
+    const internalUrl =  document.getElementById("internal-url");
+    const copyButton = document.getElementById("copy");
+    const openLink = document.getElementById("scan-link");
+
+    // public key regex
+    const pubKeyFmt = new RegExp("-----BEGIN PGP PUBLIC KEY BLOCK-----.+-----END PGP PUBLIC KEY BLOCK-----", "s");
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let PAGE_LANG = "en";
+    // TODO: allow different languages
+
+    /************************/
+    /** Main Functionality **/
+    /************************/
+
+    // update internal url
+    function updateUrl() {
+
+        // reset validation
+        keyfileInput.classList.remove("is-invalid");
+        keyfileInput.classList.remove("is-valid");
+        keyfileValid.classList.add("d-none");
+        keyfileError.classList.add("d-none");
+        internalUrl.value = "...waiting on keyfile";
+        copyButton.classList.add("disabled");
+        openLink.classList.add("disabled");
+
+        // initiate a file reader
+        const reader = new FileReader();
+
+        // error reading the file
+        reader.onerror = function(errorEvent) {
+            keyfileInput.classList.add("is-invalid");
+            keyfileError.querySelector(".invalid-feedback").textContent = reader.error;
+            keyfileError.classList.remove("d-none");
+        };
+
+        // successfully read file
+        reader.onload = function(loadEvent) {
+
+            // parse the keyfile for public keys
+            const publicKeyArmoredMatch = loadEvent.target.result.match(pubKeyFmt);
+            if (publicKeyArmoredMatch === null) {
+                keyfileInput.classList.add("is-invalid");
+                keyfileError.querySelector(".invalid-feedback").textContent = "Couldn't find a public key in this file";
+                keyfileError.classList.remove("d-none");
+                return;
+            }
+            const pubAsc = publicKeyArmoredMatch[0];
+
+            // show as valid keyfile
+            keyfileInput.classList.add("is-valid");
+            keyfileValid.querySelector(".valid-feedback").textContent = "Successfully loaded keyfile!";
+            keyfileValid.classList.remove("d-none");
+
+            // populate the scan
+            internalUrl.value = "https://vax.codes/scan#pubkey=" + window.btoa(pubAsc);
+            openLink.href = "/scan#pubkey=" + window.btoa(pubAsc);
+
+            // undisable the copy/open buttons
+            copyButton.classList.remove("disabled");
+            openLink.classList.remove("disabled");
+        };
+
+        // try to read the file
+        if (keyfileInput.files[0]) {
+            reader.readAsText(keyfileInput.files[0]);
+        }
+    }
+
+    // try to parse the keyfile as soon as it's provided
+    keyfileInput.addEventListener("change", updateUrl);
+
+    // copy link to clipboard
+    copyButton.addEventListener("click", function(e){
+        e.preventDefault();
+
+        internalUrl.focus();
+        internalUrl.select();
+        try {
+            var result = document.execCommand("copy");
+            if(result){
+                internalUrl.blur();
+                copyButton.querySelector("span").textContent = "Copied!";
+                window.setTimeout(function(){
+                    copyButton.querySelector("span").textContent = "Copy to clipboard";
+                }, 500);
+            }
+        } catch (err) {
+            console.log("Error copying link", err);
+        }
+    });
+
+</script>
+

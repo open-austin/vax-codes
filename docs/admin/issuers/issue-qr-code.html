@@ -668,7 +668,7 @@ DOB: YYYY-MM-DD"
 
                 // show internal only disclaimer for non-registered issuers
                 if (result['issuer'] === undefined) {
-                    internalOnlyLink.href = "/scan#pubkey=" + encodeURIComponent(result['pubkey']);
+                    internalOnlyLink.href = "/scan#pubkey=" + window.btoa(result['pubkey']);
                     internalScanLink.href = internalOnlyLink.href + "/" + result['code'].split("#", 2)[1];
                     internalOnlyWrapper.classList.remove("d-none");
                 }
