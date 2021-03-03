@@ -791,6 +791,10 @@ DOB: YYYY-MM-DD"
 
         // hide the passphrase input (since the keyfile is cleared)
         passphraseWrapper.classList.remove("show");
+
+        // revert the resetting state
+        overallReset.classList.remove("disabled");
+        overallReset.textContent = "Reset";
     });
 
     // auto-populate the issuer id when provided in url parameters

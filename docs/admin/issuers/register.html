@@ -2,4 +2,286 @@
 layout: base
 title: Vax.Codes - Register as issuer
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<style>
+    #email-body {
+        white-space: pre;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Register
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3 mb-2">
+        <div class="col">
+            <h1>
+                Register as an issuer
+            </h1>
+            <p>
+                While anyone can
+                <a href="{{ '/admin/issuers/generate' | relative_url }}">generate</a>
+                a keyfile they can use to issue QR codes for internal purposes only,
+                in order to actually have you QR codes scan on the main
+                <a href="{{ '/scan' | relative_url }}">scan</a>
+                page, you must register with Vax.Codes so your issuer public key
+                can be included in the recognized issuers list.
+            </p>
+
+            <form id="register-form" action="mailto:register@vax.codes" target="_blank">
+
+                <label for="keyfile" class="h3 form-label mt-3">
+                    Step 1: Provide keyfile
+                </label>
+                <div class="row">
+                    <div class="col-sm-8 col-md-6 col-lg-4">
+                        <input type="file" class="form-control" id="keyfile" aria-describedby="keyfile-help">
+                    </div>
+                    <div id="keyfile-error" class="col-sm-12 col-md-6 col-lg-8 d-none">
+                        <div class="mt-2 invalid-feedback d-block"></div>
+                    </div>
+                    <div id="keyfile-valid" class="col-sm-12 col-md-6 col-lg-8 d-none">
+                        <div class="mt-2 valid-feedback d-block"></div>
+                    </div>
+                </div>
+                <div id="keyfile-help" class="form-text">
+                    This is the keyfile you previously
+                    <a href="{{ '/admin/issuers/generate' | relative_url }}" tabindex="-1">generated</a>
+                    and saved to your computer.
+                </div>
+
+                <label for="email-body" class="h3 form-label mt-5">
+                    Step 2: Send registration request
+                </label>
+                <div class="row">
+                    <div class="col-md-12 col-lg-10 col-xl-8">
+                        <input type="hidden" name="subject" value="I'd like to regster as an issuer">
+                        <textarea
+                            class="form-control font-monospace"
+                            id="email-body"
+                            name="body"
+                            rows="22"
+                            aria-describedby="body-help"
+                        ></textarea>
+                    </div>
+                </div>
+                <div id="body-error" class="invalid-feedback"></div>
+                <div id="body-help" class="form-text">
+                    Replace the "REPLACE_ME" with your organization name, phone number, email, and website.
+                </div>
+
+                <div class="mt-4">
+                    <button id="send-email" type="submit" class="btn btn-primary btn-lg disabled" aria-describedby="send-help">
+                        Send Email
+                    </button>
+                    <button id="reset-template" type="reset" class="btn btn-link ms-2">
+                        Reset email template
+                    </button>
+                </div>
+                <div id="send-help" class="form-text">
+                    This should open in your default email client so you can send it directly from your email.
+                    <br>
+                    If it doesn't, copy the above message and email it to
+                    <a href="mailto:register@vax.codes">register@vax.codes</a> with the subject "Register".
+                </div>
+
+            </form>
+
+            <hr class="mt-5">
+            <p class="mt-3 small">
+                <em>
+                    Want to register with a public key you generated locally?
+                    <br>
+                    Provide your public key <code>.asc</code> in Step 1 instead of a keyfile.
+                </em>
+            </p>
+            <p class="small">
+                <em>
+                    Want to check on the status of an existing registration request?
+                    <br>
+                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "What's the status of my registration?"
+                </em>
+            </p>
+            <p class="small">
+                <em>
+                    Forgot your Issue ID?
+                    <br>
+                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "What's my Issuer ID?"
+                </em>
+            </p>
+            <p class="small">
+                <em>
+                    Want to add or remove a public key from your existing registration?
+                    <br>
+                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "I need to modify my registration" and include the public key in the message body.
+                </em>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    /**********************/
+    /** Global Variables **/
+    /**********************/
+
+    // relevant elements
+    const registerForm = document.getElementById("register-form");
+    const keyfileInput = document.getElementById("keyfile");
+    const keyfileValid = document.getElementById("keyfile-valid");
+    const keyfileError = document.getElementById("keyfile-error");
+    const emailBody = document.getElementById("email-body");
+    const emailError = document.getElementById("body-error");
+    const emailButton = document.getElementById("send-email");
+    const resetButton = document.getElementById("reset-template");
+
+    // public key regex
+    const pubKeyFmt = new RegExp("-----BEGIN PGP PUBLIC KEY BLOCK-----.+-----END PGP PUBLIC KEY BLOCK-----", "s");
+
+    // default tempalte
+    let EMAIL_TEMPLATE = "Hello,\n\n" +
+        "I'd like to register as a new issuer. Here are my details:\n\n" +
+        "Name: REPLACE_ME\n" +
+        "Phone: REPLACE_ME\n" +
+        "Email: REPLACE_ME\n" +
+        "Website: REPLACE_ME\n\n" +
+        "Public Key:\n" +
+        "[...waiting on keyfile to be provided...]";
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let PAGE_LANG = "en";
+    // TODO: allow different languages
+
+    /************************/
+    /** Main Functionality **/
+    /************************/
+
+    // update email template
+    function updateTemplate() {
+
+        // reset validation
+        keyfileInput.classList.remove("is-invalid");
+        keyfileInput.classList.remove("is-valid");
+        keyfileValid.classList.add("d-none");
+        keyfileError.classList.add("d-none");
+
+        // initiate a file reader
+        const reader = new FileReader();
+
+        // error reading the file
+        reader.onerror = function(errorEvent) {
+            keyfileInput.classList.add("is-invalid");
+            keyfileError.querySelector(".invalid-feedback").textContent = reader.error;
+            keyfileError.classList.remove("d-none");
+        };
+
+        // successfully read file
+        reader.onload = function(loadEvent) {
+
+            // parse the keyfile for public keys
+            const publicKeyArmoredMatch = loadEvent.target.result.match(pubKeyFmt);
+            if (publicKeyArmoredMatch === null) {
+                keyfileInput.classList.add("is-invalid");
+                keyfileError.querySelector(".invalid-feedback").textContent = "Couldn't find a public key in this file";
+                keyfileError.classList.remove("d-none");
+                return;
+            }
+            const pubAsc = publicKeyArmoredMatch[0];
+
+            // remove any placeholder text from the registration template
+            emailBody.value = emailBody.value.replace("[...waiting on keyfile to be provided...]", "");
+
+            // remove any other public keys from the registration template
+            emailBody.value = emailBody.value.replace(pubKeyFmt, "");
+
+            // add the public key to the end of the template
+            emailBody.value = emailBody.value.trim() + "\n" + pubAsc;
+
+            // show as valid keyfile
+            keyfileInput.classList.add("is-valid");
+            keyfileValid.querySelector(".valid-feedback").textContent = "Successfully loaded keyfile!";
+            keyfileValid.classList.remove("d-none");
+
+            // un-disable the submit button
+            emailButton.classList.remove("disabled");
+        };
+
+        // try to read the file
+        if (keyfileInput.files[0]) {
+            reader.readAsText(keyfileInput.files[0]);
+        }
+    }
+
+    // reset to template default text
+    function resetTemplate(e) {
+        // ignore the default form reset logic since that will reset the keyfile input, too
+        if (e) { e.preventDefault(); }
+
+        // reset the email validation state
+        emailBody.classList.remove("is-invalid");
+        emailError.classList.remove("d-block");
+
+        // reset the template back to the default
+        emailBody.value = EMAIL_TEMPLATE;
+
+        // update with any provided public key
+        updateTemplate();
+    }
+
+    // validate email template to see if there's any special values remaining
+    function submitEmail(e) {
+
+        // reset the email validation state
+        emailBody.classList.remove("is-invalid");
+        emailError.classList.remove("d-block");
+
+        // show an error if the user hasn't updated all the REPLACE_ME placeholders
+        if (emailBody.value.indexOf("REPLACE_ME") !== -1){
+            emailBody.classList.add("is-invalid");
+            emailError.textContent = "It looks like you haven't replaced all the \"REPLACE_ME\" values.";
+            emailError.classList.add("d-block");
+            e.preventDefault();
+        }
+
+        // show an error if the user removed their public key from the email
+        if (emailBody.value.match(pubKeyFmt) === null) {
+            emailBody.classList.add("is-invalid");
+            emailError.textContent = "It looks like you haven't included the public key from your keyfile. Please reset the template and try again.";
+            emailError.classList.add("d-block");
+            e.preventDefault();
+        }
+
+        // passes validation, so just continue on submitting the form
+    }
+
+    // try to parse the keyfile as soon as it's provided
+    keyfileInput.addEventListener("change", updateTemplate);
+
+    // resetting the tempalte reverts the template
+    registerForm.addEventListener("reset", resetTemplate);
+
+    // resetting the tempalte reverts the template
+    registerForm.addEventListener("submit", submitEmail);
+
+    // update the template on pageload
+    resetTemplate();
+
+</script>
+
