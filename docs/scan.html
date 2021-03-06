@@ -612,7 +612,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
         // see if we should use a non-default API
         // e.g. "https://vax.codes/scan#api=<api_endpoint>"
-        let vaxCodesV1IssuersAPI = "api/v1/issuers/"; // default api endpoint root
+        let vaxCodesV1IssuersAPI = "api/v1/issuers"; // default api endpoint root
         let overrideAPI = window.location.href.match(/#(?:[^#]+\/|)api=([^#=\/]+)/);
         if (overrideAPI !== null) {
             vaxCodesV1IssuersAPI = overrideAPI[1];
@@ -664,7 +664,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         // look up the issuer's public keys from the api
         else {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", vaxCodesV1IssuersAPI + issuerId + ".json");
+            xhr.open("GET", vaxCodesV1IssuersAPI + "/" + issuerId + ".json");
             xhr.onreadystatechange = function() {
                 if(xhr.readyState === XMLHttpRequest.DONE) {
 

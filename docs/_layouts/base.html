@@ -18,6 +18,12 @@
                 image-rendering: crisp-edges;
                 image-rendering: pixelated;
             }
+            #top-button-extra {
+                display: none;
+            }
+            @media (min-width: 400px) {
+                #top-button-extra { display: inline; }
+            }
         </style>
         <style>
             /* SVG icons (based on https://github.com/diafygi/svg-font-to-svg-sprite-converter)
@@ -65,7 +71,7 @@
                     Vax.Codes
                 </a>
                 <a class="btn btn-outline-light text-nowrap me-auto{% if page.url == '/scan.html' %} d-none{% endif %}" href="{{ '/scan' | relative_url }}">
-                    Scan a QR code
+                    Scan <span id="top-button-extra">a QR code</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vax-codes-nav" aria-controls="vax-codes-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -180,10 +186,53 @@
             <script src="{{ additional_js | strip | relative_url }}" defer></script>
         {% endfor %}
 
-        <!-- Internationalization -->
         <script>
+            "use strict";
+
+            /********************/
+            /** General Tweaks **/
+            /********************/
+
+            // dismiss popovers when the user clicks out of them
+            document.querySelector("body").addEventListener("click", function(e) {
+                let clickedPopoverIds = {};
+                // walk up the parent tree looking to see if we're within an open popover
+                let curEl = e.target;
+                while (curEl) {
+                    // found that the click is within a popover
+                    if (curEl.classList.contains("popover") && curEl.classList.contains("show")) {
+                        clickedPopoverIds[curEl.id] = true;
+                    }
+                    // found that the click is within a trigger for a popover
+                    if (window.bootstrap && curEl.getAttribute("data-bs-toggle") === "popover") {
+                        let popoverObj = bootstrap.Popover.getInstance(curEl);
+                        if (popoverObj && popoverObj.tip && popoverObj.tip.id && popoverObj.tip.classList.contains("show")) {
+                            clickedPopoverIds[popoverObj.tip.id] = true;
+                        }
+                    }
+                    // keep walking up the parent tree
+                    curEl = curEl.parentElement;
+                }
+                // hide all the popovers that aren't being clicked on
+                const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+                for (let i = 0; i < popoverTriggerList.length; i++) {
+                    if (window.bootstrap) {
+                        let popoverObj = bootstrap.Popover.getInstance(popoverTriggerList[i]);
+                        if (popoverObj && popoverObj.tip && popoverObj.tip.id && clickedPopoverIds[popoverObj.tip.id] === undefined) {
+                            popoverObj.hide();
+                        }
+                    }
+                }
+            });
+
+
+            /**************************/
+            /** Internationalization **/
+            /**************************/
+
             let BASE_LANG = "en";
             // TODO: allow different languages
+
         </script>
     </body>
 </html>

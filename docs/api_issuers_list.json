@@ -5,8 +5,24 @@ permalink: /api/v1/issuers.json
     "issuers": [{% for issuer in listed_issuers %}
         {
             "id": {{ issuer.slug | jsonify }},
+            "listed": {{ issuer.is_listed | jsonify  }},
             "url": "{{ site.url }}{{ issuer.url }}",
-            "name": {{ issuer.issuer_name | jsonify }}
+            "name": {{ issuer.issuer_name | jsonify }},
+            "phone": {{ issuer.issuer_phone | jsonify }},
+            "email": {{ issuer.issuer_email | jsonify }},
+            "website": {{ issuer.issuer_website | jsonify }},
+            "keys": [{% for key in issuer.issuer_keys %}
+                {
+                    "groups": [{% for group in key.groups %}
+                        { {% for g in site.groups %}{% if g.slug == group.slug %}
+                            "id": {{ g.slug | jsonify }},
+                            "url": "{{ site.url }}{{ g.url }}",
+                            "name": {{ g.group_name | jsonify }},
+                            "listed": {{ g.is_listed | jsonify }}{% endif %}{% endfor %}
+                        }{% if forloop.last == false %},{% endif %}{% endfor %}
+                    ]
+                }{% if forloop.last == false %},{% endif %}{% endfor %}
+            ]
         }{% if forloop.last == false %},{% endif %}{% endfor %}
     ],
     "next": null
