@@ -21,6 +21,15 @@ title: Vax.Codes - Browse issuers
     <div class="row mt-2 mb-5">
         <div class="col">
 
+            <div id="api-alert" class="alert alert-warning d-none">
+                <strong>WARNING:</strong>
+                You have set a non-default API endpoint ("<span id="api-debug"></span>")!
+                <br>
+                Only trust these issuers if you know what you're doing!
+                <br>
+                <a href="{{ '/issuers' | relative_url }}">Click here to go back to using the default API</a>
+            </div>
+
             <div id="list-header" class="d-none">
                 <h1>
                     Trusted issuers
@@ -537,6 +546,8 @@ title: Vax.Codes - Browse issuers
     const apiMatch = window.location.href.match(apiParam);
     if (apiMatch !== null) {
         apiBase = decodeURIComponent(apiMatch[1]).trim();
+        document.getElementById("api-alert").classList.remove("d-none");
+        document.getElementById("api-debug").textContent = apiBase;
     }
 
     const trustParam = new RegExp("\\?(?:.*&|)show_untrusted=(on)");
