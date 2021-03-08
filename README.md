@@ -40,6 +40,7 @@ See our [github issues](https://github.com/open-austin/vax-codes/issues) for the
 * [ ] Embedding docs
 * [ ] Local QR code issuing docs
 * [ ] Self-hosting docs
+* [ ] Other extra features (scanning uploaded pdfs, etc.)
 
 ### Phase 3 - Internationalization
 * [ ] Multi-language support
