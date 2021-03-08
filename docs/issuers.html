@@ -49,7 +49,7 @@ title: Vax.Codes - Browse issuers
                 <p id="revert-default" class="mt-3 d-none">
                     <strong>NOTE:</strong>
                     These results include issuers that aren't trusted by default.
-                    <a id="revert-default-link" href="#" class="d-inline-block">Go back to only showing issuers that are trusted by default</a>
+                    <a id="revert-default-link" href="#" class="d-inline-block">Show only issuers that are trusted by default</a>
                 </p>
                 <p id="results-summary" class="mt-3">
                     Found <span id="num-results">0</span> issuers
@@ -120,6 +120,13 @@ title: Vax.Codes - Browse issuers
                             <span class="issuer-groups"></span>
                         </li>
                     </ul>
+                    <p class="contact-instructions mt-4 d-none">
+                        <em>
+                            Received the Covid-19 vaccine and want to be issued QR code from this issuer?
+                            <br>
+                            Reach out to them via the above contact information and ask how you can get issued a QR code.
+                        </em>
+                    </p>
                 </div>
             </div>
 
@@ -367,6 +374,11 @@ title: Vax.Codes - Browse issuers
             // not part of any groups
             if (numGroups === 0) {
                 issuerElem.querySelector(".issuer-groups").textContent = "Not part of any groups";
+            }
+
+            // show instructions for contacting issuer
+            if (issuerId) {
+                issuerElem.querySelector(".contact-instructions").classList.remove("d-none");
             }
 
             // add to the results
@@ -642,21 +654,21 @@ title: Vax.Codes - Browse issuers
     }
 
     // update links to toggle betweeen showing/hiding non-default issuers
-    if (urlParams.get("show_nondefault") !== null && urlParams.get("show_nondefault") === "on") {
-        showNonDefaultInput.value = "on";
-        const revertDefaultLinkParams = new URLSearchParams(urlParams.toString());
-        revertDefaultLinkParams.delete("show_nondefault");
-        const revertParamString = revertDefaultLinkParams.toString();
-        revertDefaultLink.href = window.location.origin + window.location.pathname + (revertParamString ? "?" : "") + revertParamString;
-        revertDefault.classList.remove("d-none"); // show revert-to-default-only option
-    }
-    else {
+    if (urlParams.get("show_nondefault") !== null && urlParams.get("show_nondefault") === "off") {
         showNonDefaultInput.value = "off";
         const nonDefaultLinkParams = new URLSearchParams(urlParams.toString());
         nonDefaultLinkParams.set("show_nondefault", "on");
         const nonDefaultParamString = nonDefaultLinkParams.toString();
         nonDefaultLink.href = window.location.origin + window.location.pathname + (nonDefaultParamString ? "?" : "") + nonDefaultParamString;
         defaultWrapper.classList.remove("d-none"); // show note in results summary
+    }
+    else {
+        showNonDefaultInput.value = "on";
+        const revertDefaultLinkParams = new URLSearchParams(urlParams.toString());
+        revertDefaultLinkParams.set("show_nondefault", "off");
+        const revertParamString = revertDefaultLinkParams.toString();
+        revertDefaultLink.href = window.location.origin + window.location.pathname + (revertParamString ? "?" : "") + revertParamString;
+        revertDefault.classList.remove("d-none"); // show revert-to-default-only option
     }
 
     // show loading state based on url parameters
