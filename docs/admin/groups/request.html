@@ -1,5 +1,107 @@
 ---
 layout: base
-title: Vax.Codes - Groups - Request to be trusted
+title: Vax.Codes - Request to join a group
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/groups' | relative_url }}">Group owners admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Request to join a group
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+            <h1>
+                Request to join a group
+            </h1>
+            <p>
+                If you are an
+                <a href="{{ '/admin/issuers' | relative_url }}">issuer</a>
+                and would like to join a specific group, here's the steps to do so.
+            </p>
+
+            <h3>
+                Step 1:
+            </h3>
+            <p>
+                <a href="{{ '/groups' | relative_url }}">Search the groups list</a>
+                for the group you want to join.
+            </p>
+
+            <h3>
+                Step 2:
+            </h3>
+            <p>
+                Click on the group name to go to that group's profile page.
+            </p>
+
+            <h3>
+                Step 3:
+            </h3>
+            <p>
+                Click "For Issuers: Click here to request to join this group".
+            </p>
+
+            <h3>
+                Step 4:
+            </h3>
+            <p>
+                Using the provided template, send an email to the group owner asking to join the group.
+            </p>
+
+            <h3>
+                Step 5:
+            </h3>
+            <p>
+                Wait for the group owner to respond, cc'ing join@vax.codes, with their approval.
+            </p>
+
+            <h3>
+                Step 6:
+            </h3>
+            <p>
+                Vax.Codes will add that groups membership to your issuer registration.
+            </p>
+
+            <h3>
+                Step 7:
+            </h3>
+            <p>
+                Done! You membership in that group will be now visible in your entry in the
+                <a href="{{ '/issuers' | relative_url }}">issuers list</a>.
+            </p>
+
+
+            <div class="mt-5">
+                <strong>Next:</strong>
+                <a href="{{ '/admin/issuers/issue-qr-code' | relative_url }}">Start issuing QR codes</a>
+            </div>
+            <div>
+                <strong>Back:</strong>
+                <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+            </div>
+
+
+            <hr class="mt-5">
+            <p class="small">
+                <em>
+                    Don't have an Issuer ID?
+                    <br>
+                    <a href="{{ '/admin/issuers/register' | relative_url }}">Register as an issuer</a> to be assigned one.
+                </em>
+            </p>
+        </div>
+    </div>
+</div>
+

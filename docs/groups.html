@@ -3,6 +3,16 @@ layout: base
 svgicons: fa-chevron-left, fa-check, fa-exclamation-triangle, fa-exclamation-circle
 title: Vax.Codes - Browse groups
 ---
+<style>
+    #modal-group-email,
+    #modal-group-subject,
+    #modal-group-body {
+        /*font-size: 80%;*/
+    }
+    #modal-group-body {
+        white-space: pre;
+    }
+</style>
 <div class="container-fluid">
     <div class="row mt-1 mb-3">
         <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
@@ -107,6 +117,14 @@ title: Vax.Codes - Browse groups
                             <a class="group-issuers" href="#">see list of issuers</a>
                         </li>
                     </ul>
+                    <p class="for-issuers mt-5 fst-italic d-none">
+                        For Issuers:
+                        <a data-bs-toggle="modal" data-bs-target="#request-to-join" href="#" role="button" class="btn btn-link btn-sm join-modal-trigger"
+                            >Click here to request to join this group</a>
+                        <small class="no-group-email text-muted d-inline-block d-none">
+                            (this group don't have a listed email, so you must contact them some other way to join)
+                        </small>
+                    </p>
                 </div>
             </div>
 
@@ -134,6 +152,81 @@ title: Vax.Codes - Browse groups
         </div>
     </div>
 </div>
+
+<!-- Request to join a group modal -->
+<div class="modal fade" id="request-to-join" tabindex="-1" aria-labelledby="request-to-join-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="join-group-form" action="mailto:join@vax.codes" target="_blank" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="request-to-join-title">
+                    Request to join this group
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Want to join "<span id="modal-group-name" title=""></span>"?
+                    Simply email them using the below template asking to join.
+                </p>
+                <p>
+                    <label for="modal-group-email" class="form-label">
+                        To:
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control form-control-sm font-monospace"
+                        id="modal-group-email"
+                        name="to"
+                        value=""
+                        readonly
+                    >
+                </p>
+                <div class="mt-3">
+                    <label for="modal-group-subject" class="form-label">
+                        Subject:
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control form-control-sm font-monospace"
+                        id="modal-group-subject"
+                        name="subject"
+                        value=""
+                    >
+                </div>
+                <div class="mt-3">
+                    <label for="modal-group-body" class="form-label">
+                        Email Message:
+                    </label>
+                    <textarea
+                        class="form-control form-control-sm font-monospace"
+                        id="modal-group-body"
+                        name="body"
+                        rows="9"
+                        aria-describedby="body-help"
+                    ></textarea>
+                    <div id="body-error" class="invalid-feedback">
+                    </div>
+                    <div id="body-help" class="form-text">
+                        Replace the "ISSUER_ID_HERE" with your Issuer ID.
+                    </div>
+                </div>
+
+                <div class="mt-4 small text-muted">
+                    Clicking "Send Email" below should open in your default email client so you can
+                    send it directly from your email.
+                    <br>
+                    If it doesn't, copy the above message and email it to
+                    <a id="modal-footer-email" href="mailto:aaa@bbb.com">aaa@bbb.com</a> yourself.
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button id="send-email" type="submit" class="btn btn-primary">Send Email</button>
+                <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
     "use strict";
 
@@ -158,12 +251,44 @@ title: Vax.Codes - Browse groups
     const websiteLinkTemplate = document.getElementById("website-link-template");
     const groupTemplate = document.getElementById("group-template");
     const groupsDiv = document.getElementById("groups");
+    const modalGroupName = document.getElementById("modal-group-name");
+    const modalFooterEmail = document.getElementById("modal-footer-email");
+    const emailTo = document.getElementById("modal-group-email");
+    const emailForm = document.getElementById("join-group-form");
+    const emailSubject = document.getElementById("modal-group-subject");
+    const emailBody = document.getElementById("modal-group-body");
+    const emailError = document.getElementById("body-error");
 
     // global variables used by loading/rendering functions
     let apiBase = "api/v1/groups";
     let groupId = "";
     let searchString = "";
     let nextPage = null;
+
+    // default request-to-join template
+    let EMAIL_SUBJECT = "I'd like to join your Vax.Codes group";
+    let EMAIL_TEMPLATE = "Hello,\n\n" +
+        "I'm requesting to join \"{GROUP_NAME}\" ({GROUP_ID}).\n\n" +
+        "You can find my issuer information here:\n" +
+        "https://github.com/open-austin/vax-codes/blob/master/docs/_issuers/ISSUER_ID_HERE.json\n\n" +
+        "Please reply, cc'ing join@vax.codes, if you approve us joining your group.";
+
+    // validate email template to see if there's any special values remaining
+    function submitEmail(e) {
+
+        // reset the email validation state
+        emailBody.classList.remove("is-invalid");
+
+        // show an error if the user hasn't updated all the REPLACE_ME placeholders
+        if (emailBody.value.indexOf("ISSUER_ID_HERE") !== -1){
+            emailBody.classList.add("is-invalid");
+            emailError.textContent = "It looks like you haven't replaced \"ISSUER_ID_HERE\" with your Issuer ID.";
+            e.preventDefault();
+        }
+
+        // passes validation, so just continue on submitting the form
+    }
+    emailForm.addEventListener("submit", submitEmail);
 
     // render additional groups in the results list
     const emailRe = /^[^@\s]+@[^@\s]+$/; // really dumb, just checks for {something}@{something}
@@ -257,6 +382,35 @@ title: Vax.Codes - Browse groups
 
             // populate group issuers link
             groupElem.querySelector(".group-issuers").href = "issuers?show_nondefault=on&q=" + encodeURIComponent("group:" + groupObj['id']);
+
+            // populate request-to-join modal
+            if (groupId) {
+                groupElem.querySelector(".for-issuers").classList.remove("d-none");
+
+                // has group email, so populate the modal
+                if (groupObj['email']) {
+
+                    // only reset template if a different group
+                    const prevGroupID = modalGroupName.getAttribute("title");
+                    if (prevGroupID !== groupObj['id']) {
+                        modalGroupName.textContent = groupObj['name'];
+                        modalGroupName.setAttribute("title", groupObj['id']);
+
+                        emailTo.value = groupObj['email'];
+                        emailSubject.value = EMAIL_SUBJECT;
+                        emailBody.value = EMAIL_TEMPLATE.replace("{GROUP_NAME}", groupObj['name']).replace("{GROUP_ID}", groupObj['id']);
+                        emailBody.classList.remove("is-invalid"); // reset validation
+
+                        modalFooterEmail.href = "mailto:" + encodeURIComponent(groupObj['email']);
+                        modalFooterEmail.textContent = groupObj['email'];
+                    }
+                }
+                // no group email, so disable request to join
+                else {
+                    groupElem.querySelector(".join-modal-trigger").classList.add("disabled");
+                    groupElem.querySelector(".no-group-email").classList.remove("d-none");
+                }
+            }
 
             // add to the results
             groupsDiv.appendChild(groupElem);
