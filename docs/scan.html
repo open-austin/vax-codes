@@ -76,14 +76,14 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             <div id="scan-success" class="scan-result alert alert-success mt-4 text-center d-none" role="alert">
                 Verified vaccine recipient!
             </div>
-            <div id="scan-unlisted" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
+            <div id="scan-nondefault" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
                     Verified vaccine, but only trusted within an
-                    <a href="{{ '/how-it-works' | relative_url }}#unlisted-groups" class="alert-link d-inline-block" target="_blank">unlisted group</a>
+                    <a href="{{ '/how-it-works' | relative_url }}#non-default-groups" class="alert-link d-inline-block" target="_blank">non-default group</a>
                 </div>
                 <div class="mt-1">
                     Please make sure you <em>personally know and trust</em>:
-                    <span id="unlisted-groups"></span>
+                    <span id="nondefault-groups"></span>
                 </div>
             </div>
             <div id="scan-no-groups" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
@@ -201,7 +201,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <!-- TODO: add trust settings -->
                 <p class="small mt-5">
                     Current trust configuration:<br>
-                    <em>Trusting issuers from within listed groups</em><br>
+                    <em>Trusting issuers from within default groups</em><br>
                     <a class="small" data-bs-toggle="modal" data-bs-target="#edit-groups-modal" href="#" role="button">(edit which groups you trust)</a>
                 </p>
             </div>
@@ -800,10 +800,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const alertinvalidSignature = document.getElementById("scan-invalidSignature");
     const alertUnknownError = document.getElementById("scan-unknownError");
     const alertSuccess = document.getElementById("scan-success");
-    const alertUnlisted = document.getElementById("scan-unlisted");
+    const alertNonDefault = document.getElementById("scan-nondefault");
     const alertNoGroups = document.getElementById("scan-no-groups");
     const alertManualPubkey = document.getElementById("scan-manual-pubkey");
-    const unlistedGroupsWrapper = document.getElementById("unlisted-groups");
+    const nonDefaultGroupsWrapper = document.getElementById("nondefault-groups");
     const noGroupsIssuerLink = document.getElementById("no-groups-issuer");
     const resultsWrapper = document.getElementById("results-wrapper");
     const resultsValue = document.getElementById("results-value");
@@ -845,7 +845,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
             // see if we should trust a specific set of groups
             // e.g. "https://vax.codes/scan#groups=<group_id>,<group_id>,..."
-            let trustedGroupsRef = undefined; // default is only trust listed groups
+            let trustedGroupsRef = undefined; // default is only trust default groups
             let overrideGroups = window.location.href.match(/#(?:[^#]+\/|)groups=([^#=\/]+)/);
             if (overrideGroups !== null) {
                 trustedGroupsRef = overrideGroups[1].split(",");
@@ -863,8 +863,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     continue;
                 }
 
-                // in a listed group, and only trusting listed groups (default)
-                if (trustedGroupsRef === undefined && group['listed']) {
+                // in a default group, and only trusting default groups (default)
+                if (trustedGroupsRef === undefined && group['is_default']) {
                     trustedGroups.push(group);
                 }
 
@@ -923,7 +923,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 resultsIssuer.href = "{{ '/issuers' | relative_url }}?id=" + encodeURIComponent(results['issuer']['id']);
 
                 // populate groups
-                unlistedGroupsWrapper.innerHTML = "";
+                nonDefaultGroupsWrapper.innerHTML = "";
                 resultsGroupsWrapper.innerHTML = "";
                 for (let g = 0; g < untrustedGroups.length; g++) {
                     let group = untrustedGroups[g];
@@ -935,12 +935,12 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     alertLink.classList.add("alert-link");
                     alertLink.classList.add("d-inline-block");
                     alertLink.setAttribute("target", "_blank");
-                    unlistedGroupsWrapper.appendChild(alertLink);
+                    nonDefaultGroupsWrapper.appendChild(alertLink);
                     if (g < (untrustedGroups.length - 1)) {
-                        unlistedGroupsWrapper.appendChild(document.createTextNode(" or "));
+                        nonDefaultGroupsWrapper.appendChild(document.createTextNode(" or "));
                     }
 
-                    // add unlisted group links
+                    // add non-default group links
                     let groupLink = document.createElement("a");
                     groupLink.textContent = group['name'];
                     groupLink.href = "{{ '/groups' | relative_url }}?id=" + encodeURIComponent(group['id']);
@@ -952,7 +952,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 }
 
                 // show rendered results
-                alertUnlisted.classList.remove("d-none");
+                alertNonDefault.classList.remove("d-none");
                 resultsWrapper.classList.remove("d-none");
                 scanAnotherWrapper.classList.remove("d-none");
                 inputOptions.classList.remove("show");

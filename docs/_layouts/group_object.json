@@ -1,6 +1,6 @@
 {
     "id": {{ page.slug | jsonify }},
-    "listed": {{ page.is_listed | jsonify  }},
+    "is_default": {{ page.is_default | jsonify  }},
     "url": "{{ site.url }}{{ page.url }}",
     "name": {{ page.group_name | jsonify }},
     "phone": {{ page.group_phone | jsonify  }},

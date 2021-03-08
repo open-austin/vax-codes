@@ -1,6 +1,5 @@
 {
     "id": {{ page.slug | jsonify }},
-    "listed": {{ page.is_listed | jsonify  }},
     "url": "{{ site.url }}/api/v1/issuers/{{ page.slug }}.json",
     "name": {{ page.issuer_name | jsonify }},
     "phone": {{ page.issuer_phone | jsonify }},
@@ -14,7 +13,7 @@
                     "id": {{ g.slug | jsonify }},
                     "url": "{{ site.url }}{{ g.url }}",
                     "name": {{ g.group_name | jsonify }},
-                    "listed": {{ g.is_listed | jsonify }}{% endif %}{% endfor %}
+                    "is_default": {{ g.is_default | jsonify }}{% endif %}{% endfor %}
                 }{% if forloop.last == false %},{% endif %}{% endfor %}
             ]
         }{% if forloop.last == false %},{% endif %}{% endfor %}

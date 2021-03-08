@@ -1,12 +1,16 @@
 ---
 permalink: /api/v1/groups.json
 ---
-{% assign listed_groups = site.groups | where: "is_listed", true %}{
-    "groups": [{% for group in listed_groups %}
+{% assign page_groups = site.groups | where: "page", 1 %}{
+    "groups": [{% for group in page_groups %}
         {
             "id": {{ group.slug | jsonify }},
+            "is_default": {{ group.is_default | jsonify  }},
             "url": "{{ site.url }}{{ group.url }}",
-            "name": {{ group.group_name | jsonify }}
+            "name": {{ group.group_name | jsonify }},
+            "phone": {{ group.group_phone | jsonify }},
+            "email": {{ group.group_email | jsonify }},
+            "website": {{ group.group_website | jsonify }}
         }{% if forloop.last == false %},{% endif %}{% endfor %}
     ],
     "next": null

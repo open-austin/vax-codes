@@ -1,11 +1,10 @@
 ---
 permalink: /api/v1/issuers.json
 ---
-{% assign listed_issuers = site.issuers | where: "is_listed", true %}{
-    "issuers": [{% for issuer in listed_issuers %}
+{% assign page_issuers = site.issuers | where: "page", 1 %}{
+    "issuers": [{% for issuer in page_issuers %}
         {
             "id": {{ issuer.slug | jsonify }},
-            "listed": {{ issuer.is_listed | jsonify  }},
             "url": "{{ site.url }}{{ issuer.url }}",
             "name": {{ issuer.issuer_name | jsonify }},
             "phone": {{ issuer.issuer_phone | jsonify }},
@@ -18,7 +17,7 @@ permalink: /api/v1/issuers.json
                             "id": {{ g.slug | jsonify }},
                             "url": "{{ site.url }}{{ g.url }}",
                             "name": {{ g.group_name | jsonify }},
-                            "listed": {{ g.is_listed | jsonify }}{% endif %}{% endfor %}
+                            "is_default": {{ g.is_default | jsonify }}{% endif %}{% endfor %}
                         }{% if forloop.last == false %},{% endif %}{% endfor %}
                     ]
                 }{% if forloop.last == false %},{% endif %}{% endfor %}

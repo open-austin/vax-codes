@@ -32,24 +32,37 @@ title: Vax.Codes - Browse issuers
 
             <div id="list-header" class="d-none">
                 <h1>
-                    Trusted issuers
+                    Browse issuers
                 </h1>
                 <p>
-                    These are organizations that are trusted by default to issue QR codes to recipients of a Covid-19 vaccine.
+                    These are organizations and people that have registered to issue QR codes to recipients of a Covid-19 vaccine.
                 </p>
                 <form class="row">
                     <div class="col-sm-10 col-md-6 col-lg-4">
                         <div class="input-group">
+                            <input id="show-nondefault-input" type="hidden" name="show_nondefault" value="off">
                             <input id="search-input" type="text" class="form-control" name="q" placeholder="(e.g. Some Company)">
                             <button class="btn btn-outline-secondary" type="submit" title="Search">Search</button>
                         </div>
                     </div>
                 </form>
-                <p id="search-results" class="mt-3 d-none">
-                    Found <span id="num-results"></span> results for the search "<span id="search-term"></span>".
+                <p id="revert-default" class="mt-3 d-none">
+                    <strong>NOTE:</strong>
+                    These results include issuers that aren't trusted by default.
+                    <a id="revert-default-link" href="#" class="d-inline-block">Go back to only showing issuers that are trusted by default</a>
                 </p>
-                <p id="empty-state" class="mt-3 d-none">
-                    Sorry, there's no public.
+                <p id="results-summary" class="mt-3">
+                    Found <span id="num-results">0</span> issuers
+                    <span id="search-wrapper" class="d-none">
+                        for the search "<span id="search-term"></span>"
+                    </span>
+                    <span id="default-wrapper" class="d-none">
+                        that are trusted by default
+                        <span id="has-nondefault" class="d-none">
+                            (hiding <a id="nondefault-link" href="#"><span id="nondefault-count"></span> non-default issuers</a>)
+                        </span>
+                    </span>
+                    <span id="results-pending">so far...</span>
                 </p>
             </div>
 
@@ -57,20 +70,12 @@ title: Vax.Codes - Browse issuers
                 <a href="{{ '/issuers' | relative_url }}"><svg class="svgicon fs-5"><use href="#fa-chevron-left"/></svg> Back to list of issuers</a>
             </div>
 
-            <h4 id="loading" class="mt-3 fst-italic">
-                Loading...
-            </h4>
-
-            <p id="load-error" class="mt-3 text-danger d-none">
-                Couldn't load the list of issuers :(
-            </p>
-
             <div id="group-template" class="d-none">
                 <span class="group me-3 d-inline-block">
-                    <a class="group-name" href="#">Austin Health Department</a>
+                    <a class="group-name" href="#"></a>
                     <span class="group-is-trusted-by-default d-none" tabindex="0" role="button" data-bs-toggle="popover"
                         ><svg class="svgicon text-success fs-4"><use href="#fa-check"/></svg></span>
-                    <span class="group-is-unlisted d-none" tabindex="0" role="button" data-bs-toggle="popover"
+                    <span class="group-is-nondefault d-none" tabindex="0" role="button" data-bs-toggle="popover"
                         ><svg class="svgicon text-warning fs-4"><use href="#fa-exclamation-triangle"/></svg></span>
                 </span>
             </div>
@@ -78,7 +83,7 @@ title: Vax.Codes - Browse issuers
             <div id="website-link-template" class="d-none">
                 <span class="website">
                     <a class="website-link" href="https://example.com/vaxcodes" target="_blank" rel="noopener noreferrer nofollow"
-                        ><span class="website-name">https://example.com/vaxcodes</span>
+                        ><span class="website-name"></span>
                         <svg class="svgicon fs-5"><use href="#fa-external-link"/></svg></a>
                 </span>
             </div>
@@ -86,13 +91,13 @@ title: Vax.Codes - Browse issuers
             <div id="issuer-template" class="d-none">
                 <div class="issuer">
                     <h4 class="mt-4">
-                        <a class="issuer-name" href="#">Test Vaccine Giver</a>
+                        <a class="issuer-name" href="#"></a>
                         <span class="issuer-is-trusted-by-default d-none" tabindex="0" role="button" data-bs-toggle="popover"
                             ><svg class="svgicon text-success fs-2"><use href="#fa-check"/></svg></span>
-                        <span class="issuer-is-in-unlisted-groups d-none" tabindex="0" role="button" data-bs-toggle="popover"
+                        <span class="issuer-is-in-nondefault-groups d-none" tabindex="0" role="button" data-bs-toggle="popover"
                             ><svg class="svgicon text-warning fs-2"><use href="#fa-exclamation-triangle"/></svg></span>
                         <span class="issuer-is-in-no-groups d-none" tabindex="0" role="button" data-bs-toggle="popover"
-                            ><svg class="svgicon text-danger fs-2"><use href="#fa-exclamation-circle"/></svg></span>
+                            ><svg class="svgicon text-warning fs-2"><use href="#fa-exclamation-triangle"/></svg></span>
                     </h4>
                     <ul class="list-unstyled">
                         <li>
@@ -118,22 +123,18 @@ title: Vax.Codes - Browse issuers
             <div id="issuers">
             </div>
 
-            <div id="next-link-wrapper" class="mt-4 d-none">
-                <a id="next-link" href="#">Load the next page of issuers</a>
-            </div>
+            <h4 id="loading" class="mt-3 fst-italic">
+                Loading...
+            </h4>
 
+            <p id="load-error" class="mt-3 text-danger d-none">
+                Couldn't load the list of issuers :(
+            </p>
         </div>
     </div>
     <div class="row mt-5">
         <div class="col">
             <hr>
-            <p class="mt-3 small">
-                <em>
-                    Want to browse all registered issuers, both publicly listed and unlisted?
-                    <a href="https://github.com/open-austin/vax-codes/tree/master/docs/_issuers" target="_blank" rel="noopener noreferrer"
-                        >See the github folder <svg class="svgicon fs-6"><use href="#fa-external-link"/></svg></a>
-                </em>
-            </p>
             <p class="mt-3 small">
                 <em>
                     Want to issue QR codes yourself (for either public or internal purposes)?
@@ -148,11 +149,19 @@ title: Vax.Codes - Browse issuers
 
     // elements
     const listHeader = document.getElementById("list-header");
+    const showNonDefaultInput = document.getElementById("show-nondefault-input");
     const searchInput = document.getElementById("search-input");
-    const searchResults = document.getElementById("search-results");
+    const revertDefault = document.getElementById("revert-default");
+    const revertDefaultLink = document.getElementById("revert-default-link");
+    const resultsSummary = document.getElementById("results-summary");
     const numResults = document.getElementById("num-results");
+    const searchWrapper = document.getElementById("search-wrapper");
     const searchTerm = document.getElementById("search-term");
-    const emptyState = document.getElementById("empty-state");
+    const defaultWrapper = document.getElementById("default-wrapper");
+    const hasNonDefault = document.getElementById("has-nondefault");
+    const nonDefaultLink = document.getElementById("nondefault-link");
+    const nonDefaultCount = document.getElementById("nondefault-count");
+    const resultsPending = document.getElementById("results-pending");
     const individualHeader = document.getElementById("individual-header");
     const loading = document.getElementById("loading");
     const loadError = document.getElementById("load-error");
@@ -165,64 +174,57 @@ title: Vax.Codes - Browse issuers
     let apiBase = "api/v1/issuers";
     let issuerId = "";
     let searchString = "";
-    let thisPage = "";
-    let showUntrusted = "off";
     let nextPage = null;
-    let issuerList = [];
 
     // determine trust level of an issuer
-    // returns one of: "is-trusted-by-default" "is-in-unlisted-groups" "is-in-no-groups"
+    // returns one of: "is-trusted-by-default" "is-in-nondefault-groups" "is-in-no-groups"
     function getTrustLevel(issuerObj) {
         let numGroups = 0;
-        let foundListed = false;
+        let foundDefaultGroup = false;
         if (issuerObj['keys']) {
             for (let k = 0; k < issuerObj['keys'].length; k++) {
                 let issuerKey = issuerObj['keys'][k];
                 if (issuerKey['groups']) {
                     for (let g = 0; g < issuerKey['groups'].length; g++) {
                         numGroups += 1;
-                        if (issuerKey['groups'][g]['listed'] === true) {
-                            foundListed = true;
+                        if (issuerKey['groups'][g]['is_default'] === true) {
+                            foundDefaultGroup = true;
                             break;
                         }
                     }
                 }
-                if (foundListed) {
+                if (foundDefaultGroup) {
                     break;
                 }
             }
         }
-        if (foundListed) {
+        if (foundDefaultGroup) {
             return "is-trusted-by-default";
         }
         else if (numGroups) {
-            return "is-in-unlisted-groups";
+            return "is-in-nondefault-groups";
         }
         else {
             return "is-in-no-groups";
         }
     }
 
-    // populate the issuers list with the results
-    function renderIssuers() {
-
-        // search results summary
-        if (searchString) {
-            numResults.textContent = issuerList.length;
-            searchTerm.textContent = searchString;
-            searchResults.classList.remove("d-none");
-        }
-
-        // empty state
-        if (issuerList.length === 0 && !searchString) {
-            emptyState.classList.remove("d-none");
-        }
+    // render additional issuers in the results list
+    const emailRe = /^[^@\s]+@[^@\s]+$/; // really dumb, just checks for {something}@{something}
+    const websiteRe = /^https?:\/\//; // really dumb, just checks the start for http
+    function renderIssuers(issuerList) {
 
         for (let i = 0; i < issuerList.length; i++) {
             const issuerObj = issuerList[i];
 
+            // skip if issuer already rendered
+            if (document.getElementById("issuer-" + issuerObj['id'])) {
+                continue;
+            }
+
             // clone the issuer template
             const issuerElem = issuerTemplate.querySelector(".issuer").cloneNode(true);
+            issuerElem.id = "issuer-" + issuerObj['id'];
 
             // populate name
             issuerElem.querySelector(".issuer-name").textContent = issuerObj['name'];
@@ -239,8 +241,8 @@ title: Vax.Codes - Browse issuers
                 });
                 popoverTrigger.classList.remove("d-none");
             }
-            else if (trustLevel === "is-in-unlisted-groups") {
-                let popoverTrigger = issuerElem.querySelector(".issuer-is-in-unlisted-groups");
+            else if (trustLevel === "is-in-nondefault-groups") {
+                let popoverTrigger = issuerElem.querySelector(".issuer-is-in-nondefault-groups");
                 let popover = new bootstrap.Popover(popoverTrigger, {
                     "title": "Only in non-default groups",
                     "content": "This issuer is only a member of non-default groups, so a warning will display when QR codes from this issuer are scanned. Only trust them if you know the issuer or group owner personally.",
@@ -260,10 +262,15 @@ title: Vax.Codes - Browse issuers
             if (issuerObj['phone']) {
                 let phoneNum = issuerObj['phone'].replace(/[^0-9]/g, ""); // strip everything except numbers from the phone number
                 phoneNum = issuerObj['phone'].indexOf("+") === -1 && phoneNum.length === 10 ? "1" + phoneNum : phoneNum; // add US country code if looks like a US number
-                const phoneLink = document.createElement("a");
-                phoneLink.href = "tel:+" + encodeURIComponent(phoneNum);
-                phoneLink.textContent = issuerObj['phone'];
-                issuerElem.querySelector(".issuer-phone").appendChild(phoneLink);
+                if (phoneNum.length > 0) {
+                    const phoneLink = document.createElement("a");
+                    phoneLink.href = "tel:+" + encodeURIComponent(phoneNum);
+                    phoneLink.textContent = issuerObj['phone'];
+                    issuerElem.querySelector(".issuer-phone").appendChild(phoneLink);
+                }
+                else {
+                    issuerElem.querySelector(".issuer-phone").textContent = issuerObj['phone'];
+                }
             }
             else {
                 issuerElem.querySelector(".issuer-phone").textContent = "Not provided";
@@ -271,10 +278,15 @@ title: Vax.Codes - Browse issuers
 
             // populate email
             if (issuerObj['email']) {
-                const emailLink = document.createElement("a");
-                emailLink.href = "mailto:" + encodeURIComponent(issuerObj['email']);
-                emailLink.textContent = issuerObj['email'];
-                issuerElem.querySelector(".issuer-email").appendChild(emailLink);
+                if (issuerObj['email'].match(emailRe)) {
+                    const emailLink = document.createElement("a");
+                    emailLink.href = "mailto:" + encodeURIComponent(issuerObj['email']);
+                    emailLink.textContent = issuerObj['email'];
+                    issuerElem.querySelector(".issuer-email").appendChild(emailLink);
+                }
+                else {
+                    issuerElem.querySelector(".issuer-email").textContent = issuerObj['email'];
+                }
             }
             else {
                 issuerElem.querySelector(".issuer-email").textContent = "Not provided";
@@ -282,10 +294,15 @@ title: Vax.Codes - Browse issuers
 
             // populate website
             if (issuerObj['website']) {
-                const websiteLink = websiteLinkTemplate.querySelector(".website").cloneNode(true);
-                websiteLink.querySelector(".website-link").href = issuerObj['website'];
-                websiteLink.querySelector(".website-name").textContent = issuerObj['website'];
-                issuerElem.querySelector(".issuer-website").appendChild(websiteLink);
+                if (issuerObj['website'].match(websiteRe)) {
+                    const websiteLink = websiteLinkTemplate.querySelector(".website").cloneNode(true);
+                    websiteLink.querySelector(".website-link").href = issuerObj['website'];
+                    websiteLink.querySelector(".website-name").textContent = issuerObj['website'];
+                    issuerElem.querySelector(".issuer-website").appendChild(websiteLink);
+                }
+                else {
+                    issuerElem.querySelector(".issuer-website").textContent = issuerObj['website'];
+                }
             }
             else {
                 issuerElem.querySelector(".issuer-website").textContent = "Not provided";
@@ -293,6 +310,7 @@ title: Vax.Codes - Browse issuers
 
             // populate groups
             let seenGroups = {};
+            let numGroups = 0;
             if (issuerObj['keys']) {
                 for (let k = 0; k < issuerObj['keys'].length; k++) {
                     let issuerKey = issuerObj['keys'][k];
@@ -305,6 +323,7 @@ title: Vax.Codes - Browse issuers
                                 continue;
                             }
                             seenGroups[groupObj['id']] = true;
+                            numGroups += 1;
 
                             // base group link off of template
                             const groupElem = groupTemplate.querySelector(".group").cloneNode(true);
@@ -314,7 +333,7 @@ title: Vax.Codes - Browse issuers
                             groupElem.querySelector(".group-name").textContent = groupObj['name'];
 
                             // group trust level
-                            if (groupObj['listed'] === true) {
+                            if (groupObj['is_default'] === true) {
                                 let popoverTrigger = groupElem.querySelector(".group-is-trusted-by-default");
                                 let popover = new bootstrap.Popover(popoverTrigger, {
                                     "title": "Trusted Group",
@@ -324,7 +343,7 @@ title: Vax.Codes - Browse issuers
                                 popoverTrigger.classList.remove("d-none");
                             }
                             else {
-                                let popoverTrigger = groupElem.querySelector(".group-is-unlisted");
+                                let popoverTrigger = groupElem.querySelector(".group-is-nondefault");
                                 let popover = new bootstrap.Popover(popoverTrigger, {
                                     "title": "Non-default group",
                                     "content": "This group is for private purposes only and is not trusted by default in our scanner.",
@@ -338,36 +357,18 @@ title: Vax.Codes - Browse issuers
                     }
                 }
             }
+            // not part of any groups
+            if (numGroups === 0) {
+                issuerElem.querySelector(".issuer-groups").textContent = "Not part of any groups";
+            }
 
             // add to the results
             issuersDiv.appendChild(issuerElem);
         }
-
-        // remove any loading state
-        loading.classList.add("d-none");
     }
 
-    // query the issuers API and show all the listed ones
+    // query the issuers API and show all the default ones
     function loadIssuers(numLoops) {
-
-        // individual loading state
-        if (issuerId) {
-            loading.textContent = "Loading...";
-            individualHeader.classList.remove("d-none");
-        }
-
-        // search loading state
-        else if (searchString) {
-            searchInput.value = searchString;
-            loading.textContent = "Searching...";
-            listHeader.classList.remove("d-none");
-        }
-
-        // default loading state
-        else {
-            loading.textContent = "Loading...";
-            listHeader.classList.remove("d-none");
-        }
 
         // show a pageload error if waited too long
         if (numLoops > 0) {
@@ -404,23 +405,23 @@ title: Vax.Codes - Browse issuers
                         }
 
                         // show the error message
-                        loading.classList.add("d-none");
-                        loadError.classList.remove("d-none");
-                        return;
-                    }
-
-                    // parse the issuer json
-                    try {
-                        issuerList = [JSON.parse(xhr.responseText)];
-                    } catch (err) {
-                        console.log("json parse error", err);
-                        loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
-                        loading.classList.add("d-none");
                         loadError.classList.remove("d-none");
                     }
 
-                    // render the individual issuer
-                    renderIssuers();
+                    // succesfully loaded issuer
+                    else {
+                        try {
+                            const issuerObj = JSON.parse(xhr.responseText);
+                            renderIssuers([issuerObj]);
+                        } catch (err) {
+                            console.log("json parse error", err);
+                            loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
+                            loadError.classList.remove("d-none");
+                        }
+                    }
+
+                    // hide any loading state
+                    loading.classList.add("d-none");
                 }
             };
             xhr.send();
@@ -428,138 +429,217 @@ title: Vax.Codes - Browse issuers
 
         // query the API
         else {
-            const listUrl = thisPage ? thisPage : apiBase + ".json";
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", listUrl);
-            xhr.onreadystatechange = function() {
-                if(xhr.readyState === XMLHttpRequest.DONE) {
 
-                    // request error (non-2XX response (or 0 for local filesystems))
-                    if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
+            let numNonDefault = 0;
 
-                        // special messaging per type of error
-                        switch (xhr.status) {
-                            default:
-                                loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
-                                console.log("xhr error", xhr);
+            // recursively query the issuer list API pages
+            function searchListAPI(nextUrl) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", nextUrl);
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                        // request error (non-2XX response (or 0 for local filesystems))
+                        if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
+
+                            // special messaging per type of error
+                            switch (xhr.status) {
+                                default:
+                                    loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
+                                    console.log("xhr error", xhr);
+                            }
+
+                            // show the error message
+                            loadError.classList.remove("d-none");
+                            loading.classList.add("d-none");
+                            return;
                         }
 
-                        // show the error message
-                        loading.classList.add("d-none");
-                        loadError.classList.remove("d-none");
-                        return;
-                    }
-
-                    // parse the issuer json
-                    try {
-                        const issuerPage = JSON.parse(xhr.responseText);
-                        issuerList = issuerPage['issuers'];
-                        nextPage = issuerPage['next'];
-                    } catch (err) {
-                        console.log("json parse error", err);
-                        loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
-                        loading.classList.add("d-none");
-                        loadError.classList.remove("d-none");
-                    }
-
-                    // filter out issuers that aren't listed or don't have any trusted groups
-                    let listedIssuers = [];
-                    for (let i = 0; i < issuerList.length; i++) {
-                        let issuerObj = issuerList[i];
-                        // skip issuers asking to be unlisted
-                        if (issuerObj['listed'] !== true) {
-                            continue;
+                        // parse the page of issuers from json to object
+                        let issuerPage = undefined;
+                        try {
+                            issuerPage = JSON.parse(xhr.responseText);
+                        } catch (err) {
+                            console.log("json parse error", err);
+                            loadError.textContent = "Couldn't load the issuer list: Error " + xhr.status + " (check console for debugging info)";
+                            loadError.classList.remove("d-none");
+                            loading.classList.add("d-none");
+                            return;
                         }
-                        // skip issuers that aren't in any trusted groups
-                        if (showUntrusted === "off" && getTrustLevel(issuerObj) !== "is-trusted-by-default") {
-                            continue;
-                        }
-                        // trusted issuer, so include in results
-                        listedIssuers.push(issuerObj);
-                    }
-                    issuerList = listedIssuers;
 
-                    // for search results, filter down to only matching results
-                    if (searchString) {
-                        const simplifyRe = /[:\/\?&#=\-_\+ \.,\(\)]/g; // remove common punctuation from searchs so that more likely to find a match
-                        const searchSimplified = searchString.replace(simplifyRe, "").toLowerCase();
-                        let filteredIssuers = [];
-                        for (let i = 0; i < issuerList.length; i++) {
-                            let issuerObj = issuerList[i];
-                            // matches id
-                            if (searchSimplified && issuerObj['id'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                console.log("matches id", issuerObj);
-                                filteredIssuers.push(issuerObj);
-                                continue;
-                            }
-                            // matches name
-                            if (searchSimplified && issuerObj['name'] && issuerObj['name'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                console.log("matches name", issuerObj);
-                                filteredIssuers.push(issuerObj);
-                                continue;
-                            }
-                            // matches phone
-                            if (searchSimplified && issuerObj['phone'] && searchString.replace(/[^0-9]/g, "") !== "" && issuerObj['phone'].replace(/[^0-9]/g, "").indexOf(searchString.replace(/[^0-9]/g, "")) !== -1) {
-                                console.log("matches phone", issuerObj);
-                                filteredIssuers.push(issuerObj);
-                                continue;
-                            }
-                            // matches email
-                            if (searchSimplified && issuerObj['email'] && issuerObj['email'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                console.log("matches email", issuerObj);
-                                filteredIssuers.push(issuerObj);
-                                continue;
-                            }
-                            // matches website
-                            if (searchSimplified && issuerObj['website'] && issuerObj['website'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                console.log("matches website", issuerObj);
-                                filteredIssuers.push(issuerObj);
-                                continue;
+                        // for search results, filter down to only matching results
+                        let issuerMatches = issuerPage['issuers']; // non-search matches everything
+                        if (searchString) {
+                            issuerMatches = []; // reset to nothing
+                            const simplifyRe = /[:\/\?&#=\-_\+ \.,\(\)]/g; // remove common punctuation from searchs so that more likely to find a match
+                            const searchSimplified = searchString.replace(simplifyRe, "").toLowerCase();
+                            for (let i = 0; i < issuerPage['issuers'].length; i++) {
+                                let issuerObj = issuerPage['issuers'][i];
+                                // matches id
+                                if (searchSimplified && issuerObj['id'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    issuerMatches.push(issuerObj);
+                                    continue;
+                                }
+                                // matches name
+                                if (searchSimplified && issuerObj['name'] && issuerObj['name'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    issuerMatches.push(issuerObj);
+                                    continue;
+                                }
+                                // matches phone
+                                if (searchSimplified && issuerObj['phone'] && searchString.replace(/[^0-9]/g, "") !== "" && issuerObj['phone'].replace(/[^0-9]/g, "").indexOf(searchString.replace(/[^0-9]/g, "")) !== -1) {
+                                    issuerMatches.push(issuerObj);
+                                    continue;
+                                }
+                                // matches email
+                                if (searchSimplified && issuerObj['email'] && issuerObj['email'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    issuerMatches.push(issuerObj);
+                                    continue;
+                                }
+                                // matches website
+                                if (searchSimplified && issuerObj['website'] && issuerObj['website'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    issuerMatches.push(issuerObj);
+                                    continue;
+                                }
                             }
                         }
-                        issuerList = filteredIssuers;
-                    }
 
-                    // render the list of results
-                    renderIssuers();
+                        // filter out issuers that aren't default or don't have any trusted groups
+                        let pageIssuerList = [];
+                        for (let i = 0; i < issuerMatches.length; i++) {
+                            let issuerObj = issuerMatches[i];
+                            // skip issuers that aren't in any trusted groups and haven't already been added
+                            if (showNonDefaultInput.value === "off" && getTrustLevel(issuerObj) !== "is-trusted-by-default") {
+                                // only count if not already rendered
+                                if (document.getElementById("issuer-" + issuerObj['id']) === null) {
+                                    numNonDefault += 1;
+                                }
+                                continue;
+                            }
+                            // trusted issuer, so include in results
+                            pageIssuerList.push(issuerObj);
+                        }
+
+                        // render the list of results
+                        renderIssuers(pageIssuerList);
+
+                        // update results count
+                        numResults.textContent = issuersDiv.querySelectorAll(".issuer").length;
+
+                        // show toggle for viewing non-default issuers
+                        if (showNonDefaultInput.value === "off" && numNonDefault > 0) {
+                            nonDefaultCount.textContent = numNonDefault;
+                            hasNonDefault.classList.remove("d-none");
+                        }
+
+                        // recurse if has next page
+                        if (issuerPage['next'] !== null) {
+                            searchListAPI(issuerPage['next']);
+                        }
+                        // no next page, so hide loading
+                        else {
+                            loading.classList.add("d-none");
+                            resultsPending.classList.add("d-none");
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+
+            //query for exact matches of the issuer first
+            if (searchString) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", apiBase + "/" + searchString + ".json");
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                        // found an issuer exactly matching search string
+                        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
+                            try {
+                                let issuerObj = JSON.parse(xhr.responseText);
+
+                                // non-default issuer, so show non-default toggle
+                                if (showNonDefaultInput.value === "off" && getTrustLevel(issuerObj) !== "is-trusted-by-default") {
+                                    numNonDefault += 1;
+                                    nonDefaultCount.textContent = numNonDefault;
+                                    hasNonDefault.classList.remove("d-none");
+                                }
+                                // can render the issuer
+                                else {
+                                    numResults.textContent = 1;
+                                    renderIssuers([issuerObj]);
+                                }
+                            } catch (err) {
+                                // just log the error and keep moving
+                                console.log("individual issuer json parse error", err);
+                            }
+                        }
+
+                        // start scanning the issuer list
+                        searchListAPI(apiBase + ".json");
+                    }
                 }
-            };
-            xhr.send();
+                xhr.send();
+            }
+
+            // by default just start scanning the issuer list API
+            else {
+                searchListAPI(apiBase + ".json");
+            }
         }
     }
 
-    // parse the url for search strings, issuer ids, custom API base endpoints, and pagination
+    // parse the url for search strings, issuer ids, custom API base endpoints
     // (e.g. "/issuers?id=test_arc&q=123&api=https...&show_untrusted=on&page=https...")
-    const issuerIdParam = new RegExp("\\?(?:.*&|)id=([^&]+)");
-    const issuerIdMatch = window.location.href.match(issuerIdParam);
-    if (issuerIdMatch !== null) {
-        issuerId = decodeURIComponent(issuerIdMatch[1]).trim();
+    const urlParams = new URLSearchParams(window.location.search.slice(1));
+    if (urlParams.get("id") !== null && urlParams.get("id").trim()) {
+        issuerId = urlParams.get("id").trim();
     }
-
-    const searchParam = new RegExp("\\?(?:.*&|)q=([^&]+)");
-    const searchMatch = window.location.href.match(searchParam);
-    if (searchMatch !== null) {
-        searchString = decodeURIComponent(searchMatch[1]).trim();
+    if (urlParams.get("q") !== null && urlParams.get("q").trim()) {
+        searchString = urlParams.get("q").trim();
     }
-
-    const apiParam = new RegExp("\\?(?:.*&|)api=([^&]+)");
-    const apiMatch = window.location.href.match(apiParam);
-    if (apiMatch !== null) {
-        apiBase = decodeURIComponent(apiMatch[1]).trim();
+    if (urlParams.get("api") !== null && urlParams.get("api").trim()) {
+        apiBase = urlParams.get("api").trim();
         document.getElementById("api-alert").classList.remove("d-none");
         document.getElementById("api-debug").textContent = apiBase;
     }
 
-    const trustParam = new RegExp("\\?(?:.*&|)show_untrusted=(on)");
-    const trustMatch = window.location.href.match(trustParam);
-    if (trustMatch !== null) {
-        showUntrusted = decodeURIComponent(trustMatch[1]).trim();
+    // update links to toggle betweeen showing/hiding non-default issuers
+    if (urlParams.get("show_nondefault") !== null && urlParams.get("show_nondefault") === "on") {
+        showNonDefaultInput.value = "on";
+        const revertDefaultLinkParams = new URLSearchParams(urlParams.toString());
+        revertDefaultLinkParams.delete("show_nondefault");
+        const revertParamString = revertDefaultLinkParams.toString();
+        revertDefaultLink.href = window.location.origin + window.location.pathname + (revertParamString ? "?" : "") + revertParamString;
+        revertDefault.classList.remove("d-none"); // show revert-to-default-only option
+    }
+    else {
+        showNonDefaultInput.value = "off";
+        const nonDefaultLinkParams = new URLSearchParams(urlParams.toString());
+        nonDefaultLinkParams.set("show_nondefault", "on");
+        const nonDefaultParamString = nonDefaultLinkParams.toString();
+        nonDefaultLink.href = window.location.origin + window.location.pathname + (nonDefaultParamString ? "?" : "") + nonDefaultParamString;
+        defaultWrapper.classList.remove("d-none"); // show note in results summary
     }
 
-    const pageParam = new RegExp("\\?(?:.*&|)page=([^&]+)");
-    const pageMatch = window.location.href.match(pageParam);
-    if (pageMatch !== null) {
-        thisPage = decodeURIComponent(pageMatch[1]).trim();
+    // show loading state based on url parameters
+    // individual loading state
+    if (issuerId) {
+        loading.textContent = "Loading...";
+        individualHeader.classList.remove("d-none");
+    }
+    // search loading state
+    else if (searchString) {
+        searchInput.value = searchString;
+        searchTerm.textContent = searchString;
+        searchWrapper.classList.remove("d-none");
+        loading.textContent = "Searching...";
+        listHeader.classList.remove("d-none");
+    }
+    // default loading state
+    else {
+        loading.textContent = "Loading...";
+        listHeader.classList.remove("d-none");
     }
 
     // start the process of loading the issuers
