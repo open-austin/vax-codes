@@ -29,7 +29,7 @@ See our [github issues](https://github.com/open-austin/vax-codes/issues) for the
 * [x] QR code issuing (in browser)
 * [x] Issuer admin
 * [x] Issuer explorer/searching
-* [ ] Group admin
+* [x] Group admin
 * [x] Group explorer/searching
 * [ ] Informational pages (how-it-works, about-us, etc.)
 * [ ] Security overview page
