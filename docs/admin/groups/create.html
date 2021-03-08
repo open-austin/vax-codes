@@ -1,0 +1,190 @@
+---
+layout: base
+title: Vax.Codes - Create a new group
+---
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/groups' | relative_url }}">Group owners admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Create a new group
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+            <h1>
+                Create a new group
+            </h1>
+            <p>
+                Just like
+                <a href="{{ '/admin/issuers/register' | relative_url }}">registering a new issuer</a>,
+                you must email us with information about your group so that we can include it in our
+                <a href="{{ '/groups' | relative_url }}">recognized groups list</a>.
+            </p>
+
+            <form id="create-form" action="mailto:create-group@vax.codes" target="_blank">
+
+                <label for="email-body" class="h3 form-label mt-4">
+                    Send group creation request
+                </label>
+                <div class="row">
+                    <div class="col-md-12 col-lg-10 col-xl-8">
+                        <input type="hidden" name="subject" value="I'd like to create a new group">
+                        <textarea
+                            class="form-control font-monospace"
+                            id="email-body"
+                            name="body"
+                            rows="10"
+                            aria-describedby="body-help"
+                        ></textarea>
+                    </div>
+                </div>
+                <div id="body-error" class="invalid-feedback"></div>
+                <div id="body-help" class="form-text">
+                    Replace the "REPLACE_ME" with your organization name, phone number, email, and website.
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-12 col-lg-10 col-xl-8">
+                        <div class="alert alert-warning">
+                            <strong>WARNING:</strong>
+                            When you create a new group, your contact info will be public in our
+                            <a href="{{ '/groups' | relative_url }}" class="alert-link">groups page</a>.
+                            <br>
+                            If you don't want to have one of the fields above be public, replace "REPLACE_ME" with "Not Provided".
+                            <br>
+                            If you don't anything to be public,
+                            <a href="{{ '/docs/self-host' | relative_url }}" class="alert-link">self-host</a>
+                            your own private version of Vax.Codes (it's open source!).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button id="send-email" type="submit" class="btn btn-primary btn-lg" aria-describedby="send-help">
+                        Send Email
+                    </button>
+                    <button id="reset-template" type="reset" class="btn btn-link ms-2">
+                        Reset email template
+                    </button>
+                </div>
+                <div id="send-help" class="form-text">
+                    This should open in your default email client so you can send it directly from your email.
+                    <br>
+                    If it doesn't, copy the above message and email it to
+                    <a href="mailto:create-group@vax.codes">create-group@vax.codes</a> with the subject "Create Group".
+                </div>
+
+            </form>
+
+            <hr class="mt-5">
+            <p class="small">
+                <em>
+                    Forgot your Group ID?
+                    <br>
+                    <a href="{{ '/groups' | relative_url }}">Search the groups list</a> for your group.
+                </em>
+            </p>
+            <p class="small">
+                <em>
+                    Want to check on the status of an existing group creation request?
+                    <br>
+                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "What's the status of my group creation?"
+                </em>
+            </p>
+            <p class="small">
+                <em>
+                    Want to edit something for your already created group?
+                    <br>
+                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> from your group email with the subject "I need to modify my group" and include the details you want to change.
+                </em>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    /**********************/
+    /** Global Variables **/
+    /**********************/
+
+    // relevant elements
+    const createForm = document.getElementById("create-form");
+    const emailBody = document.getElementById("email-body");
+    const emailError = document.getElementById("body-error");
+    const emailButton = document.getElementById("send-email");
+    const resetButton = document.getElementById("reset-template");
+
+    // default tempalte
+    let EMAIL_TEMPLATE = "Hello,\n\n" +
+        "I'd like to create a new group. I'm okay with this information being public.\n\n" +
+        "group_name: REPLACE_ME\n" +
+        "group_phone: REPLACE_ME\n" +
+        "group_email: REPLACE_ME\n" +
+        "group_website: REPLACE_ME\n";
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let PAGE_LANG = "en";
+    // TODO: allow different languages
+
+    /************************/
+    /** Main Functionality **/
+    /************************/
+
+    // reset to template default text
+    function resetTemplate(e) {
+        // ignore the default form reset logic since that will reset the email template, too
+        if (e) { e.preventDefault(); }
+
+        // reset the email validation state
+        emailBody.classList.remove("is-invalid");
+        emailError.classList.remove("d-block");
+
+        // reset the template back to the default
+        emailBody.value = EMAIL_TEMPLATE;
+    }
+
+    // validate email template to see if there's any special values remaining
+    function submitEmail(e) {
+
+        // reset the email validation state
+        emailBody.classList.remove("is-invalid");
+        emailError.classList.remove("d-block");
+
+        // show an error if the user hasn't updated all the REPLACE_ME placeholders
+        if (emailBody.value.indexOf("REPLACE_ME") !== -1){
+            emailBody.classList.add("is-invalid");
+            emailError.textContent = "It looks like you haven't replaced all the \"REPLACE_ME\" values.";
+            emailError.classList.add("d-block");
+            e.preventDefault();
+        }
+
+        // passes validation, so just continue on submitting the form
+    }
+
+    // resetting the tempalte reverts the template
+    createForm.addEventListener("reset", resetTemplate);
+
+    // resetting the tempalte reverts the template
+    createForm.addEventListener("submit", submitEmail);
+
+    // update the template on pageload
+    resetTemplate();
+
+</script>

@@ -2,4 +2,54 @@
 layout: base
 title: Vax.Codes - Group owners admin
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Group owners admin
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+            <h1>
+                Group Owner Admin
+            </h1>
+
+            <h4>
+                What is a group?
+            </h4>
+            <p>
+                Groups are organizations that trusts one or more <a href="{{ '/admin/issuers' | relative_url }}">issuers</a> to issue QR codes verifying someone has received a Covid-19 vaccine.
+                <br>
+                Anyone can create a new group for local community use.
+            </p>
+
+            <h4>
+                Helpful Links:
+            </h4>
+            <ul>
+                <li>
+                    <a href="{{ '/admin/groups/create' | relative_url }}"
+                        >Create a new group</a>
+                </li>
+                <li>
+                    <a href="{{ '/groups' | relative_url }}"
+                        >Find your group profile</a> (for group owners)
+                </li>
+                <li>
+                    <a href="{{ '/admin/groups/request' | relative_url }}"
+                        >Request to join a group</a> (for issuers)
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</div>
