@@ -198,19 +198,13 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     Already got your Covid-19 vaccine and want a QR code?<br>
                     <a href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
                 </p>
-                <!-- TODO: add trust settings -->
-                <p class="small mt-5 d-none">
-                    Current trust configuration:<br>
-                    <em>Trusting issuers from within default groups</em><br>
-                    <a class="small" data-bs-toggle="modal" data-bs-target="#edit-groups-modal" href="#" role="button">(edit which groups you trust)</a>
-                </p>
             </div>
         </div>
     </div>
 
 </div>
 
-<!-- Modal: Edit trusted groups -->
+<!-- Modal: Ask to start scanner (for getting user interaction on iOS) -->
 <div class="modal fade" id="play-video-modal" tabindex="-1" aria-labelledby="image-upload-title" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -283,25 +277,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
             </div>
         </form>
-    </div>
-</div>
-
-<!-- Modal: Edit trusted groups -->
-<div class="modal fade" id="edit-groups-modal" tabindex="-1" aria-labelledby="edit-groups-title" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="edit-groups-title">Set Trusted Groups</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <code>TODO: add this functionality</code>
-            </div>
-            <div class="modal-footer">
-                <button id="set-groups" type="button" class="btn btn-primary">Set As Trusted Groups</button>
-                <button type="button" class="btn btn-link" data-bs-dismiss="modal">Nevermind</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -771,19 +746,6 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         // didn't match any versions, so not a supported code
         errorCallback({"error": "invalidFormat", "code": code});
     }
-
-    /********************/
-    /** Trust Settings **/
-    /********************/
-
-    // trust settings components
-    const setGroupsButton = document.getElementById("set-groups");
-
-    // try to verify a copy/pasted verification code URL
-    setGroupsButton.addEventListener("click", function(event) {
-        // TODO
-        alert("Coming soon!");
-    });
 
     /*********************/
     /** Results Display **/
