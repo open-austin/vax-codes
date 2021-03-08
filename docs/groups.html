@@ -1,5 +1,551 @@
 ---
 layout: base
+svgicons: fa-chevron-left, fa-check, fa-exclamation-triangle, fa-exclamation-circle
 title: Vax.Codes - Browse groups
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Browse groups
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+
+            <div id="api-alert" class="alert alert-warning d-none">
+                <strong>WARNING:</strong>
+                You have set a non-default API endpoint ("<span id="api-debug"></span>")!
+                <br>
+                Only trust these groups if you know what you're doing!
+                <br>
+                <a href="{{ '/groups' | relative_url }}">Click here to go back to using the default API</a>
+            </div>
+
+            <div id="list-header" class="d-none">
+                <h1>
+                    Browse groups
+                </h1>
+                <p>
+                    These are organizations that bundle a set of
+                    <a href="{{ '/issuers' | relative_url }}">issuers</a>
+                    into a trusted group.
+                </p>
+                <form class="row">
+                    <div class="col-sm-10 col-md-6 col-lg-4">
+                        <div class="input-group">
+                            <input id="show-nondefault-input" type="hidden" name="show_nondefault" value="off">
+                            <input id="search-input" type="text" class="form-control" name="q" placeholder="(e.g. Some Organization)">
+                            <button class="btn btn-outline-secondary" type="submit" title="Search">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <p id="revert-default" class="mt-3 d-none">
+                    <strong>NOTE:</strong>
+                    These results include groups that aren't trusted by default.
+                    <a id="revert-default-link" href="#" class="d-inline-block">Go back to only showing groups that are trusted by default</a>
+                </p>
+                <p id="results-summary" class="mt-3">
+                    Found <span id="num-results">0</span> groups
+                    <span id="search-wrapper" class="d-none">
+                        for the search "<span id="search-term"></span>"
+                    </span>
+                    <span id="default-wrapper" class="d-none">
+                        that are trusted by default
+                        <span id="has-nondefault" class="d-none">
+                            (hiding <a id="nondefault-link" href="#"><span id="nondefault-count"></span> non-default groups</a>)
+                        </span>
+                    </span>
+                    <span id="results-pending">so far...</span>
+                </p>
+            </div>
+
+            <div id="individual-header" class="d-none">
+                <a href="{{ '/groups' | relative_url }}"><svg class="svgicon fs-5"><use href="#fa-chevron-left"/></svg> Back to list of groups</a>
+            </div>
+
+            <div id="website-link-template" class="d-none">
+                <span class="website">
+                    <a class="website-link" href="https://example.com/vaxcodes" target="_blank" rel="noopener noreferrer nofollow"
+                        ><span class="website-name"></span>
+                        <svg class="svgicon fs-5"><use href="#fa-external-link"/></svg></a>
+                </span>
+            </div>
+
+            <div id="group-template" class="d-none">
+                <div class="group">
+                    <h4 class="mt-4">
+                        <a class="group-name" href="#"></a>
+                        <span class="group-is-trusted-by-default d-none" tabindex="0" role="button" data-bs-toggle="popover"
+                            ><svg class="svgicon text-success fs-2"><use href="#fa-check"/></svg></span>
+                        <span class="group-is-nondefault d-none" tabindex="0" role="button" data-bs-toggle="popover"
+                            ><svg class="svgicon text-warning fs-2"><use href="#fa-exclamation-triangle"/></svg></span>
+                    </h4>
+                    <ul class="list-unstyled">
+                        <li>
+                            <strong>Phone:</strong>
+                            <span class="group-phone"></span>
+                        </li>
+                        <li>
+                            <strong>Email:</strong>
+                            <span class="group-email"></span>
+                        </li>
+                        <li>
+                            <strong>Website:</strong>
+                            <span class="group-website"></span>
+                        </li>
+                        <li>
+                            <strong>Issuers:</strong>
+                            <a class="group-issuers" href="#">see list of issuers</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="groups">
+            </div>
+
+            <h4 id="loading" class="mt-3 fst-italic">
+                Loading...
+            </h4>
+
+            <p id="load-error" class="mt-3 text-danger d-none">
+                Couldn't load the list of groups :(
+            </p>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col">
+            <hr>
+            <p class="mt-3 small">
+                <em>
+                    Want to create your own group (for either public or internal purposes)?
+                    <a href="{{ '/admin/groups' | relative_url }}">Visit the groups admin</a>
+                </em>
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    "use strict";
+
+    // elements
+    const listHeader = document.getElementById("list-header");
+    const showNonDefaultInput = document.getElementById("show-nondefault-input");
+    const searchInput = document.getElementById("search-input");
+    const revertDefault = document.getElementById("revert-default");
+    const revertDefaultLink = document.getElementById("revert-default-link");
+    const resultsSummary = document.getElementById("results-summary");
+    const numResults = document.getElementById("num-results");
+    const searchWrapper = document.getElementById("search-wrapper");
+    const searchTerm = document.getElementById("search-term");
+    const defaultWrapper = document.getElementById("default-wrapper");
+    const hasNonDefault = document.getElementById("has-nondefault");
+    const nonDefaultLink = document.getElementById("nondefault-link");
+    const nonDefaultCount = document.getElementById("nondefault-count");
+    const resultsPending = document.getElementById("results-pending");
+    const individualHeader = document.getElementById("individual-header");
+    const loading = document.getElementById("loading");
+    const loadError = document.getElementById("load-error");
+    const websiteLinkTemplate = document.getElementById("website-link-template");
+    const groupTemplate = document.getElementById("group-template");
+    const groupsDiv = document.getElementById("groups");
+
+    // global variables used by loading/rendering functions
+    let apiBase = "api/v1/groups";
+    let groupId = "";
+    let searchString = "";
+    let nextPage = null;
+
+    // render additional groups in the results list
+    const emailRe = /^[^@\s]+@[^@\s]+$/; // really dumb, just checks for {something}@{something}
+    const websiteRe = /^https?:\/\//; // really dumb, just checks the start for http
+    function renderGroups(groupList) {
+
+        for (let i = 0; i < groupList.length; i++) {
+            const groupObj = groupList[i];
+
+            // skip if group already rendered
+            if (document.getElementById("group-" + groupObj['id'])) {
+                continue;
+            }
+
+            // clone the group template
+            const groupElem = groupTemplate.querySelector(".group").cloneNode(true);
+            groupElem.id = "group-" + groupObj['id'];
+
+            // populate name
+            groupElem.querySelector(".group-name").textContent = groupObj['name'];
+            groupElem.querySelector(".group-name").href = "groups?id=" + encodeURIComponent(groupObj['id']);
+
+            // populate warnings
+            if (groupObj['is_default'] === true) {
+                let popoverTrigger = groupElem.querySelector(".group-is-trusted-by-default");
+                let popover = new bootstrap.Popover(popoverTrigger, {
+                    "title": "Default Group",
+                    "content": "QR codes from issuers that are members of this group will be trusted by default when <a href='scan'>scanned</a>.",
+                    "html": true,
+                });
+                popoverTrigger.classList.remove("d-none");
+            }
+            else {
+                let popoverTrigger = groupElem.querySelector(".group-is-nondefault");
+                let popover = new bootstrap.Popover(popoverTrigger, {
+                    "title": "Non-default Group",
+                    "content": "QR codes from issuers that are members of this group will show a warning when scanned to only trust the QR code if you know the issuer or group owner personally.",
+                });
+                popoverTrigger.classList.remove("d-none");
+            }
+
+            // populate phone
+            if (groupObj['phone']) {
+                let phoneNum = groupObj['phone'].replace(/[^0-9]/g, ""); // strip everything except numbers from the phone number
+                phoneNum = groupObj['phone'].indexOf("+") === -1 && phoneNum.length === 10 ? "1" + phoneNum : phoneNum; // add US country code if looks like a US number
+                if (phoneNum.length > 0) {
+                    const phoneLink = document.createElement("a");
+                    phoneLink.href = "tel:+" + encodeURIComponent(phoneNum);
+                    phoneLink.textContent = groupObj['phone'];
+                    groupElem.querySelector(".group-phone").appendChild(phoneLink);
+                }
+                else {
+                    groupElem.querySelector(".group-phone").textContent = groupObj['phone'];
+                }
+            }
+            else {
+                groupElem.querySelector(".group-phone").textContent = "Not provided";
+            }
+
+            // populate email
+            if (groupObj['email']) {
+                if (groupObj['email'].match(emailRe)) {
+                    const emailLink = document.createElement("a");
+                    emailLink.href = "mailto:" + encodeURIComponent(groupObj['email']);
+                    emailLink.textContent = groupObj['email'];
+                    groupElem.querySelector(".group-email").appendChild(emailLink);
+                }
+                else {
+                    groupElem.querySelector(".group-email").textContent = groupObj['email'];
+                }
+            }
+            else {
+                groupElem.querySelector(".group-email").textContent = "Not provided";
+            }
+
+            // populate website
+            if (groupObj['website']) {
+                if (groupObj['website'].match(websiteRe)) {
+                    const websiteLink = websiteLinkTemplate.querySelector(".website").cloneNode(true);
+                    websiteLink.querySelector(".website-link").href = groupObj['website'];
+                    websiteLink.querySelector(".website-name").textContent = groupObj['website'];
+                    groupElem.querySelector(".group-website").appendChild(websiteLink);
+                }
+                else {
+                    groupElem.querySelector(".group-website").textContent = groupObj['website'];
+                }
+            }
+            else {
+                groupElem.querySelector(".group-website").textContent = "Not provided";
+            }
+
+            // populate group issuers link
+            groupElem.querySelector(".group-issuers").href = "issuers?show_nondefault=on&q=" + encodeURIComponent("group:" + groupObj['id']);
+
+            // add to the results
+            groupsDiv.appendChild(groupElem);
+        }
+    }
+
+    // query the groups API and show all the default ones
+    function loadGroups(numLoops) {
+
+        // show a pageload error if waited too long
+        if (numLoops > 0) {
+            loading.classList.add("d-none");
+            loadError.textContent = "A dependency (bootstrap) didn't load. Please refresh the page or try again later.";
+            loadError.classList.remove("d-none");
+            return;
+        }
+
+        // wait a bit more if bootstrap isn't loaded yet
+        if (window.bootstrap === undefined) {
+            setTimeout(loadGroups, 200, numLoops + 1);
+            return;
+        }
+
+        // load a single group
+        if (groupId) {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", apiBase + "/" + groupId + ".json");
+            xhr.onreadystatechange = function() {
+                if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                    // request error (non-2XX response (or 0 for local filesystems))
+                    if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
+
+                        // special messaging per type of error
+                        switch (xhr.status) {
+                            case 404:
+                                loadError.textContent = "\"" + groupId + "\" doesn't appear to be a registered group";
+                                break;
+                            default:
+                                loadError.textContent = "Couldn't load this group: Error " + xhr.status + " (check console for debugging info)";
+                                console.log("xhr error", xhr);
+                        }
+
+                        // show the error message
+                        loadError.classList.remove("d-none");
+                    }
+
+                    // succesfully loaded group
+                    else {
+                        try {
+                            const groupObj = JSON.parse(xhr.responseText);
+                            renderGroups([groupObj]);
+                        } catch (err) {
+                            console.log("json parse error", err);
+                            loadError.textContent = "Couldn't load the group list: Error " + xhr.status + " (check console for debugging info)";
+                            loadError.classList.remove("d-none");
+                        }
+                    }
+
+                    // hide any loading state
+                    loading.classList.add("d-none");
+                }
+            };
+            xhr.send();
+        }
+
+        // query the API
+        else {
+
+            let numNonDefault = 0;
+
+            // recursively query the group list API pages
+            function searchListAPI(nextUrl) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", nextUrl);
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                        // request error (non-2XX response (or 0 for local filesystems))
+                        if (!(xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300))) {
+
+                            // special messaging per type of error
+                            switch (xhr.status) {
+                                default:
+                                    loadError.textContent = "Couldn't load the group list: Error " + xhr.status + " (check console for debugging info)";
+                                    console.log("xhr error", xhr);
+                            }
+
+                            // show the error message
+                            loadError.classList.remove("d-none");
+                            loading.classList.add("d-none");
+                            return;
+                        }
+
+                        // parse the page of groups from json to object
+                        let groupPage = undefined;
+                        try {
+                            groupPage = JSON.parse(xhr.responseText);
+                        } catch (err) {
+                            console.log("json parse error", err);
+                            loadError.textContent = "Couldn't load the group list: Error " + xhr.status + " (check console for debugging info)";
+                            loadError.classList.remove("d-none");
+                            loading.classList.add("d-none");
+                            return;
+                        }
+
+                        // for search results, filter down to only matching results
+                        let groupMatches = groupPage['groups']; // non-search matches everything
+                        if (searchString) {
+                            groupMatches = []; // reset to nothing
+                            const simplifyRe = /[:\/\?&#=\-_\+ \.,\(\)]/g; // remove common punctuation from searchs so that more likely to find a match
+                            const searchSimplified = searchString.replace(simplifyRe, "").toLowerCase();
+                            for (let i = 0; i < groupPage['groups'].length; i++) {
+                                let groupObj = groupPage['groups'][i];
+                                // matches id
+                                if (searchSimplified && groupObj['id'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    groupMatches.push(groupObj);
+                                    continue;
+                                }
+                                // matches name
+                                if (searchSimplified && groupObj['name'] && groupObj['name'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    groupMatches.push(groupObj);
+                                    continue;
+                                }
+                                // matches phone
+                                if (searchSimplified && groupObj['phone'] && searchString.replace(/[^0-9]/g, "") !== "" && groupObj['phone'].replace(/[^0-9]/g, "").indexOf(searchString.replace(/[^0-9]/g, "")) !== -1) {
+                                    groupMatches.push(groupObj);
+                                    continue;
+                                }
+                                // matches email
+                                if (searchSimplified && groupObj['email'] && groupObj['email'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    groupMatches.push(groupObj);
+                                    continue;
+                                }
+                                // matches website
+                                if (searchSimplified && groupObj['website'] && groupObj['website'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                    groupMatches.push(groupObj);
+                                    continue;
+                                }
+                            }
+                        }
+
+                        // filter out groups that aren't default or don't have any trusted groups
+                        let pageGroupList = [];
+                        for (let i = 0; i < groupMatches.length; i++) {
+                            let groupObj = groupMatches[i];
+                            // skip groups that aren't in any trusted groups and haven't already been added
+                            if (showNonDefaultInput.value === "off" && groupObj['is_default'] !== true) {
+                                // only count if not already rendered
+                                if (document.getElementById("group-" + groupObj['id']) === null) {
+                                    numNonDefault += 1;
+                                }
+                                continue;
+                            }
+                            // trusted group, so include in results
+                            pageGroupList.push(groupObj);
+                        }
+
+                        // render the list of results
+                        renderGroups(pageGroupList);
+
+                        // update results count
+                        numResults.textContent = groupsDiv.querySelectorAll(".group").length;
+
+                        // show toggle for viewing non-default groups
+                        if (showNonDefaultInput.value === "off" && numNonDefault > 0) {
+                            nonDefaultCount.textContent = numNonDefault;
+                            hasNonDefault.classList.remove("d-none");
+                        }
+
+                        // recurse if has next page
+                        if (groupPage['next'] !== null) {
+                            searchListAPI(groupPage['next']);
+                        }
+                        // no next page, so hide loading
+                        else {
+                            loading.classList.add("d-none");
+                            resultsPending.classList.add("d-none");
+                        }
+                    }
+                };
+                xhr.send();
+            }
+
+
+            //query for exact matches of the group first
+            if (searchString) {
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", apiBase + "/" + searchString + ".json");
+                xhr.onreadystatechange = function() {
+                    if(xhr.readyState === XMLHttpRequest.DONE) {
+
+                        // found an group exactly matching search string
+                        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status < 300)) {
+                            try {
+                                let groupObj = JSON.parse(xhr.responseText);
+
+                                // non-default group, so show non-default toggle
+                                if (showNonDefaultInput.value === "off" && groupObj['is_default'] !== true) {
+                                    numNonDefault += 1;
+                                    nonDefaultCount.textContent = numNonDefault;
+                                    hasNonDefault.classList.remove("d-none");
+                                }
+                                // can render the group
+                                else {
+                                    numResults.textContent = 1;
+                                    renderGroups([groupObj]);
+                                }
+                            } catch (err) {
+                                // just log the error and keep moving
+                                console.log("individual group json parse error", err);
+                            }
+                        }
+
+                        // start scanning the group list
+                        searchListAPI(apiBase + ".json");
+                    }
+                }
+                xhr.send();
+            }
+
+            // by default just start scanning the group list API
+            else {
+                searchListAPI(apiBase + ".json");
+            }
+        }
+    }
+
+    // parse the url for search strings, group ids, custom API base endpoints
+    // (e.g. "/groups?id=test_arc&q=123&api=https...&show_untrusted=on&page=https...")
+    const urlParams = new URLSearchParams(window.location.search.slice(1));
+    if (urlParams.get("id") !== null && urlParams.get("id").trim()) {
+        groupId = urlParams.get("id").trim();
+    }
+    if (urlParams.get("q") !== null && urlParams.get("q").trim()) {
+        searchString = urlParams.get("q").trim();
+    }
+    if (urlParams.get("api") !== null && urlParams.get("api").trim()) {
+        apiBase = urlParams.get("api").trim();
+        document.getElementById("api-alert").classList.remove("d-none");
+        document.getElementById("api-debug").textContent = apiBase;
+    }
+
+    // update links to toggle betweeen showing/hiding non-default groups
+    if (urlParams.get("show_nondefault") !== null && urlParams.get("show_nondefault") === "on") {
+        showNonDefaultInput.value = "on";
+        const revertDefaultLinkParams = new URLSearchParams(urlParams.toString());
+        revertDefaultLinkParams.delete("show_nondefault");
+        const revertParamString = revertDefaultLinkParams.toString();
+        revertDefaultLink.href = window.location.origin + window.location.pathname + (revertParamString ? "?" : "") + revertParamString;
+        revertDefault.classList.remove("d-none"); // show revert-to-default-only option
+    }
+    else {
+        showNonDefaultInput.value = "off";
+        const nonDefaultLinkParams = new URLSearchParams(urlParams.toString());
+        nonDefaultLinkParams.set("show_nondefault", "on");
+        const nonDefaultParamString = nonDefaultLinkParams.toString();
+        nonDefaultLink.href = window.location.origin + window.location.pathname + (nonDefaultParamString ? "?" : "") + nonDefaultParamString;
+        defaultWrapper.classList.remove("d-none"); // show note in results summary
+    }
+
+    // show loading state based on url parameters
+    // individual loading state
+    if (groupId) {
+        loading.textContent = "Loading...";
+        individualHeader.classList.remove("d-none");
+    }
+    // search loading state
+    else if (searchString) {
+        searchInput.value = searchString;
+        searchTerm.textContent = searchString;
+        searchWrapper.classList.remove("d-none");
+        loading.textContent = "Searching...";
+        listHeader.classList.remove("d-none");
+    }
+    // default loading state
+    else {
+        loading.textContent = "Loading...";
+        listHeader.classList.remove("d-none");
+    }
+
+    // start the process of loading the groups
+    loadGroups();
+
+    /**************************/
+    /** Internationalization **/
+    /**************************/
+
+    let PAGE_LANG = "en";
+    // TODO: allow different languages
+
+</script>

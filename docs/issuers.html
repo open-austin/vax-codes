@@ -56,6 +56,9 @@ title: Vax.Codes - Browse issuers
                     <span id="search-wrapper" class="d-none">
                         for the search "<span id="search-term"></span>"
                     </span>
+                    <span id="group-search" class="d-none">
+                        for the group "<span id="group-search-name"></span>"
+                    </span>
                     <span id="default-wrapper" class="d-none">
                         that are trusted by default
                         <span id="has-nondefault" class="d-none">
@@ -157,6 +160,8 @@ title: Vax.Codes - Browse issuers
     const numResults = document.getElementById("num-results");
     const searchWrapper = document.getElementById("search-wrapper");
     const searchTerm = document.getElementById("search-term");
+    const groupSearch = document.getElementById("group-search");
+    const groupSearchName = document.getElementById("group-search-name");
     const defaultWrapper = document.getElementById("default-wrapper");
     const hasNonDefault = document.getElementById("has-nondefault");
     const nonDefaultLink = document.getElementById("nondefault-link");
@@ -175,6 +180,8 @@ title: Vax.Codes - Browse issuers
     let issuerId = "";
     let searchString = "";
     let nextPage = null;
+    let groupSearchRe = /^group:([^\s:]+)$/; // e.g. "group:test_austin"
+    let groupSearchMatch = null;
 
     // determine trust level of an issuer
     // returns one of: "is-trusted-by-default" "is-in-nondefault-groups" "is-in-no-groups"
@@ -470,35 +477,65 @@ title: Vax.Codes - Browse issuers
                         // for search results, filter down to only matching results
                         let issuerMatches = issuerPage['issuers']; // non-search matches everything
                         if (searchString) {
-                            issuerMatches = []; // reset to nothing
-                            const simplifyRe = /[:\/\?&#=\-_\+ \.,\(\)]/g; // remove common punctuation from searchs so that more likely to find a match
-                            const searchSimplified = searchString.replace(simplifyRe, "").toLowerCase();
-                            for (let i = 0; i < issuerPage['issuers'].length; i++) {
-                                let issuerObj = issuerPage['issuers'][i];
-                                // matches id
-                                if (searchSimplified && issuerObj['id'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                    issuerMatches.push(issuerObj);
-                                    continue;
+                            // reset results
+                            issuerMatches = [];
+
+                            // search for issuers part of a specific group
+                            if (groupSearchMatch) {
+                                for (let i = 0; i < issuerPage['issuers'].length; i++) {
+                                    let issuerObj = issuerPage['issuers'][i];
+                                    let foundGroupId = true;
+                                    for (let k = 0; k < issuerObj['keys'].length; k++) {
+                                        let issuerKey = issuerObj['keys'][k];
+                                        if (issuerKey['groups']) {
+                                            for (let g = 0; g < issuerKey['groups'].length; g++) {
+                                                if (issuerKey['groups'][g]['id'] === groupSearchMatch[1]) {
+                                                    foundGroupId = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (foundGroupId) {
+                                            break;
+                                        }
+                                    }
+                                    if (foundGroupId) {
+                                        issuerMatches.push(issuerObj);
+                                    }
                                 }
-                                // matches name
-                                if (searchSimplified && issuerObj['name'] && issuerObj['name'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                    issuerMatches.push(issuerObj);
-                                    continue;
-                                }
-                                // matches phone
-                                if (searchSimplified && issuerObj['phone'] && searchString.replace(/[^0-9]/g, "") !== "" && issuerObj['phone'].replace(/[^0-9]/g, "").indexOf(searchString.replace(/[^0-9]/g, "")) !== -1) {
-                                    issuerMatches.push(issuerObj);
-                                    continue;
-                                }
-                                // matches email
-                                if (searchSimplified && issuerObj['email'] && issuerObj['email'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                    issuerMatches.push(issuerObj);
-                                    continue;
-                                }
-                                // matches website
-                                if (searchSimplified && issuerObj['website'] && issuerObj['website'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
-                                    issuerMatches.push(issuerObj);
-                                    continue;
+                            }
+
+                            // search issuer contents
+                            else {
+                                const simplifyRe = /[:\/\?&#=\-_\+ \.,\(\)]/g; // remove common punctuation from searchs so that more likely to find a match
+                                const searchSimplified = searchString.replace(simplifyRe, "").toLowerCase();
+                                for (let i = 0; i < issuerPage['issuers'].length; i++) {
+                                    let issuerObj = issuerPage['issuers'][i];
+                                    // matches id
+                                    if (searchSimplified && issuerObj['id'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                        issuerMatches.push(issuerObj);
+                                        continue;
+                                    }
+                                    // matches name
+                                    if (searchSimplified && issuerObj['name'] && issuerObj['name'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                        issuerMatches.push(issuerObj);
+                                        continue;
+                                    }
+                                    // matches phone
+                                    if (searchSimplified && issuerObj['phone'] && searchString.replace(/[^0-9]/g, "") !== "" && issuerObj['phone'].replace(/[^0-9]/g, "").indexOf(searchString.replace(/[^0-9]/g, "")) !== -1) {
+                                        issuerMatches.push(issuerObj);
+                                        continue;
+                                    }
+                                    // matches email
+                                    if (searchSimplified && issuerObj['email'] && issuerObj['email'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                        issuerMatches.push(issuerObj);
+                                        continue;
+                                    }
+                                    // matches website
+                                    if (searchSimplified && issuerObj['website'] && issuerObj['website'].replace(simplifyRe, "").toLowerCase().indexOf(searchSimplified) !== -1) {
+                                        issuerMatches.push(issuerObj);
+                                        continue;
+                                    }
                                 }
                             }
                         }
@@ -631,10 +668,19 @@ title: Vax.Codes - Browse issuers
     // search loading state
     else if (searchString) {
         searchInput.value = searchString;
-        searchTerm.textContent = searchString;
-        searchWrapper.classList.remove("d-none");
         loading.textContent = "Searching...";
         listHeader.classList.remove("d-none");
+        // group search
+        groupSearchMatch = searchString.match(groupSearchRe);
+        if (groupSearchMatch) {
+            groupSearch.classList.remove("d-none");
+            groupSearchName.textContent = groupSearchMatch[1];
+        }
+        // default search
+        else {
+            searchWrapper.classList.remove("d-none");
+            searchTerm.textContent = searchString;
+        }
     }
     // default loading state
     else {
