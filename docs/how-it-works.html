@@ -2,4 +2,183 @@
 layout: base
 title: Vax.Codes - How it works
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    How it works
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+            <h1>
+                How it works
+            </h1>
+            <p>
+                This project aims to make it very easy for local communities to set up a system for
+                community members to prove to event organizers and businesses that they have received
+                a Covid-19 vaccine. Below are our how-to-use steps for both reciepients of the vaccine
+                and organizers who want to check for proof of vaccination.
+            </p>
+
+            <hr>
+            <h2 id="for-vaccine-recipients" class="permalink-hover permalink-highlight mt-3">
+                For Covid-19 vaccine recipients
+                <a href="#for-vaccine-recipients" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+
+            <h5 class="mt-4">
+                Step 1: Request a QR code from an "issuer"
+            </h5>
+            <p class="ms-3">
+                Have you been asked by an event organizer or business to show proof that you've been vaccinated?
+                <br>
+                If so, they may have linked you to this website and asked you contact a specific
+                <a href="{{ '/issuers' | relative_url }}">"issuer"</a>
+                or
+                <a href="{{ '/groups' | relative_url }}">"group" of issuers</a>
+                that they trust to verify you've been vaccinated.
+                <br>
+                Simply call, email, or visit the website of the issuer you want to get a QR code from,
+                and they will verify that you have received you Covid-19 vaccine.
+                <br>
+                (NOTE: issuers may ask you for additional proof, like showing your vaccine record card)
+            </p>
+
+            <h5 class="mt-4">
+                Step 2: Get issued a vaccine verification QR code
+            </h5>
+            <p class="ms-3">
+                Once the "issuer" has verified you've received a Covid-19 vaccine, they will generate a QR code and give it to you.
+                <br>
+                You'll get your QR code via email, text, or they may even print it out and hand it to you (if you're getting issued a QR code in-person).
+                <br>
+                You can save this QR code wherever you want and make as many copies of it as you like.
+                <br>
+                NOTE: Your QR code contains your name and possibly some other personal information (depending on the issuer).
+                <a href="{{ '/scan' | relative_url }}">Scan</a> your QR code to see what it has in it.
+            </p>
+
+            <h5 class="mt-4">
+                Step 3: Show you QR code as proof of vaccination
+            </h5>
+            <p class="ms-3">
+                Once you have your QR code, you can email, text, or show the QR code in-person to the event organizer or business that originally asked for it.
+                <br>
+                NOTE: It's up to the event organizer or business owner to decide which "issuers" they will trust, so check with them to see if your issuer is one they trust.
+            </p>
+
+            <h5 class="mt-4">
+                Step 4: Event organizer or business scans your QR code
+            </h5>
+            <p class="ms-3">
+                When you send or show your QR code to the event organizer or business that asked for proof, they must
+                <a href="{{ '/scan' | relative_url }}">scan</a>
+                it.
+                <br>
+                They will make sure they trust the issuer and make sure you are the person listed in the QR code (usually by checking your ID).
+            </p>
+
+            <hr>
+            <h2 id="for-organizers" class="permalink-hover permalink-highlight mt-3">
+                For event organizers and businesses
+                <a href="#for-organizers" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+
+            <h5 class="mt-4">
+                Step 1: Find "issuers" you trust
+            </h5>
+            <p class="ms-3">
+                Browse the
+                <a href="{{ '/issuers' | relative_url }}">"issuer"</a>
+                and
+                <a href="{{ '/groups' | relative_url }}">"group" of issuers</a>
+                directories and see if there's anyone you trust to correctly issue QR codes to vaccinated people.
+                <br>
+                If you don't find anyone you trust, you can
+                <a href="{{ '/admin/issuers' | relative_url }}">become your own issuer</a>
+                and generate QR codes yourself to people you know have received a Covid-19 vaccine.
+            </p>
+
+            <h5 class="mt-4">
+                Step 2: Ask people to get a vaccination verification QR code
+            </h5>
+            <p class="ms-3">
+                If you have in-person gathering where everyone needs to be vaccinated,
+                ask people to get a QR code from one of your trusted issuers or groups from Step 1.
+                <br>
+                You can link directly to the specific
+                <a href="{{ '/issuers' | relative_url }}">issuer</a>
+                or
+                <a href="{{ '/groups' | relative_url }}">group</a>
+                by clicking on that issuer or group's name and copying the url
+                (e.g. "https://vax.codes/issuers?id=some_id").
+            </p>
+
+            <h5 class="mt-4">
+                Step 3: Scan QR codes
+            </h5>
+            <p class="ms-3">
+                Before your in-person gathering, attendees can email, text, or show you their vaccination verification QR codes.
+                <br>
+                Scan them using our
+                <a href="{{ '/scan' | relative_url }}">scanner page</a>
+                (should work on any mobile phone)
+                or use any QR code scanner app and open the scanned link in a web browser.
+                <br>
+                If you don't have a camera, no worries! If you have an image file of the QR code, you can just
+                <a href="{{ '/scan' | relative_url }}">upload it directly</a>
+                on our scanner page (click "Upload an image...").
+            </p>
+
+            <h5 class="mt-4">
+                Step 4: Verify the scanned results
+            </h5>
+            <p class="ms-3">
+                When you scan a QR code, it will show the contents included in the QR code and list the "issuer"
+                and any "groups" that issuer is in.
+                <br>
+                <strong>VERIFY THE QR CODE CONTENTS MATCH THE PERSON'S ID</strong>
+                <br>
+                <strong>MAKE SURE THE ISSUER AND/OR GROUPS ARE ONES YOU TRUST</strong>
+                <br>
+                Anyone can become an issuer of QR codes,
+                <em>so only trust the specific issuers and groups you picked out in Step 1.</em>
+                <br>
+                If you have any questions about the validity of a QR code, contact the issuer listed at the bottom of the
+                scanned QR code.
+            </p>
+
+            <hr>
+            <h2 id="for-issuers" class="permalink-hover permalink-highlight mt-3">
+                For issuers
+                <a href="#for-issuers" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p class="ms-3">
+                Visit the
+                <a href="{{ '/admin/issuers' | relative_url }}">issuers admin</a>
+                to learn more about being a QR code issuer.
+            </p>
+
+            <hr>
+            <h2 id="for-group-owners" class="permalink-hover permalink-highlight mt-3">
+                For group owners
+                <a href="#for-group-owners" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p class="ms-3">
+                Visit the
+                <a href="{{ '/admin/groups' | relative_url }}">group owners admin</a>
+                to learn more about setting up a group of trusted issuers.
+            </p>
+
+        </div>
+    </div>
+</div>

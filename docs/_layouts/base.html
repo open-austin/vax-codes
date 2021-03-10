@@ -24,8 +24,6 @@
             @media (min-width: 400px) {
                 #top-button-extra { display: inline; }
             }
-        </style>
-        <style>
             /* SVG icons (based on https://github.com/diafygi/svg-font-to-svg-sprite-converter)
                Example (put "svgicons: fa-link, fa-plus-circle" in front matter):
                <svg class="svgicon"><use href="#fa-link"/></svg>
@@ -40,6 +38,29 @@
                 width: 0.7em;
                 fill:currentColor;
             }
+            /* Permalink Example:
+                <h2 id="aaa" class="permalink-hover permalink-highlight">
+                    Some Header
+                    <a href="#aaa" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+                </h2>
+            */
+            .permalink-hover:hover .permalink {
+                display: inline-block;
+                text-decoration: none;
+                margin-left: 0.3em;
+            }
+            .permalink {
+                display: none;
+                position: absolute;
+            }
+            .permalink-highlight:target{
+                animation:punch 2s ease-out;
+            }
+            @keyframes punch{
+                0%{ background-color: #ffffff; }
+                10%{ background-color: #ffe038; }
+                100%{ background-color: #ffffff; }
+            }
         </style>
     </head>
     <body>
@@ -47,6 +68,7 @@
         <svg id="svgicon-defs" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 {% include fontawesome/fa-external-link.svg %}
+                {% include fontawesome/fa-link.svg %}
                 {% assign additional_svgicons = page.svgicons | split: ',' %}
                 {% for svgicon_name in additional_svgicons %}
                     {% assign svgicon_file = svgicon_name | strip | prepend: "fontawesome/" | append: ".svg" %}
