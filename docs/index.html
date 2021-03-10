@@ -1,11 +1,24 @@
 ---
 layout: base
+svgicons: fa-camera, fa-globe, fa-code, fa-lock
 title: Vax.Codes - Easy, free Covid-19 vaccine verification
 ---
+<style>
+    #landing-photo {
+        width: 90%;
+    }
+    #landing-photo img {
+        width: 100%;
+    }
+    .feature .svgicon {
+        font-size: 300%;
+        color: #595959;
+    }
+</style>
 <div class="container mt-5 mb-5">
     <div class="row">
         <div class="col-sm">
-            <h1>
+            <h1 class="mt-5">
                 Easy, Free<br>
                 Covid-19 Vaccine Verification
             </h1>
@@ -22,12 +35,103 @@ title: Vax.Codes - Easy, free Covid-19 vaccine verification
             </p>
         </div>
         <div class="col-sm d-none d-md-block">
-            <code>TODO: Graphic here</code>
+            <div id="landing-photo" class="text-end small text-muted">
+                <img src="{{ '/assets/pexels-mikhail-nilov-6973197-resized.jpg' | relative_url }}">
+                <small>Public Domain: <a href="https://www.pexels.com/photo/man-in-gray-long-sleeve-shirt-holding-baby-in-white-onesie-6973197/" class="text-muted" target="_blank" rel="noreferrer noopener nofollow">Mikhail Nilov</a></small>
+            </div>
         </div>
     </div>
+
+    <hr class="mt-5">
+    <h2 class="mt-5 text-center">
+        What is Vax.Codes?
+    </h2>
+    <p class="text-center mt-4">
+        Vax.Codes is a project to help communities start issuing QR codes to people who have received a Covid-19 vaccine.
+        <br>
+        Event organizers and businesses can then scan these QR codes to verify that a person has received a vaccine.
+    </p>
+    <p class="text-center mt-4">
+        This free, open source project was created by volunteers at
+        <a href="https://www.open-austin.org/" target="_blank" rel="noopener noreferrer"
+            >Open Austin
+            <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+        to help communities start to safely gather together in-person again.
+    </p>
+
+    <hr class="mt-5">
+    <h2 class="mt-5 text-center">
+        Free to Use - Secure - Open Source
+    </h2>
     <div class="row mt-5 mb-5">
-        <div class="col-sm text-center">
-            <code>TODO: More content here</code>
+        <div class="feature col-sm text-center">
+            <div class="h1">
+                <svg class="svgicon text-muted"><use href="#fa-camera"/></svg>
+            </div>
+            <div class="h5">
+                Vaccine verification QR codes can be scanned by any scanner app.
+            </div>
+        </div>
+        <div class="feature col-sm text-center">
+            <div class="h1">
+                <svg class="svgicon text-muted"><use href="#fa-globe"/></svg>
+            </div>
+            <div class="h5">
+                Any community can create their own group of trusted verifiers.
+            </div>
+        </div>
+        <div class="feature col-sm text-center">
+            <div class="h1">
+                <svg class="svgicon text-muted"><use href="#fa-lock"/></svg>
+            </div>
+            <div class="h5">
+                No personal or medical data is stored by Vax.Codes.
+            </div>
+        </div>
+        <div class="feature col-sm text-center">
+            <div class="h1">
+                <svg class="svgicon text-muted"><use href="#fa-code"/></svg>
+            </div>
+            <div class="h5">
+                Run by volunteers, open source, and free to use by anyone
+            </div>
         </div>
     </div>
+
+    <hr class="mt-5">
+    <h4 class="mt-5">
+        Common Questions:
+    </h4>
+    <p class="small">
+        <em>
+            Received a Covid-19 vaccine and want to be issued a QR code you can show event organizers and businesses?
+            <br>
+            Browse the
+            <a href="{{ '/groups' | relative_url }}">groups list</a>
+            or
+            <a href="{{ '/issuers' | relative_url }}">issuers list</a>
+            to find an organization you know and trust.
+        </em>
+    </p>
+    <p class="mt-3 small">
+        <em>
+            Want to become verifier that can issue QR codes to people you've confirmed have received a Covid-19 vaccine?
+            <br>
+            <a href="{{ '/admin/issuers' | relative_url }}">Visit the issuers admin</a> to learn how to register as an issuer.
+        </em>
+    </p>
+    <p class="mt-3 small">
+        <em>
+            Want to create your own local group of trusted issuers for your community?
+            <br>
+            <a href="{{ '/admin/groups' | relative_url }}">Visit the group owners admin</a> to learn how to create a group.
+        </em>
+    </p>
+    <p class="mt-3 small">
+        <em>
+            Want to learn more about the technical, security, and privacy details of this project?
+            <br>
+            <a href="{{ '/docs/security' | relative_url }}">Read our security overview</a> to learn how our QR codes are secure and private.
+        </em>
+    </p>
 </div>
