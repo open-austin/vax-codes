@@ -2,4 +2,253 @@
 layout: base
 title: Vax.Codes - Security details
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/docs' | relative_url }}">Developers</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Security
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-2 mb-5">
+        <div class="col">
+            <h1>
+                Security
+            </h1>
+            <p>
+                This dives into the technical details of how our QR codes work and are secured.
+                <br>
+                If you're looking for a less-technical overview of how our system works, check out
+                the <a href="{{ '/how-it-works' | relative_url }}">how it works</a> page.
+            </p>
+
+            <hr>
+            <h2 id="overview" class="permalink-hover permalink-highlight mt-3">
+                Overview
+                <a href="#overview" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p>
+                Vax.Codes is a very simple
+                <a href="https://en.wikipedia.org/wiki/Public_key_infrastructure" target="_blank" rel="noopener noreferrer"
+                    >public key infrastructure
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                system that makes it easy for locally trusted organizations to issue signed
+                <a href="https://en.wikipedia.org/wiki/QR_code" target="_blank" rel="noopener noreferrer"
+                    >QR codes
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                to people who they've verified to have received a Covid-19 vaccine.
+                Organizations that generate these QR codes are called "issuers", and communities
+                can also create "groups" of issuers they trust.
+            </p>
+            <p>
+                Issuers sign QR codes using a "keyfile", which is a public/private
+                <a href="https://en.wikipedia.org/wiki/Pretty_Good_Privacy" target="_blank" rel="noopener noreferrer"
+                    >OpenPGP
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                keypair generated either in our
+                <a href="{{ '/admin/issuers/generate' | relative_url }}">browser tool</a>
+                or
+                <a href="{{ '/admin/issuers/generate-local-keyfile' | relative_url }}">locally</a>.
+                Signed QR codes contain some sort of identifying information about the person being
+                verified (e.g. their name), the issuer's ID, and a cryptographic signature proving
+                the issuer verified the identifying information.
+            </p>
+            <p>
+                QR codes are then scanned by an event organizer or business who wants to verify if
+                a person has received Covid-19 vaccine. QR message itself is just a URL to our
+                <a href="{{ '/scan' | relative_url }}">scan</a>
+                page with the signature + issuer_id + message as a URL
+                <a href="https://en.wikipedia.org/wiki/URI_fragment" target="_blank" rel="noopener noreferrer"
+                    >fragment
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                (e.g. <code>https://vax.codes/scan<strong>#v1/some_id/...signature.../Joe%20Smith...</strong></code>).
+            </p>
+            <p>
+                When the scan page loads, the page's javascript check the URL fragment for something
+                that looks like our verification code format. If present, it tries to load the
+                issuer's public key from the "issuers API" and validate the signature in the code.
+                If the signature validates, the signed message (e.g. the verfied person's name) is
+                displayed, along with links to the issuer's profile and any groups the issuer is in.
+            </p>
+            <p>
+                By default, issuers and groups are untrusted, so it is up to the event organizer or
+                business doing the scanning to have a list of issuers they trust to properly issue
+                QR codes to vaccine recipients. In general, the expectation is that a local event
+                organizer or business personally knows and trusts the issuer or group owner (e.g. a
+                local community center).
+            </p>
+            <p>
+                The goal of this project is not become a global vaccine verification system (e.g.
+                "vaccine passports"), but rather focus on getting local communities to get a short-term
+                system in place for verifying local community members have been vaccinated so that
+                in-person gathers can safely resume. Eventually, the expectation is that local Vax.Codes
+                issuers and groups will be replaced by more robust, sophisticated, government-run vaccine
+                verification infrastructure.
+            </p>
+
+            <hr>
+            <h2 id="privacy" class="permalink-hover permalink-highlight mt-3">
+                Privacy
+                <a href="#privacy" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p>
+                This project is nothing more than a
+                <a href="#static-website">static website</a>
+                with a list of registered issuers and groups hardcoded into the static issuers API.
+                All keyfile
+                <a href="{{ '/admin/issuers/generate' | relative_url }}">generation</a>,
+                QR code
+                <a href="{{ '/admin/issuers/issue-qr-code' | relative_url }}">issuing</a>,
+                and QR code
+                <a href="{{ '/scan' | relative_url }}">scanning</a>
+                are done entirely client-side in javascript, so no private key or QR code contents
+                are ever passed to our servers.
+            </p>
+            <p>
+                So this project <strong>NEVER</strong> stores <em>or even receives</em>
+                any personal or medical information about people who have been issued QR codes.
+                Only the issuers of those QR codes knows what's in them and who they issued them
+                to.
+            </p>
+            <p>
+                Additionally, this project is completely open source and available from our
+                <a href="https://github.com/open-austin/vax-codes" target="_blank" rel="noopener noreferrer"
+                    >Github repo
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>,
+                so anyone can fork our codebase and
+                <a href="{{ '/docs/self-host' | relative_url }}">self-host</a>
+                their own system if they don't trust us.
+            </p>
+
+            <hr>
+            <h2 id="qr-code-format" class="permalink-hover permalink-highlight mt-3">
+                QR code format
+                <a href="#qr-code-format" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p>
+                Our QR code format is just a simple
+                <a href="https://en.wikipedia.org/wiki/URL" target="_blank" rel="noopener noreferrer"
+                    >URL
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                that links to a code verification page that can verify the code.
+                That way, any scanner app will be able to open the link in a browser
+                and verify the contents as signed by the issuer.
+            </p>
+            <p>
+                Our QR code URLs have the following format:
+            </p>
+            <div class="card text-primary bg-light">
+                <div class="card-body">
+                    <pre class="mb-0">{scan_url}#{version}/{issuer_id}/{signature}/{message}</pre>
+                </div>
+            </div>
+            <p class="mt-3">
+                The <code>{scan_url}</code> a link to a scanner website that will know how to interpret
+                the code (i.e. <a href="https://vax.codes/scan">https://vax.codes/scan</a>).
+            </p>
+            <p>
+                The <code>{version}</code> is the format version of the code (currently <code>v1</code>).
+            </p>
+            <p>
+                The <code>{signature}</code> is the detached OpenPGP signature using the issuer's keypair
+                encoded as a
+                <a href="https://en.wikipedia.org/wiki/Base64#URL_applications" target="_blank" rel="noopener noreferrer"
+                    >url-safe base64 string
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                (since detacted signatures are binary data).
+            </p>
+            <p>
+                The <code>{message}</code> is the
+                <a href="https://en.wikipedia.org/wiki/Percent-encoding" target="_blank" rel="noopener noreferrer"
+                    >percent-encoded
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                contents that the issuer wants to include in the QR code
+                (usually the name of the person they verified, e.g. "John Smith").
+            </p>
+            <div>
+                For example, this QR code:
+            </div>
+            <div>
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAAAAACIM/FCAAADgUlEQVR42u3c27LiIBCF4bz/S7NvdyWs1QtFBerPxdSMY0w+i3DobrzaIccFBAgQIECAAAECBAgQIECAAAECBAiQJSFX77i9rk68/f32ztu5z3+aqwM5A6Je6V66e/P/76p7q93vzV8dyBmQ54d3W2z3zebSt+/keZa6OpCzIU+OevHZeaqe/Ha3QICow4/OzwcteeiAnARRfaZ6w/PB6Y7m6tzk6kAOgKiW/50/v7CwAvITSB240CN4t3dVI3gyyfxoOAjIlyHd4VgtVJ+35Ef8cmncnWECOQaiLqcmfn5QVoO7X+x05wlAtoaYxm8asJo0DonC0RzI7pA8pGbCIyrq6yMzOQfIRpBu0zUQM3v0y2HzyX5lDWRTiOpLVQsvh+kwAZpHdYBsCuk25rJP9qtX9W2YtU/ygADZC1K25zBQbN5gpEk0GMi+EBNzM7RkaA4jdfmSBMhGkCSUUY7dPgHadI2QWWID2R1SRj9UpCWZCqo1r18BATkDksTcfMGGehDUI/PpggEgi0DM0GyyS/6R8SO+iSq/uR4BshREBXVVY/ZJBB/OLZ8pICdByixSmV8oi4vKdNXE/AiQdSCqfEKV/Y/GQMqMQzhdBLIvRN22D6n5h0L1yeasWcWZQH4OUaO238hWBlXMgjfJfwE5BhLWY5cxutHOfG51EJClICZ6lhSb+bqOcpJgcg1ADoCYVYaJlpRh3qHZYLLOBbIjxEfqmq5PSxIKplBttLIRyHaQspw1GanLTMGVHUCOgZQzOpOc8vWQQz8+0CZV0AFZB6LuzVT1+6/CbKMzE87pWV0gP4eUu2ub3Qyi/tdv7H2t/AzIRpBkxWoCa34XSQuK/z+RegOyGiTZl5101y3bHDfU8QLZDmIuZ8pow7XwZX8o7BN5diALQpou1wkjIa36XdYyLzYxiA3k5xBfklGmOP238ULa683UG5DVIH5SVz41PgVfptEnlnAAWQcytNuoXNKWH6Wy8+G8EchGkDy6UsbZ8lSUiSQDOQZiGrmqlb3sj8slMZMkUwbkAMjoK6bP9OUfZSXSrBIOIOtAzGbw0Sx5GIgryyCBnAopdxiVmayS4wsdgRwMeXmUL2MvphpkSrkskHUgnmaibWWf6SseJyZDgSwI8TtHkp2VPqUVxvTa1O17QH4O2esAAgQIECBAgAABAgQIECBAgAABAgQIkPePP/Dru2vpMTV9AAAAAElFTkSuQmCC">
+            </div>
+            <p>
+                will scan as this URL:
+            </p>
+            <div class="card text-primary bg-light">
+                <div class="card-body">
+                    <pre class="mb-0">https://vax.codes/scan#v1/test_arc/iF4EABMIAAYFAmApt2gACgkQ0ldpWsVGpsTl8QD_cnfQCpJC2QZaLDT7i8o_uXu7pCWVuNI7n5hvwcxRAf4A_3fwIqNIcEZZ-O3lsSVubq2yccUskpgeXqTU0DcDsfG8/Hello%20World</pre>
+                </div>
+            </div>
+
+
+            <hr>
+            <h2 id="static-website" class="permalink-hover permalink-highlight mt-3">
+                Static website
+                <a href="#static-website" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h2>
+            <p>
+                The project is nothing more than a
+                <a href="https://jekyllrb.com/" target="_blank" rel="noopener noreferrer"
+                    >Jekyll static website
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                hosted on
+                <a href="https://pages.github.com/" target="_blank" rel="noopener noreferrer"
+                    >Github pages
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>.
+            </p>
+            <p>
+                Our
+                <a href="{{ '/api/v1/issuers.json' | relative_url }}">issuers API</a>
+                and
+                <a href="{{ '/api/v1/groups.json' | relative_url }}">groups API</a>
+                are just statically generated json endpoints on the same static website as our other pages.
+            </p>
+            <p>
+                Issuers and groups are manually added to the
+                <a href="https://github.com/open-austin/vax-codes/tree/master/docs/_issuers" target="_blank" rel="noopener noreferrer"
+                    ><code>_issuers</code>
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                and
+                <a href="https://github.com/open-austin/vax-codes/tree/master/docs/_groups" target="_blank" rel="noopener noreferrer"
+                    ><code>_groups</code>
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                collections in our repo whenever a new issuer requests to
+                <a href="{{ '/admin/issuers/register' | relative_url }}">register</a>
+                or a group is
+                <a href="{{ '/admin/groups/create' | relative_url }}">created</a>.
+            </p>
+            <p>
+                Both issuer registration and group creation requests are done by emailing the request directly
+                from the propsective issuer or group owner's own email, all we need to do is have an email
+                address where they can send the request. Also, the request for issuers to
+                <a href="{{ '/admin/groups/request' | relative_url }}">join</a>
+                a group is done via email, and updates to an issuer's groups is done manually after we receive
+                an email from a group owner approving the membership request.
+            </p>
+            <p>
+                By using email as the issuer/group communication mechanism and hardcoding issuers and groups
+                into our static website repository, we can run a very simple, secure, and scalable public key
+                infrastructure that is also easy to clone and self-host.
+            </p>
+
+            <hr class="mt-5">
+            <p class="small">
+                <em>
+                    Have feedback or thoughts on this security document?
+                    <a href="{{ '/admin/groups/request' | relative_url }}#how-to-contact">Let us know!</a>
+                </em>
+            </p>
+
+        </div>
+    </div>
+</div>
