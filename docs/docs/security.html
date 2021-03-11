@@ -26,7 +26,7 @@ title: Vax.Codes - Security details
                 Security
             </h1>
             <p>
-                This dives into the technical details of how our QR codes work and are secured.
+                This page dives into the technical details of how our QR codes work and are secured.
                 <br>
                 If you're looking for a less-technical overview of how our system works, check out
                 the <a href="{{ '/how-it-works' | relative_url }}">how it works</a> page.
@@ -65,7 +65,7 @@ title: Vax.Codes - Security details
             </p>
             <p>
                 QR codes are then scanned by an event organizer or business who wants to verify if
-                a person has received Covid-19 vaccine. QR message itself is just a URL to our
+                a person has received Covid-19 vaccine. The QR message itself is just a URL to our
                 <a href="{{ '/scan' | relative_url }}">scan</a>
                 page with the signature + issuer_id + message as a URL
                 <a href="https://en.wikipedia.org/wiki/URI_fragment" target="_blank" rel="noopener noreferrer"
@@ -74,10 +74,10 @@ title: Vax.Codes - Security details
                 (e.g. <code>https://vax.codes/scan<strong>#v1/some_id/...signature.../Joe%20Smith...</strong></code>).
             </p>
             <p>
-                When the scan page loads, the page's javascript check the URL fragment for something
+                When the scan page loads, the page's javascript checks the URL fragment for something
                 that looks like our verification code format. If present, it tries to load the
                 issuer's public key from the "issuers API" and validate the signature in the code.
-                If the signature validates, the signed message (e.g. the verfied person's name) is
+                If the signature validates, the signed message (e.g. the verified person's name) is
                 displayed, along with links to the issuer's profile and any groups the issuer is in.
             </p>
             <p>
@@ -89,7 +89,7 @@ title: Vax.Codes - Security details
             </p>
             <p>
                 The goal of this project is not become a global vaccine verification system (e.g.
-                "vaccine passports"), but rather focus on getting local communities to get a short-term
+                "vaccine passports"), but rather focus on helping local communities get a short-term
                 system in place for verifying local community members have been vaccinated so that
                 in-person gathers can safely resume. Eventually, the expectation is that local Vax.Codes
                 issuers and groups will be replaced by more robust, sophisticated, government-run vaccine
@@ -115,13 +115,19 @@ title: Vax.Codes - Security details
                 are ever passed to our servers.
             </p>
             <p>
-                So this project <strong>NEVER</strong> stores <em>or even receives</em>
-                any personal or medical information about people who have been issued QR codes.
-                Only the issuers of those QR codes knows what's in them and who they issued them
-                to.
+                The QR codes themselves are the things that contain the signature and contents of the
+                signed message, so there's no need for us to run a database or have any record of who
+                has been issued a QR code. Only the issuers of those QR codes knows what's in them and
+                who they issued them to.
             </p>
             <p>
-                Additionally, this project is completely open source and available from our
+                So this project <strong>NEVER</strong> stores <em>or even receives</em>
+                any personal or medical information about people who have been issued QR codes.
+                Our goal is simply to make it easy for local community issuers to succeed in setting
+                up a local vaccine verification system for event organizers and businesses.
+            </p>
+            <p>
+                Finally, this project is completely open source and available from our
                 <a href="https://github.com/open-austin/vax-codes" target="_blank" rel="noopener noreferrer"
                     >Github repo
                     <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>,
@@ -189,6 +195,12 @@ title: Vax.Codes - Security details
                     <pre class="mb-0">https://vax.codes/scan#v1/test_arc/iF4EABMIAAYFAmApt2gACgkQ0ldpWsVGpsTl8QD_cnfQCpJC2QZaLDT7i8o_uXu7pCWVuNI7n5hvwcxRAf4A_3fwIqNIcEZZ-O3lsSVubq2yccUskpgeXqTU0DcDsfG8/Hello%20World</pre>
                 </div>
             </div>
+            <p class="small">
+                <a href="https://vax.codes/scan#v1/test_arc/iF4EABMIAAYFAmApt2gACgkQ0ldpWsVGpsTl8QD_cnfQCpJC2QZaLDT7i8o_uXu7pCWVuNI7n5hvwcxRAf4A_3fwIqNIcEZZ-O3lsSVubq2yccUskpgeXqTU0DcDsfG8/Hello%20World"
+                    target="_blank"
+                    >Open this link
+                    <svg class="svgicon"><use href="#fa-external-link"/></svg></a>
+            </p>
 
 
             <hr>
@@ -229,7 +241,7 @@ title: Vax.Codes - Security details
             </p>
             <p>
                 Both issuer registration and group creation requests are done by emailing the request directly
-                from the propsective issuer or group owner's own email, all we need to do is have an email
+                from the propsective issuer or group owner's own email, so all we need to do is have an email
                 address where they can send the request. Also, the request for issuers to
                 <a href="{{ '/admin/groups/request' | relative_url }}">join</a>
                 a group is done via email, and updates to an issuer's groups is done manually after we receive
@@ -245,7 +257,7 @@ title: Vax.Codes - Security details
             <p class="small">
                 <em>
                     Have feedback or thoughts on this security document?
-                    <a href="{{ '/admin/groups/request' | relative_url }}#how-to-contact">Let us know!</a>
+                    <a href="{{ '/about' | relative_url }}#how-to-contact">Let us know!</a>
                 </em>
             </p>
 
