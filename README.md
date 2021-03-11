@@ -1,6 +1,6 @@
 # Vax.Codes - Free QR Codes for Covid-19 Vaccine Recipients
 
-**WARNING: THIS PROJECT IS UNDER DEVELOPMENT AND DOES NOT WORK YET**
+**WARNING: THIS PROJECT IS IN BETA**
 
 Website: https://vax.codes/
 
@@ -31,8 +31,8 @@ See our [github issues](https://github.com/open-austin/vax-codes/issues) for the
 * [x] Issuer explorer/searching
 * [x] Group admin
 * [x] Group explorer/searching
-* [ ] Informational pages (how-it-works, about-us, etc.)
-* [ ] Security overview page
+* [x] Informational pages (how-it-works, about-us, etc.)
+* [x] Security overview page
 
 ### Phase 2 - Technical Features
 * [ ] API docs
