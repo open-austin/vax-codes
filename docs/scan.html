@@ -1,6 +1,6 @@
 ---
 layout: base
-title: Vax.Codes - Scan QR code
+title: Scan QR code
 svgicons: fa-camera, fa-pencil
 additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 ---
@@ -264,7 +264,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     class="form-control"
                     id="manual-code-entry"
                     aria-describedby="code-entry-help"
-                    placeholder="(e.g. https://vax.codes/scan#v1/abc123...)">
+                    placeholder="(e.g. {{ site.root_url }}/scan#v1/abc123...)">
                 <div id="code-entry-error" class="invalid-feedback d-block">
                     &nbsp;
                 </div>
@@ -547,7 +547,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     //  {optional_url_and_settings}{version}/{issuer}/{signature_url_safe_b64}/{signed_value_percent_encoded}
     // Examples:
     //  v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
-    //  https://vax.codes/scan#v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
+    //  {{ site.root_url }}/scan#v1/test_arc/l4390gjeio238jfwkdj-lkfjwi3jfed_23j.../hello%0Aworld
     const vaxCodesV1MatchRegex = new RegExp("^(.*)v1/([^/#]+)/([a-zA-Z0-9-_]+)/([^/#]+)$");
     const vaxCodesV1CodeType = "vax-codes-v1";
     function vaxCodesV1Verify(code, successCallback, errorCallback) {
@@ -586,7 +586,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         }
 
         // see if we should use a non-default API
-        // e.g. "https://vax.codes/scan#api=<api_endpoint>"
+        // e.g. "{{ site.root_url }}/scan#api=<api_endpoint>"
         let vaxCodesV1IssuersAPI = "api/v1/issuers"; // default api endpoint root
         let overrideAPI = window.location.href.match(/#(?:[^#]+\/|)api=([^#=\/]+)/);
         if (overrideAPI !== null) {
@@ -594,7 +594,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
         }
 
         // see if we should only trust a specific public key
-        // e.g. "https://vax.codes/scan#pubkey=<base64_encoded_pgp_key>"
+        // e.g. "{{ site.root_url }}/scan#pubkey=<base64_encoded_pgp_key>"
         let vaxCodesV1TrustedPubkey = undefined; // default is no override public key
         let overridePubkey = window.location.href.match(/#(?:[^#]+\/|)pubkey=([^#=\/]+)/);
         if (overridePubkey !== null) {
@@ -806,7 +806,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             }
 
             // see if we should trust a specific set of groups
-            // e.g. "https://vax.codes/scan#groups=<group_id>,<group_id>,..."
+            // e.g. "{{ site.root_url }}/scan#groups=<group_id>,<group_id>,..."
             let trustedGroupsRef = undefined; // default is only trust default groups
             let overrideGroups = window.location.href.match(/#(?:[^#]+\/|)groups=([^#=\/]+)/);
             if (overrideGroups !== null) {

@@ -1,7 +1,7 @@
 ---
 layout: base
 svgicons: fa-clipboard
-title: Vax.Codes - Find your internal scan page
+title: Find your internal scan page
 ---
 <div class="container-fluid">
     <div class="row mt-1 mb-3">
@@ -85,7 +85,7 @@ title: Vax.Codes - Find your internal scan page
             <hr class="mt-3">
             <p class="mt-3 small">
                 <em>
-                    Have questions? Email <a href="mailto:support@vax.codes">support@vax.codes</a> for assistance.
+                    Have questions? Email <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a> for assistance.
                 </em>
             </p>
 
@@ -163,7 +163,7 @@ title: Vax.Codes - Find your internal scan page
             keyfileValid.classList.remove("d-none");
 
             // populate the scan
-            internalUrl.value = "https://vax.codes/scan#pubkey=" + window.btoa(pubAsc);
+            internalUrl.value = "{{ site.root_url }}/scan#pubkey=" + window.btoa(pubAsc);
             openLink.href = "/scan#pubkey=" + window.btoa(pubAsc);
 
             // undisable the copy/open buttons

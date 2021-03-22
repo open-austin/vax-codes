@@ -1,7 +1,7 @@
 ---
 layout: base
 svgicons: fa-chevron-left, fa-check, fa-exclamation-triangle, fa-exclamation-circle
-title: Vax.Codes - Browse groups
+title: Browse groups
 ---
 <style>
     #modal-group-email,
@@ -156,7 +156,7 @@ title: Vax.Codes - Browse groups
 <!-- Request to join a group modal -->
 <div class="modal fade" id="request-to-join" tabindex="-1" aria-labelledby="request-to-join-title" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <form id="join-group-form" action="mailto:join@vax.codes" target="_blank" class="modal-content">
+        <form id="join-group-form" action="mailto:{{ site.join_group_email }}" target="_blank" class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="request-to-join-title">
                     Request to join this group
@@ -266,12 +266,12 @@ title: Vax.Codes - Browse groups
     let nextPage = null;
 
     // default request-to-join template
-    let EMAIL_SUBJECT = "I'd like to join your Vax.Codes group";
+    let EMAIL_SUBJECT = "I'd like to join your {{ site.site_name }} group";
     let EMAIL_TEMPLATE = "Hello,\n\n" +
         "I'm requesting to join \"{GROUP_NAME}\" ({GROUP_ID}).\n\n" +
         "You can find my issuer information here:\n" +
         "https://github.com/open-austin/vax-codes/blob/master/docs/_issuers/ISSUER_ID_HERE.json\n\n" +
-        "Please reply, cc'ing join@vax.codes, if you approve us joining your group.";
+        "Please reply, cc'ing {{ site.join_group_email }}, if you approve us joining your group.";
 
     // validate email template to see if there's any special values remaining
     function submitEmail(e) {

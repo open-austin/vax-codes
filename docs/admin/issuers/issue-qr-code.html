@@ -1,6 +1,6 @@
 ---
 layout: base
-title: Vax.Codes - Issue QR code
+title: Issue QR code
 svgicons: fa-download, fa-print
 additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js, /assets/qrenc/qrenc_reorganize.js
 ---
@@ -393,7 +393,7 @@ DOB: YYYY-MM-DD"
     //
     // returns: {
     //  "image": "data:image/png;base64,iVBORw0K...",
-    //  "code": "https://vax.codes/scan#v1/...",
+    //  "code": "{{ site.root_url }}/scan#v1/...",
     //  "issuer": {...}, // undefined if internal only
     //  "pubkey": "-----BEGIN PGP PUBLIC KEY BLOCK-----...",
     // }
@@ -511,7 +511,7 @@ DOB: YYYY-MM-DD"
 
         // make into a Vax.Codes v1 format
         const vaxCode = "" +
-            "https://vax.codes/scan#v1" +
+            "{{ site.root_url }}/scan#v1" +
             "/" + (issuer ? issuer['id'] : "INTERNAL_ONLY") +
             "/" + sig64 +
             "/" + encodeURIComponent(content);

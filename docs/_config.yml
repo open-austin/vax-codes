@@ -4,6 +4,13 @@ exclude:
   - README.md
   - CNAME
 
+site_name: Vax.Codes
+root_url: https://vax.codes
+support_email: support@vax.codes
+join_group_email: join@vax.codes
+create_group_email: create-group@vax.codes
+register_issuer_email: register@vax.codes
+
 collections:
   groups:
     output: true

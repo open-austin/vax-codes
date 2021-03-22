@@ -1,6 +1,6 @@
 ---
 layout: base
-title: Vax.Codes - Register as issuer
+title: Register as issuer
 ---
 <style>
     #email-body {
@@ -36,12 +36,12 @@ title: Vax.Codes - Register as issuer
                 a keyfile they can use to issue QR codes for internal purposes only,
                 in order to actually have you QR codes scan on the main
                 <a href="{{ '/scan' | relative_url }}">scan</a>
-                page, you must register with Vax.Codes so your issuer public key
+                page, you must register with {{ site.site_name }} so your issuer public key
                 can be included in the
                 <a href="{{ '/issuers' | relative_url }}">recognized issuers list</a>.
             </p>
 
-            <form id="register-form" action="mailto:register@vax.codes" target="_blank">
+            <form id="register-form" action="mailto:{{ site.register_issuer_email }}" target="_blank">
 
                 <label for="keyfile" class="h3 form-label mt-3">
                     Step 1: Provide keyfile
@@ -94,7 +94,7 @@ title: Vax.Codes - Register as issuer
                             <br>
                             If you don't anything to be public,
                             <a href="{{ '/docs/self-host' | relative_url }}" class="alert-link">self-host</a>
-                            your own private version of Vax.Codes (it's open source!).
+                            your own private version of {{ site.site_name }} (it's open source!).
                         </div>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ title: Vax.Codes - Register as issuer
                     This should open in your default email client so you can send it directly from your email.
                     <br>
                     If it doesn't, copy the above message and email it to
-                    <a href="mailto:register@vax.codes">register@vax.codes</a> with the subject "Register".
+                    <a href="mailto:{{ site.register_issuer_email }}">{{ site.register_issuer_email }}</a> with the subject "Register".
                 </div>
 
             </form>
@@ -136,14 +136,14 @@ title: Vax.Codes - Register as issuer
                 <em>
                     Want to check on the status of an existing registration request?
                     <br>
-                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "What's the status of my registration?"
+                    Email <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a> with the subject "What's the status of my registration?"
                 </em>
             </p>
             <p class="small">
                 <em>
                     Want to add or remove a public key from your existing registration?
                     <br>
-                    Email <a href="mailto:support@vax.codes">support@vax.codes</a> with the subject "I need to modify my registration" and include the public key in the message body.
+                    Email <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a> with the subject "I need to modify my registration" and include the public key in the message body.
                 </em>
             </p>
         </div>
