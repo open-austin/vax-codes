@@ -78,11 +78,12 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             </div>
             <div id="scan-nondefault" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
-                    Verified vaccine, but only trusted within an
-                    <a href="{{ '/how-it-works' | relative_url }}#non-default-groups" class="alert-link d-inline-block" target="_blank">non-default group</a>
+                    Verified vaccine by
+                    <a id="nondefault-groups-issuer" href="#" class="alert-link d-inline-block" target="_blank"></a>,
+                    but this issuer is not trusted by default
                 </div>
                 <div class="mt-1">
-                    Please make sure you <em>personally know and trust</em>:
+                    Please make sure you <em>personally know and trust</em> the issuer or these groups:
                     <span id="nondefault-groups"></span>
                 </div>
             </div>
@@ -766,6 +767,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const alertNoGroups = document.getElementById("scan-no-groups");
     const alertManualPubkey = document.getElementById("scan-manual-pubkey");
     const nonDefaultGroupsWrapper = document.getElementById("nondefault-groups");
+    const nonDefaultGroupsIssuerLink = document.getElementById("nondefault-groups-issuer");
     const noGroupsIssuerLink = document.getElementById("no-groups-issuer");
     const resultsWrapper = document.getElementById("results-wrapper");
     const resultsValue = document.getElementById("results-value");
@@ -883,6 +885,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // populate issuer
                 resultsIssuer.textContent = results['issuer']['name'];
                 resultsIssuer.href = "{{ '/issuers' | relative_url }}?id=" + encodeURIComponent(results['issuer']['id']);
+                nonDefaultGroupsIssuerLink.textContent = results['issuer']['name'];
+                nonDefaultGroupsIssuerLink.href = resultsIssuer.href;
 
                 // populate groups
                 nonDefaultGroupsWrapper.innerHTML = "";
