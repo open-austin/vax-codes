@@ -1,0 +1,26 @@
+---
+slug: test_movies
+page: 1
+
+issuer_name: Test Movie Theater
+issuer_phone: (512) 555-5555
+issuer_email: movie-safety@example.com
+issuer_website: https://example.com/movie-safety
+
+issuer_keys:
+
+  # Main office
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYFimDhYJKwYBBAHaRw8BAQdA3iRdzG55czVEycEOrooHToZ/eY9KvxRY
+      RvFBS18ITVnNAMKPBBAWCgAgBQJgWKYOBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQg2HTKp0qYjsWIQRe3jRTWmU1VSbpTiCDYdMqnSpiOwg3AQD9
+      f6YzN79jTUaNSIrdrDlyj+ygKwfHZ+zRpzHdVBdzbgD/Rhvx4/+hlm9hWs1Y
+      wifYC7x+7oiHwkZnbw411KWAdQU=
+      =rwwa
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+

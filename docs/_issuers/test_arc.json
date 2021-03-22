@@ -12,14 +12,15 @@ issuer_keys:
   # Site 1 (downtown)
   - pubkey: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
-      Version: GnuPG v2
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
 
-      mFIEYBGjHBMIKoZIzj0DAQcCAwQvc5ikzwmQVGc2wwz2DJ/ShLHMPE+5MyS7YcaX
-      KPbKLRr03U1VxEyM+RG8kSOOMer3y41keNP8RP9ec/L5Ng3ctBVBQUEgQkJCIDxh
-      YWFAYmJiLmNvbT6IeQQTEwgAIQUCYBGjHAIbAwULCQgHAgYVCAkKCwIEFgIDAQIe
-      AQIXgAAKCRCsXouZ2/Z1CFHcAQDyOctXSblYGuyBJy1vd8Z4f3gpFRsLwhkCODya
-      o1YzGQD/fZoKqJvFuXy2PT1A+KLqi3voxiu02sdDU6NLSfh+YUk=
-      =rCqm
+      xjMEYFil+xYJKwYBBAHaRw8BAQdAENz27LJ/IcTA97xP8vkjzytgkc9DS6ko
+      OQnQExICZ1fNAMKPBBAWCgAgBQJgWKX7BgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQVaVzzTmeYWIWIQSxt4Lh6Ar5b5JjbiVVpXPNOZ5hYhddAQDk
+      /JokMo+puYjVHb5YIYL05Ppy4qPt/KEmZ6W9HUGv3QD+O66l2XQELNslU61t
+      YVfQbHh9R++Em8AbOd5JnOwZTg8=
+      =H7oN
       -----END PGP PUBLIC KEY BLOCK-----
     groups:
     - slug: test_austin
