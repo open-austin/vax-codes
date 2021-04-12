@@ -2,4 +2,193 @@
 layout: base
 title: Issue QR code locally
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Issue QR code locally
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3 mb-5">
+        <div class="col">
+            <h1>
+                Issue a QR code locally
+            </h1>
+            <p>
+                This tutorial explains how to issue QR codes on your own computer with your keyfile
+                using only the command line. However, if you are going to be issuing many QR codes,
+                we encourage you to write a script in your language of choice to automate the
+                process.
+            </p>
+
+            <h3 id="step-1-install-prerequisites" class="permalink-hover permalink-highlight mt-5">
+                Step 1: Install Prerequisites
+                <a href="#step-1-install-prerequisites" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <div class="alert alert-warning">
+                <strong>For Windows:</strong>
+                This tutorial assumes you have installed
+                <a href="https://docs.microsoft.com/en-us/windows/wsl/" target="_blank" rel="noreferrer noopener nofollow"
+                    >Windows Subsystem for Linux (WSL)
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                    so that you can install and use qrencode.
+            </div>
+            <p>
+                You need some basic command line tools to generate QR codes on your own computer.
+            </p>
+            <ul>
+                <li>
+                    <strong>Mac:</strong>
+                    <code>brew install gnupg python3 qrencode</code>
+                </li>
+                <li>
+                    <strong>Debian/Ubuntu/WSL:</strong>
+                    <code>sudo apt-get install gnupg python3 qrencode</code>
+                </li>
+            </ul>
+
+            <h3 id="step-2-import-keyfile" class="permalink-hover permalink-highlight mt-5">
+                Step 2: Import your keyfile into gpg
+                <a href="#step-2-import-keyfile" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                You'll be using <code>gpg</code> to create issuer signatures for your QR codes, so
+                you need to import your keyfile into your local gpg keychain.<br>
+                (You can skip this step if you've already imported your keyfile)
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --import /path/to/your/keyfile.asc</pre>
+                </div>
+            </div>
+            <p class="mt-1 mb-1">
+                Should print something like:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg: key 836...: public key "" imported
+gpg: key 836...: secret key imported
+gpg: Total number processed: 2
+gpg:               imported: 1
+gpg:       secret keys read: 1
+gpg:   secret keys imported: 1</pre>
+                </div>
+            </div>
+
+            <h3 id="step-3-find-fingerprint" class="permalink-hover permalink-highlight mt-5">
+                Step 3: Find your keypair fingerprint
+                <a href="#step-3-find-fingerprint" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Once you have imported your keypair, find the fingerprint for it by listing your
+                secret keys.<br>
+                (You can skip this step if you already know your fingerprint)
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --list-secret-keys</pre>
+                </div>
+            </div>
+            <p class="mt-1 mb-1">
+                Will print something like:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>/path/to/pubring.kbx
+--------------------------------------
+sec   ed25519 2021-04-12 [SC]
+      68632A32FFDB8EB9ED589CDEF246AA78FD1EFDB1    <--- this is your fingerprint
+uid           [ultimate] Test Issuer              <--- make sure this matches your issuer name</pre>
+                </div>
+            </div>
+
+            <h3 id="step-4-build-qr-code-url" class="permalink-hover permalink-highlight mt-5">
+                Step 4: Build QR code raw url
+                <a href="#step-4-build-qr-code-url" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                You're now ready to create the various parts of the QR code and build the full QR code
+                raw string (which is just a url to the scan page).
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+># create the url prefix (replace INTERNAL_ONLY with your issuer ID if you have already registered)
+echo -n "https://vax.codes/scan#v1/INTERNAL_ONLY/" > v1_prefix.txt
+
+# create the QR code contents (replace CONTENTS_HERE with whatever you want to display when the QR code is scanned)
+echo -n "CONTENTS_HERE" > v1_contents.txt
+
+# percent-encode the contents for the url
+cat v1_contents.txt | python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read()), end='')" > v1_contents_percent.txt
+
+# sign the contents with your issuer keypair (replace FINGERPRINT_HERE with your fingerprint from Step 3)
+cat v1_contents.txt | gpg --detach-sig --sign --user FINGERPRINT_HERE --output - > v1_signature.sig
+
+# base64 encode the signature
+cat v1_signature.sig | python3 -c "import base64, sys; print(base64.urlsafe_b64encode(sys.stdin.buffer.read()).decode().replace('=', ''), end='') > v1_signature.txt
+
+# merge everything into the final qr code raw url
+python3 -c "print('{}{}/{}'.format(open('v1_prefix.txt').read(), open('v1_signature.txt').read(), open('v1_contents_percent.txt').read()), end='')" > v1_qr_code.txt
+
+# view the url to make sure it looks good
+cat v1_qr_code.txt</pre>
+                </div>
+            </div>
+
+            <h3 id="step-5-create-qr-code" class="permalink-hover permalink-highlight mt-5">
+                Step 5: Create QR code image
+                <a href="#step-5-create-qr-code" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Now that you have qr code raw string (<code>v1_qr_code.txt</code>), you can convert
+                that into QR code png image.
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>cat v1_qr_code.txt | qrencode -o - > v1_qr_code.png</pre>
+                </div>
+            </div>
+
+            <h3 id="step-6-done" class="permalink-hover permalink-highlight mt-5">
+                Step 6: Done!
+                <a href="#step-6-done" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Congratulations! You can created <code>v1_qr_code.png</code>. Open the image in any image editor
+                (or your browser) and try
+                <a href="{{ '/scan' | relative_url }}">scanning</a>
+                it.
+            </p>
+
+            <hr class="mt-5">
+            <p class="mt-3 small">
+                <em>
+                    Want to use our online interface for issuing QR codes instead of the command line? <a href="{{ '/admin/issuers/issue-qr-code' | relative_url }}">Click here</a>
+                </em>
+            </p>
+            <p class="mt-3 small">
+                <em>
+                    Have questions? Email <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a> for assistance.
+                </em>
+            </p>
+
+        </div>
+    </div>
+</div>

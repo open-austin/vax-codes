@@ -2,4 +2,233 @@
 layout: base
 title: Generate keyfile locally
 ---
-<code class="m-5 d-block text-center">TODO: create content</code>
+<div class="container-fluid">
+    <div class="row mt-1 mb-3">
+        <nav style="--bs-breadcrumb-divider: '›';" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ '/' | relative_url }}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ '/admin/issuers' | relative_url }}">Issuers admin</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Generate keyfile locally
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row mt-3 mb-5">
+        <div class="col">
+            <h1>
+                Generate a keyfile locally
+            </h1>
+            <p>
+                To generate issuer keyfiles, you can either use our
+                <a href="{{ '/admin/issuers/generate' | relative_url }}">generate</a>
+                page or on your own computer. This page explains how to generate
+                keyfiles on your own computer.
+            </p>
+
+            <h3 id="step-1-install-gnupg" class="permalink-hover permalink-highlight mt-5">
+                Step 1: Install GnuPG
+                <a href="#step-1-install-gnupg" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Keyfiles are nothing more than a
+                <a href="https://tools.ietf.org/html/rfc4880" target="_blank" rel="noreferrer noopener nofollow"
+                    >OpenPGP
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                public/private keypair in a text file, so all you
+                need to generate a keyfile locally is
+                <a href="https://en.wikipedia.org/wiki/GNU_Privacy_Guard" target="_blank" rel="noreferrer noopener nofollow"
+                    >GnuPG
+                    <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>.
+            </p>
+            <ul>
+                <li>
+                    <strong>Windows:</strong>
+                    Install
+                    <a href="https://www.gpg4win.org/" target="_blank" rel="noreferrer noopener nofollow"
+                        >Gpg4win
+                        <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
+                </li>
+                <li>
+                    <strong>Mac:</strong>
+                    <code>brew install gnupg</code>
+                </li>
+                <li>
+                    <strong>Debian/Ubuntu:</strong>
+                    <code>sudo apt-get install gnupg</code> (should already be installed)
+                </li>
+            </ul>
+
+            <h3 id="step-2-generate-keypair" class="permalink-hover permalink-highlight mt-5">
+                Step 2: Generate a keypair
+                <a href="#step-2-generate-keypair" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Once you have GnuPG installed, you need to generate an elliptic curve keypair.
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --expert --full-gen-key
+# select "ECC (sign only)"
+# select "Curve 25519" or "NIST P-256"
+# select 0 (key does not expire)
+# select y (for "is this correct?")
+# for Real Name, type your issuer name
+# for Email address, leave blank (just press Enter)
+# for Comment, leave blank (just press Enter)
+# select O (for Okay)
+# set an encryption password for your new keypair
+# done!</pre>
+                </div>
+            </div>
+
+            <h3 id="step-3-find-fingerprint" class="permalink-hover permalink-highlight mt-5">
+                Step 3: Find your keypair fingerprint
+                <a href="#step-3-find-fingerprint" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Once you have generated your keypair, find the fingerprint for it by listing your
+                secret keys.
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --list-secret-keys</pre>
+                </div>
+            </div>
+            <p class="mt-1 mb-1">
+                Will print something like:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>/path/to/pubring.kbx
+--------------------------------------
+sec   ed25519 2021-04-12 [SC]
+      68632A32FFDB8EB9ED589CDEF246AA78FD1EFDB1    <--- this is your fingerprint
+uid           [ultimate] Test Issuer              <--- make sure this matches your issuer name</pre>
+                </div>
+            </div>
+
+            <h3 id="step-4-print-keypair" class="permalink-hover permalink-highlight mt-5">
+                Step 4: Print out your keypair
+                <a href="#step-4-print-keypair" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                You now need to print out the public and private keys.
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --export --armor YOUR_FINGERPRINT_HERE</pre>
+                </div>
+            </div>
+            <p class="mt-1 mb-1">
+                Will print something like:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mDMEYFimDh... (long string of base 64 characters)
+-----END PGP PUBLIC KEY BLOCK-----</pre>
+                </div>
+            </div>
+            <p class="mt-3 mb-1">
+                Also print out your private key:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>gpg --export-secret-key --armor YOUR_FINGERPRINT_HERE</pre>
+                </div>
+            </div>
+            <p class="mt-1 mb-1">
+                Will print something like:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lFgEYHO9oh... (long string of base 64 characters)
+-----END PGP PRIVATE KEY BLOCK-----</pre>
+                </div>
+            </div>
+
+            <h3 id="step-5-copy-to-text-file" class="permalink-hover permalink-highlight mt-5">
+                Step 5: Copy your public and private keys to a single text file
+                <a href="#step-5-copy-to-text-file" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Open a text editor and copy/paste the public and private keys you printed out in
+                Step 4 into that text file.
+            </p>
+            <p class="mb-1">
+                Your text file should look something like this:
+            </p>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <pre class="mb-0"
+>-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+mDMEYFimDh... (long string of base 64 characters)
+-----END PGP PUBLIC KEY BLOCK-----
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lFgEYHO9oh... (long string of base 64 characters)
+-----END PGP PRIVATE KEY BLOCK-----</pre>
+                </div>
+            </div>
+            <p class="mt-3">
+                Save your text file as <code>keyfile.asc</code>.
+            </p>
+
+            <h3 id="step-6-done" class="permalink-hover permalink-highlight mt-5">
+                Step 6: Done!
+                <a href="#step-6-done" class="permalink" title="Permalink"><svg class="svgicon"><use href="#fa-link"/></svg></a>
+            </h3>
+            <p>
+                Congratulations! You've just created a keyfile on your local computer.
+            </p>
+            <p>
+                <strong>
+                    Remember: KEEP YOUR KEYFILE SAFE
+                </strong><br>
+                Anyone with your keyfile can issue QR codes as you, and if it gets compromised
+                your only option is to revoke <em>all</em> your previously issued QR codes to
+                prevent someone from issuing fake QR codes in your name.
+            </p>
+
+            <h5 class="mt-5">
+                Next:
+                <a href="{{ '/admin/issuers/issue-local-qr-code' | relative_url }}">Issue a QR code on your local computer</a>
+            </h5>
+            <p class="mb-1">
+                You can also issue QR codes using your keyfile in our
+                <a href="{{ '/admin/issuers/issue-qr-code' | relative_url }}">online interface</a>.
+            </p>
+            <p>
+                You can also
+                <a href="{{ '/admin/issuers/register' | relative_url }}">register as an issuer</a>
+                with your keyfile.
+            </p>
+
+            <hr class="mt-5">
+            <p class="mt-3 small">
+                <em>
+                    Have questions? Email <a href="mailto:{{ site.support_email }}">{{ site.support_email }}</a> for assistance.
+                </em>
+            </p>
+
+        </div>
+    </div>
+</div>
