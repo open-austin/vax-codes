@@ -1,0 +1,26 @@
+---
+slug: dollarbouffe
+page: 1
+
+issuer_name: DOLLARBOUFFE
+issuer_phone: 450-500-0893
+issuer_email: null
+issuer_website: https://www.facebook.com/DollarBouffe/
+
+issuer_keys:
+
+  # Main office
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYUP7YhYJKwYBBAHaRw8BAQdAWTruqByrMxnTG55sYX+EnNTsIoNATJeJ
+      v0+ejv/Xys/NAMKPBBAWCgAgBQJhQ/tiBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQBb64g+aScSYWIQSRzyWUmh7HunjVXq8FvriD5pJxJs+IAQD6
+      iFjZudWC+dlqab92Jscec5jvOU/em6Jo3nqwrsMZ1gD+ICUoxtQkVTCFPEg6
+      aXib6im+4u/4hmyGtZ6HyIpUqwA=
+      =XB3U
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
