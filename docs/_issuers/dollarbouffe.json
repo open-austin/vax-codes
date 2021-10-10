@@ -9,7 +9,7 @@ issuer_website: https://www.facebook.com/DollarBouffe/
 
 issuer_keys:
 
-  # Main office
+  # public key
   - pubkey: |
       -----BEGIN PGP PUBLIC KEY BLOCK-----
       Version: OpenPGP.js v4.10.10

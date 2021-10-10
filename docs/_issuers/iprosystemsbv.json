@@ -1,0 +1,26 @@
+---
+slug: iprosystemsbv
+page: 1
+
+issuer_name: I-Pro Systems B.v.
+issuer_phone: 06-17083445
+issuer_email: iprosystemsbv@gmail.com
+issuer_website: www.i-prosystems.nl
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYWGrHRYJKwYBBAHaRw8BAQdA63Ag55bthYUxArE6MChmbQKIFBYJvFB/
+      EXgsmvP6gdHNAMKPBBAWCgAgBQJhYasdBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQcVc1UTtIAdEWIQQrGfO4qZXkFsmwtddxVzVRO0gB0a+JAQDN
+      WgVk8NF2R2C9lCEudaYYIjdLYwDdyPQbHpGdhl8qWQD/XF0+Ljc9vnxkc36F
+      nB+B34Hr+P20N+e6ABLOEYv2rQg=
+      =Qypv
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
