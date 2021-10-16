@@ -103,8 +103,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js, /assets/qrenc/qrenc_re
                         id="qr-contents"
                         rows="3"
                         aria-describedby="qr-contents-help"
-                        placeholder="John Doe
-DOB: YYYY-MM-DD"
+                        placeholder="Name: John Doe
+Type: Negative Test"
                         ></textarea>
                     <div id="qr-contents-error" class="invalid-feedback"></div>
                     <div id="qr-contents-valid" class="valid-feedback"></div>
@@ -112,6 +112,44 @@ DOB: YYYY-MM-DD"
                         What you want to display when someone scans the QR code
                     </div>
                     <div id="qr-contents-spacer" class="feedback-spacer">&nbsp;</div>
+                </div>
+                <div class="">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="on" id="expire-toggle" data-bs-toggle="collapse" data-bs-target="#expire-section" aria-expanded="false" aria-controls="expire-section">
+                        <label class="form-check-label" for="expire-toggle">
+                            Set an expiration date (optional)
+                        </label>
+                    </div>
+                    <div id="expire-toggle-help" class="form-text">
+                        For short-lived verifications, like negative test results
+                    </div>
+                    <div class="collapse" id="expire-section">
+                        <div class="card card-body">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input mt-2" type="radio" name="expire-choice" id="expire-relative" checked>
+                                <label class="form-check-label" for="expire-relative">
+                                    In
+                                    <input type="number" class="form-control" id="expire-days" placeholder="(e.g. 3)" value="3" style="width:8em;display:inline;">
+                                    days
+                                    <small class="text-muted ps-1 d-inline-block">
+                                        (<span id="expire-days-calculated" title="Friday, September 12, 2021">12/28/2021</span> at midnight <span id="expire-days-timezone"></span>)
+                                    </small>
+                                    <div id="expire-days-error" class="invalid-feedback"></div>
+                                </label>
+                            </div>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input mt-2" type="radio" name="expire-choice" id="expire-absolute">
+                                <label class="form-check-label" for="expire-absolute">
+                                    Set a custom date:
+                                    <input type="date" class="form-control" id="expire-date" placeholder="(e.g. 2021-02-01)" style="width:11em;display:inline;">
+                                    <small class="text-muted ps-1 d-inline-block">
+                                        (at midnight <span id="expire-date-timezone"></span>)
+                                    </small>
+                                    <div id="expire-date-error" class="invalid-feedback"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="mt-4">
                     <div id="overall-buttons">
@@ -390,6 +428,7 @@ DOB: YYYY-MM-DD"
     //  keyfileStr - <str> - generated keyfile that contains the issuer's private key
     //  passphrase - <str> or undefined - private key decrypt passphrase (if any)
     //  content - <str> - contents to sign
+    //  expires - <Date> - when to expire the signature (optional, default is no expiration)
     //
     // returns: {
     //  "image": "data:image/png;base64,iVBORw0K...",
@@ -397,7 +436,7 @@ DOB: YYYY-MM-DD"
     //  "issuer": {...}, // undefined if internal only
     //  "pubkey": "-----BEGIN PGP PUBLIC KEY BLOCK-----...",
     // }
-    async function issueQRCode(issuerId, keyfileStr, passphrase, content) {
+    async function issueQRCode(issuerId, keyfileStr, passphrase, content, expires) {
 
         // wait for dependencies to load
         let numLoops = 0;
@@ -453,13 +492,40 @@ DOB: YYYY-MM-DD"
         // sign the contents
         let sig64 = undefined;
         try {
-            const sig = await openpgp.sign({
-                "message": openpgp.cleartext.fromText(content),
-                "privateKeys": [privKey],
-                "detached": true,
-            });
-            const sigData = await openpgp.signature.readArmored(sig.signature);
-            sig64 = toB64(sigData.packets.write());
+            // will be a signature of text (https://datatracker.ietf.org/doc/html/rfc4880#section-5.2.1)
+            const signatureProperties = {signatureType: 1};
+
+            // set expiration, if any
+            const curTime = new Date();
+            if (expires instanceof Date) {
+                let expireSeconds = Math.floor((expires - curTime) / 1000);
+
+                // for expiration dates in the past, expire in 1 second (i.e. immediately)
+                if (expireSeconds <= 1) {
+                    expireSeconds = 1;
+                }
+
+                signatureProperties['signatureExpirationTime'] = expireSeconds;
+            }
+
+            // create a detached signature
+            const literalDataPacket = openpgp.message.fromText(content).packets[0];
+            const privSigningKey = await privKey.getSigningKey();
+            const sigPacket = await openpgp.key.createSignaturePacket(
+                literalDataPacket,          // literal data packet
+                privKey,                    // overall private key
+                privSigningKey.keyPacket,   // specific private key used to sign (could be a subkey)
+                signatureProperties,        // overrides of default signature (used for setting expiration)
+                curTime,                    // signature date (now)
+                undefined,                  // userId (not used)
+                true,                       // detached (yes)
+                false,                      // streaming (no)
+            );
+            const sigPackets = new openpgp.packet.List();
+            sigPackets.push(sigPacket);
+
+            // convert the signature to a base64 string
+            sig64 = toB64(sigPackets.write());
         } catch (err) {
             throw new SignatureException("Signing content failed", err);
         }
@@ -556,6 +622,18 @@ DOB: YYYY-MM-DD"
     const qrContentsValid = document.getElementById("qr-contents-valid");
     const qrContentsSpacer = document.getElementById("qr-contents-spacer");
 
+    const expireToggle = document.getElementById("expire-toggle");
+    const expireSection = document.getElementById("expire-section");
+    const expireRelative = document.getElementById("expire-relative");
+    const expireAbsolute = document.getElementById("expire-absolute");
+    const expireDays = document.getElementById("expire-days");
+    const expireDaysCalculated = document.getElementById("expire-days-calculated");
+    const expireDaysTimezone = document.getElementById("expire-days-timezone");
+    const expireDaysError = document.getElementById("expire-days-error");
+    const expireDate = document.getElementById("expire-date");
+    const expireDateTimezone = document.getElementById("expire-date-timezone");
+    const expireDateError = document.getElementById("expire-date-error");
+
     const overallForm = document.getElementById("overall-form");
     const overallButtons = document.getElementById("overall-buttons");
     const overallSubmit = document.getElementById("overall-submit");
@@ -596,6 +674,9 @@ DOB: YYYY-MM-DD"
         qrContentsInput.classList.remove("is-valid");
         qrContentsSpacer.classList.remove("d-none");
 
+        expireDays.classList.remove("is-invalid");
+        expireDate.classList.remove("is-invalid");
+
         overallButtons.classList.remove("is-invalid");
 
         // hide qr image result
@@ -621,8 +702,30 @@ DOB: YYYY-MM-DD"
             qrContentsSpacer.classList.add("d-none");
         }
 
+        // missing expiration values+
+        let invalidDays = false;
+        let invalidDate = false;
+        const dateRegex = new RegExp("([0-9]{4})-([0-9]{2})-([0-9]{2})");
+        if (expireToggle.checked) {
+            if (expireRelative.checked) {
+                invalidDays = isNaN(parseInt(expireDays.value.trim()));
+                if (invalidDays) {
+                    expireDaysError.textContent = "You need to provide a number";
+                    expireDays.classList.add("is-invalid");
+                }
+            }
+            else if (expireAbsolute.checked) {
+                const dateMatch = expireDate.value.trim().match(dateRegex);
+                invalidDate = dateMatch === null || (new Date(expireDate.value.trim())).toString() === "Invalid Date";
+                if (invalidDate) {
+                    expireDateError.textContent = "You need to provide a date";
+                    expireDate.classList.add("is-invalid");
+                }
+            }
+        }
+
         // bail out if missing items
-        if (missingKeyfile || missingContents) {
+        if (missingKeyfile || missingContents || invalidDays || invalidDate) {
             // undo generating state
             overallSubmit.classList.remove("disabled");
             overallSubmit.textContent = "Generate QR Code";
@@ -640,12 +743,32 @@ DOB: YYYY-MM-DD"
         // successfully read file
         reader.onload = function(loadEvent) {
 
-            // try to generate a signed QR code
+            // contents to sign
             const keyfileStr = loadEvent.target.result;
             const issuerId = issuerIdInput.value.trim();
             const passphrase = passphraseWrapper.classList.contains("show") ? passphraseInput.value || undefined : undefined;
             const content = qrContentsInput.value.trim();
-            issueQRCode(issuerId, keyfileStr, passphrase, content)
+
+            // expiration (if any)
+            let expires = null;
+            if (expireToggle.checked) {
+                if (expireRelative.checked) {
+                    expires = new Date();
+                    expires.setHours(0);
+                    expires.setMinutes(0);
+                    expires.setSeconds(0);
+                    expires.setMilliseconds(0);
+                    expires.setDate(expires.getDate() + parseInt(expireDays.value.trim()) + 1);  // add additional day so expires at midnight
+                }
+                else if (expireAbsolute.checked) {
+                    const dateMatch = expireDate.value.trim().match(dateRegex);
+                    expires = new Date(parseInt(dateMatch[1]), parseInt(dateMatch[2]) - 1, parseInt(dateMatch[3]), 0, 0, 0, 0);
+                    expires.setDate(expires.getDate() + 1);  // add additional day so expires at midnight
+                }
+            }
+
+            // try to generate a signed QR code
+            issueQRCode(issuerId, keyfileStr, passphrase, content, expires)
 
             // success in generating the code!
             .then(function(result) {
@@ -780,6 +903,9 @@ DOB: YYYY-MM-DD"
         qrContentsInput.classList.remove("is-valid");
         qrContentsSpacer.classList.remove("d-none");
 
+        expireDays.classList.remove("is-invalid");
+        expireDate.classList.remove("is-invalid");
+
         overallButtons.classList.remove("is-invalid");
 
         // reset qr image result
@@ -804,5 +930,40 @@ DOB: YYYY-MM-DD"
         issuerIdInput.value = issuerMatch[1];
     }
 
+    // clicking on expiration inputs toggles that choice (not "focus" so tabbing doesn't switch)
+    expireDays.addEventListener("click", function(e) { expireRelative.checked = true; });
+    expireDate.addEventListener("click", function(e) { expireAbsolute.checked = true; });
+
+    // update the expiration timezone strings
+    const abbreviatedTZ = new Date().toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+    expireDaysTimezone.textContent = abbreviatedTZ;
+    expireDateTimezone.textContent = abbreviatedTZ;
+
+    // update the calculated date of expiration for relative day values
+    function updateExpireDaysCalculated(e) {
+        if(!isNaN(parseInt(expireDays.value.trim()))) {
+            let shownDate = new Date();
+            shownDate.setHours(0);
+            shownDate.setMinutes(0);
+            shownDate.setSeconds(0);
+            shownDate.setMilliseconds(0);
+            shownDate.setDate(shownDate.getDate() + parseInt(expireDays.value.trim()));
+            expireDaysCalculated.textContent = shownDate.toLocaleDateString();
+            expireDaysCalculated.title = shownDate.toISOString();
+        }
+    }
+    expireDays.addEventListener("keyup", updateExpireDaysCalculated);
+    expireDays.addEventListener("blur", updateExpireDaysCalculated);
+    updateExpireDaysCalculated();
+
+    // fix out-of-sync expires toggle collapser
+    expireToggle.addEventListener("change", function(e) {
+        if (expireToggle.checked) {
+            setTimeout(function() { expireSection.classList.add("show"); }, 500);
+        }
+        else {
+            setTimeout(function() { expireSection.classList.remove("show"); }, 500);
+        }
+    });
 </script>
 

@@ -69,6 +69,15 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 </div>
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
+            <div id="scan-expiredSignature" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-sm-center d-none" role="alert">
+                <div>
+                    This QR code has expired.
+                </div>
+                <div class="mt-1">
+                    Please request a new QR code from the issuer.
+                </div>
+                <button type="button" class="btn-close" aria-label="Close"></button>
+            </div>
             <div id="scan-unknownError" class="scan-result alert alert-danger alert-dismissible fade show mt-4 text-center d-none" role="alert">
                 Something went wrong! Please try again later.
                 <button type="button" class="btn-close" aria-label="Close"></button>
@@ -116,6 +125,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     <br>
                     This issuer is trusted by these groups:
                     <span id="results-groups"></span>
+                </div>
+                <div id="expires-wrapper" class="small d-none">
+                    Expires:
+                    <span id="expires"></span>
+                    <span id="expires-human" class="small text-muted ps-1"></span>
                 </div>
                 <div class="small fst-italic mt-3">
                     <div class="text-decoration-underline">
@@ -536,7 +550,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
      *  }
      *
      *  Success callback passed argument: {
-     *      "error": "invalidFormat|internalOnlyError|lookupError|invalidSignature",
+     *      "error": "invalidFormat|internalOnlyError|lookupError|invalidSignature|expiredSignature",
      *      "code": "<code>",
      *      "codeType": undefined|"<code_type>", // undefined if couldn't find what type of code it was
      *      ...other key-values specific to the code type
@@ -618,6 +632,21 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                         //"issuer": {...},  // no issuer details for specifically provided pubkeys
                     });
                 }
+                else if (
+                    sigResult.verifyResult
+                    && sigResult.verifyResult.signatures
+                    && sigResult.verifyResult.signatures.length === 1
+                    && sigResult.verifyResult.signatures[0].error
+                    && sigResult.verifyResult.signatures[0].error.message === "Signature is expired"
+                ) {
+                    errorCallback({
+                        "error": "expiredSignature",
+                        "code": code,
+                        "codeType": vaxCodesV1CodeType,
+                        "errorType": "manualVerifyFail",
+                        "sigResult": sigResult,
+                    });
+                }
                 else {
                     errorCallback({
                         "error": "invalidSignature",
@@ -660,6 +689,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                     // load issuer
                     let issuer = undefined;
+                    let foundExpiredSignature = false;
                     try {
                         issuer = JSON.parse(xhr.responseText);
                     }
@@ -683,7 +713,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                         // no more public keys, so give up
                         if (issuer['keys'][curIndex] === undefined || curIndex > 100) {
                             errorCallback({
-                                "error": "invalidSignature",
+                                "error": foundExpiredSignature ? "expiredSignature" : "invalidSignature",
                                 "code": code,
                                 "codeType": vaxCodesV1CodeType,
                                 "errorType": "triedAllPublicKeys",
@@ -706,6 +736,15 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                                 }
                                 // invalid signature, so try the next public key
                                 else {
+                                    if (
+                                        sigResult.verifyResult
+                                        && sigResult.verifyResult.signatures
+                                        && sigResult.verifyResult.signatures.length === 1
+                                        && sigResult.verifyResult.signatures[0].error
+                                        && sigResult.verifyResult.signatures[0].error.message === "Signature is expired"
+                                    ) {
+                                        foundExpiredSignature = true;
+                                    }
                                     _tryIssuerKey(curIndex + 1);
                                 }
                             });
@@ -760,7 +799,8 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const alertInternalError = document.getElementById("scan-internalOnlyError");
     const alertLookupError = document.getElementById("scan-lookupError");
     const lookupErrorIssuer = document.getElementById("lookupError-issuer");
-    const alertinvalidSignature = document.getElementById("scan-invalidSignature");
+    const alertInvalidSignature = document.getElementById("scan-invalidSignature");
+    const alertExpiredSignature = document.getElementById("scan-expiredSignature");
     const alertUnknownError = document.getElementById("scan-unknownError");
     const alertSuccess = document.getElementById("scan-success");
     const alertNonDefault = document.getElementById("scan-nondefault");
@@ -773,8 +813,65 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
     const resultsValue = document.getElementById("results-value");
     const resultsIssuer = document.getElementById("results-issuer");
     const resultsGroupsWrapper = document.getElementById("results-groups");
+    const expiresWrapper = document.getElementById("expires-wrapper");
+    const expiresDate = document.getElementById("expires");
+    const expiresHuman = document.getElementById("expires-human");
     const scanAnotherWrapper = document.getElementById("scan-another-wrapper");
     const inputOptions = document.getElementById("input-options");
+
+    // render expires
+    function renderExpires(results) {
+        let hasExpiration = false;
+
+        // for Vax.Codes v1, expirations are way down inside the OpenPGP signature packet
+        if (
+            results['sigResult']
+            && results['sigResult']['verifyResult']
+            && results['sigResult']['verifyResult']['signatures']
+            && results['sigResult']['verifyResult']['signatures'].length === 1
+            && results['sigResult']['verifyResult']['signatures'][0]
+            && results['sigResult']['verifyResult']['signatures'][0]['signature']
+            && results['sigResult']['verifyResult']['signatures'][0]['signature']['packets']
+            && results['sigResult']['verifyResult']['signatures'][0]['signature']['packets'].length === 1
+            && results['sigResult']['verifyResult']['signatures'][0]['signature']['packets'][0]
+        ) {
+            let sigPacket = results['sigResult']['verifyResult']['signatures'][0]['signature']['packets'][0];
+            // has expiration
+            if (sigPacket.signatureExpirationTime !== null) {
+                hasExpiration = true;
+
+                // take 1 second off so the date shows the previous day
+                let expires = new Date(sigPacket.created.getTime());
+                expires.setSeconds(expires.getSeconds() + sigPacket.signatureExpirationTime - 1);
+
+                // show the actual date of expiration
+                expiresWrapper.classList.remove("d-none");
+                expiresDate.textContent = expires.toLocaleDateString();
+                expiresDate.title = expires.toLocaleString();
+
+                // show a human friendly relative time (inspired by https://stackoverflow.com/a/53800501)
+                const humanFormat = new Intl.RelativeTimeFormat(PAGE_LANG, { numeric: 'auto' });
+                const secondsPassed = expires - (new Date());
+                const units = {"year" : 31536000000, "month" : 2628000000, "day" : 86400000, "hour" : 3600000, "minute" : 60000, "second" : 1000};
+                for (let unit in units) {
+                    if (Math.abs(secondsPassed) > units[unit] || unit === "second") {
+                        expiresHuman.textContent = "(" + humanFormat.format(Math.round(secondsPassed / units[unit]), unit) + ")";
+                        expiresHuman.title = expires.toISOString();
+                        break;
+                    }
+                }
+            }
+        }
+
+        // no expiration
+        if (!hasExpiration) {
+            expiresWrapper.classList.add("d-none");
+            expiresDate.textContent = "";
+            expiresDate.title = "";
+            expiresHuman.textContent = "";
+            expiresHuman.title = "";
+        }
+    }
 
     // show results
     function showResults(results) {
@@ -793,6 +890,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                 // populate content
                 resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+                renderExpires(results);
 
                 // populate issuer and groups with nothing
                 resultsIssuer.textContent = "FOR_INTERNAL_USE_ONLY";
@@ -848,6 +946,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                 // populate content
                 resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+                renderExpires(results);
 
                 // populate issuer
                 resultsIssuer.textContent = results['issuer']['name'];
@@ -881,6 +980,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
                 // populate content
                 resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+                renderExpires(results);
 
                 // populate issuer
                 resultsIssuer.textContent = results['issuer']['name'];
@@ -928,6 +1028,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             else {
                 // populate content
                 resultsValue.textContent = results['sigResult']['verifyResult']['data'];
+                renderExpires(results);
 
                 // populate issuer
                 resultsIssuer.textContent = results['issuer']['name'];
@@ -1010,6 +1111,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 // code signature verification failed
                 else if (error['error'] === "invalidSignature") {
                     manualEntryError.textContent = "This url is not valid. Please request a new one from the issuer.";
+                }
+                // signature has expired
+                else if (error['error'] === "expiredSignature") {
+                    manualEntryError.textContent = "This url has expired. Please request a new one from the issuer.";
                 }
                 // catch-all for unknown errors
                 else {
@@ -1101,6 +1206,10 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             // code signature verification failed
             else if (error['error'] === "invalidSignature") {
                 imageUploadError.textContent = "This QR code is not valid. Please request a new one from the issuer.";
+            }
+            // signature expired
+            else if (error['error'] === "expiredSignature") {
+                imageUploadError.textContent = "This QR code has expired. Please request a new one from the issuer.";
             }
             // catch-all for unknown errors
             else {
@@ -1316,7 +1425,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                                     }
                                     // code signature verification failed
                                     else if (error['error'] === "invalidSignature") {
-                                        alertinvalidSignature.classList.remove("d-none");
+                                        alertInvalidSignature.classList.remove("d-none");
+                                    }
+                                    // signature expired
+                                    else if (error['error'] === "expiredSignature") {
+                                        alertExpiredSignature.classList.remove("d-none");
                                     }
                                     // catch-all for unknown errors
                                     else {
@@ -1498,7 +1611,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 }
                 // code signature verification failed
                 else if (error['error'] === "invalidSignature") {
-                    alertinvalidSignature.classList.remove("d-none");
+                    alertInvalidSignature.classList.remove("d-none");
+                }
+                // signature is expired
+                else if (error['error'] === "expiredSignature") {
+                    alertExpiredSignature.classList.remove("d-none");
                 }
                 // catch-all for unknown errors
                 else {
