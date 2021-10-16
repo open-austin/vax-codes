@@ -1,7 +1,7 @@
 ---
 layout: base
 svgicons: fa-camera, fa-globe, fa-code, fa-lock
-title: Easy, free Covid-19 vaccine verification
+title: Easy, free Covid-19 test and vaccine verification
 ---
 <style>
     #landing-photo {
@@ -19,18 +19,19 @@ title: Easy, free Covid-19 vaccine verification
     <div class="row">
         <div class="col-sm">
             <h1 class="mt-5">
-                Easy, Free<br>
-                Covid-19 Vaccine Verification
+                Easy, Free Covid-19 Test
+                <br>
+                and Vaccine Verification
             </h1>
             <p class="lead">
-                Scan QR codes to verify someone has received a Covid-19 vaccine
+                Scan QR codes to verify Covid-19 tests or vaccines
             </p>
             <div>
                 <a class="btn btn-primary btn-lg mt-2 me-2" href="{{ '/scan' | relative_url }}">Scan a QR code</a>
                 <a class="btn btn-outline-secondary btn-lg mt-2" href="{{ '/how-it-works' | relative_url }}">Learn how it works</a>
             </div>
             <p class="mt-3 small fst-italic">
-                Have you received a Covid-19 vaccine and want to get issued a QR code?
+                Have you received a Covid-19 test or vaccine and want to get issued a QR code?
                 <a class="d-inline-block" href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
             </p>
         </div>
@@ -47,9 +48,9 @@ title: Easy, free Covid-19 vaccine verification
         What is {{ site.site_name }}?
     </h2>
     <p class="text-center mt-4">
-        {{ site.site_name }} is a project to help communities start issuing QR codes to people who have received a Covid-19 vaccine.
+        {{ site.site_name }} is a project to help communities start issuing QR codes to people who have received a Covid-19 test or vaccine.
         <br>
-        Event organizers and businesses can then scan these QR codes to verify that a person has received a vaccine.
+        Event organizers and businesses can then scan these QR codes to verify that a person has received a test or vaccine.
     </p>
     <p class="text-center mt-4">
         This free, open source project was created by volunteers at
@@ -69,7 +70,7 @@ title: Easy, free Covid-19 vaccine verification
                 <svg class="svgicon text-muted"><use href="#fa-camera"/></svg>
             </div>
             <div class="h5">
-                Vaccine verification QR codes can be scanned by any scanner app.
+                Verification QR codes can be scanned by any scanner app.
             </div>
         </div>
         <div class="feature col-sm text-center">
@@ -104,7 +105,7 @@ title: Easy, free Covid-19 vaccine verification
     </h4>
     <p class="small">
         <em>
-            Received a Covid-19 vaccine and want to be issued a QR code you can show event organizers and businesses?
+            Received a Covid-19 test or vaccine and want to be issued a QR code you can show event organizers and businesses?
             <br>
             Browse the
             <a href="{{ '/groups' | relative_url }}">groups list</a>
@@ -115,7 +116,7 @@ title: Easy, free Covid-19 vaccine verification
     </p>
     <p class="mt-3 small">
         <em>
-            Want to become verifier that can issue QR codes to people you've confirmed have received a Covid-19 vaccine?
+            Want to become verifier that can issue QR codes to people you've confirmed have received a Covid-19 test or vaccine?
             <br>
             <a href="{{ '/admin/issuers' | relative_url }}">Visit the issuers admin</a> to learn how to register as an issuer.
         </em>

@@ -46,7 +46,7 @@ title: Security details
                 <a href="https://en.wikipedia.org/wiki/QR_code" target="_blank" rel="noopener noreferrer"
                     >QR codes
                     <svg class="svgicon small"><use href="#fa-external-link"/></svg></a>
-                to people who they've verified to have received a Covid-19 vaccine.
+                to people who they've verified to have received a Covid-19 test or vaccine.
                 Organizations that generate these QR codes are called "issuers", and communities
                 can also create "groups" of issuers they trust.
             </p>
@@ -65,7 +65,7 @@ title: Security details
             </p>
             <p>
                 QR codes are then scanned by an event organizer or business who wants to verify if
-                a person has received Covid-19 vaccine. The QR message itself is just a URL to our
+                a person has received Covid-19 test or vaccine. The QR message itself is just a URL to our
                 <a href="{{ '/scan' | relative_url }}">scan</a>
                 page with the signature + issuer_id + message as a URL
                 <a href="https://en.wikipedia.org/wiki/URI_fragment" target="_blank" rel="noopener noreferrer"
@@ -83,17 +83,17 @@ title: Security details
             <p>
                 By default, issuers and groups are untrusted, so it is up to the event organizer or
                 business doing the scanning to have a list of issuers they trust to properly issue
-                QR codes to vaccine recipients. In general, the expectation is that a local event
+                QR codes to test or vaccine recipients. In general, the expectation is that a local event
                 organizer or business personally knows and trusts the issuer or group owner (e.g. a
                 local community center).
             </p>
             <p>
                 The goal of this project is not become a global vaccine verification system (e.g.
                 "vaccine passports"), but rather focus on helping local communities get a short-term
-                system in place for verifying local community members have been vaccinated so that
+                system in place for verifying local community members have been tested or vaccinated so that
                 in-person gathers can safely resume. Eventually, the expectation is that local {{ site.site_name }}
-                issuers and groups will be replaced by more robust, sophisticated, government-run vaccine
-                verification infrastructure.
+                issuers and groups will be replaced by more robust, sophisticated, government-run Covid-19
+                test and vaccine verification infrastructure.
             </p>
 
             <hr>
@@ -124,7 +124,7 @@ title: Security details
                 So this project <strong>NEVER</strong> stores <em>or even receives</em>
                 any personal or medical information about people who have been issued QR codes.
                 Our goal is simply to make it easy for local community issuers to succeed in setting
-                up a local vaccine verification system for event organizers and businesses.
+                up a local test or vaccine verification system for event organizers and businesses.
             </p>
             <p>
                 Finally, this project is completely open source and available from our

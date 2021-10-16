@@ -83,11 +83,11 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                 <button type="button" class="btn-close" aria-label="Close"></button>
             </div>
             <div id="scan-success" class="scan-result alert alert-success mt-4 text-center d-none" role="alert">
-                Verified vaccine recipient!
+                Verified test or vaccine recipient!
             </div>
             <div id="scan-nondefault" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
-                    Verified vaccine by
+                    Verified test or vaccine by
                     <a id="nondefault-groups-issuer" href="#" class="alert-link d-inline-block" target="_blank"></a>,
                     but this issuer is not trusted by default
                 </div>
@@ -98,7 +98,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             </div>
             <div id="scan-no-groups" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
-                    Verified vaccine, but is not part of any trusted
+                    Verified test or vaccine, but is not part of any trusted
                     <a href="{{ '/groups' | relative_url }}" class="alert-link d-inline-block" target="_blank">groups</a>
                 </div>
                 <div class="mt-1">
@@ -108,7 +108,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             </div>
             <div id="scan-manual-pubkey" class="scan-result alert alert-warning mt-4 text-sm-center d-none" role="alert">
                 <div class="small">
-                    Verified vaccine (for internal purposes only)
+                    Verified test or vaccine (for internal purposes only)
                 </div>
                 <div class="mt-1">
                     If you didn't generate this QR code, DO NOT TRUST IT
@@ -202,7 +202,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
             <div class="col-auto text-center">
                 <p class="fst-italic">
                     Use your phone camera or webcam to scan a QR code<br class="d-none d-sm-inline">
-                    to verify someone got their Covid-19 vaccine.
+                    to verify someone got their Covid-19 test or vaccine.
                 </p>
                 <p class="fst-italic">
                     Don't have a camera? No problem!<br>
@@ -210,7 +210,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
                     or <a data-bs-toggle="modal" data-bs-target="#manual-entry-modal" href="#" role="button">type in the verification URL</a>
                 </p>
                 <p class="fst-italic">
-                    Already got your Covid-19 vaccine and want a QR code?<br>
+                    Already got your Covid-19 test or vaccine and want a QR code?<br>
                     <a href="{{ '/issuers' | relative_url }}">Request a QR code from an issuer here</a>
                 </p>
             </div>
@@ -759,7 +759,7 @@ additional_js: /assets/openpgpjs-v4.10.10/openpgp.min.js
 
     // ...add more verification sub-functions for more code types here
 
-    // supported vaccine verification code formats
+    // supported test or vaccine verification code formats
     const SUPPORTED_CODE_FORMATS = [
 
         // Vax.Codes v1
