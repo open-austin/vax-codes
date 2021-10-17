@@ -1,7 +1,5 @@
 # Vax.Codes - Free QR Codes for Covid-19 Test and Vaccine Recipients
 
-**WARNING: THIS PROJECT IS IN BETA**
-
 Website: https://vax.codes/
 
 This website allows event organizers and businesses to instantly verify that someone has received a Covid-19 test or vaccination by scanning a QR code issued by a locally trusted organization.
