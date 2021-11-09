@@ -1,0 +1,25 @@
+---
+slug: towncrest
+page: 1
+
+issuer_name: TOWNCREST PHARMACY
+issuer_phone: 319-337-3526
+issuer_email: DENINGER@TOWNCREST.COM
+issuer_website: https://www.towncrest.com/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYYmpwRYJKwYBBAHaRw8BAQdAsSv9ODFep/iY3lpb2p2kSuoGLuUfWgt9
+      I4uRHsWoLs7NAMKPBBAWCgAgBQJhianBBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQdo6RoHIUJkkWIQQ4zSSdhBRgEd1ftBx2jpGgchQmSek0AQC9
+      z1awXv9kZLbJD3NOIz6Ak3NKiqZHGXyC2AKzPHWbOgEA3zw5AR3tQJKC6ECI
+      UOd9VOSwaJuaPWT0KhaC6GJdnA0=
+      =HPPB
+      -----END PGP PUBLIC KEY BLOCK-----
+---
