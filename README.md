@@ -34,16 +34,16 @@ See our [github issues](https://github.com/open-austin/vax-codes/issues) for the
 * [x] Informational pages (how-it-works, about-us, etc.)
 * [x] Security overview page
 
-### Phase 2 - Technical Features
+### Phase 2 - Internationalization
+* [ ] Multi-language support
+
+### Phase 3 - Technical Features
 * [ ] API docs
 * [ ] Embedding scanner feature
 * [ ] Embedding docs
 * [x] Local QR code issuing docs
 * [ ] Self-hosting docs
 * [ ] Other extra features (scanning uploaded pdfs, etc.)
-
-### Phase 3 - Internationalization
-* [ ] Multi-language support
 
 ## Limitations
 
