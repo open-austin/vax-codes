@@ -1,0 +1,25 @@
+---
+slug: krasimir_paskov
+page: 1
+
+issuer_name: KRASIMIR PASKOV
+issuer_phone: 0877997807
+issuer_email: KRASIMIR.V.P@GMAIL.COM
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYZ6HxhYJKwYBBAHaRw8BAQdAZRlhI6GvaZhvvWJDAQ/9Wkisc5nV+TzQ
+      olAdmE5U+5rNAMKPBBAWCgAgBQJhnofGBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQuWKifOhCSV8WIQTmuhlnkBmo5Sf5e625YqJ86EJJX+S6AQDz
+      wbPMehZ7+3w0H/DVnwAylaDtTs8fJ+P+xFri0Nxp8gD/Yg6yCkFCggyt6WNR
+      9USPo7GMp6ksPeiR41C4QvzN6Q0=
+      =DuY4
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
