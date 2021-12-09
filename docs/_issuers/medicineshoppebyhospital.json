@@ -1,0 +1,26 @@
+---
+slug: medicineshoppebyhospital
+page: 1
+
+issuer_name: The Medicine Shoppe Pharmacy #127
+issuer_phone: 403-380-3282
+issuer_email: vishal@medicineshoppebyhospital.ca
+issuer_website: https://medicineshoppebyhospital.ca/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYbDIPRYJKwYBBAHaRw8BAQdAO18m6QjTJ+ja8TfPO+7WopPv9xgFeaQs
+      8itGI8M3qUfNAMKPBBAWCgAgBQJhsMg9BgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQ8J+sHPn3i+oWIQQaw5bWYnzv4tqTLKXwn6wc+feL6llDAQCU
+      urojhFIJhvVDPqaw1AYtDfB4ZaYzlWvM7uSIBHka1wEAljYYpsjuPt/mLqcz
+      gmiWh/+GxoPTpDC47DxmB4U4fQ0=
+      =Q8Ti
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
