@@ -1,0 +1,26 @@
+---
+slug: kozuchproductions
+page: 1
+
+issuer_name: Kozuch Productions Inc
+issuer_phone: 213-293-7672
+issuer_email: contact@kozuchproductions.com
+issuer_website: https://kozuchproductions.com/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYbSDqxYJKwYBBAHaRw8BAQdAkaqhYFatRCv1eW/GlZf5C7tjixzbEIyT
+      Z3fSdkXnShvNAMKPBBAWCgAgBQJhtIOrBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQAYa414qLvqYWIQTcH9+hel3tQYMyCBABhrjXiou+pnmwAP9S
+      z4VC1HHEqCBo9H/TMHZJ5F5C0dcCS+YtYm9vZx2h9wD/SyMC7t+6d/5DyJoS
+      1S4W6sfMMxLijlRFcnDmO6un7AU=
+      =pBJm
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
