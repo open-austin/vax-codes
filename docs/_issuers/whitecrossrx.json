@@ -1,0 +1,26 @@
+---
+slug: whitecrossrx
+page: 1
+
+issuer_name: White Cross Pharmacy
+issuer_phone: 208-448-1633
+issuer_email: priestriver@whitecrossrx.com
+issuer_website: https://whitecrossrx.com/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYb472hYJKwYBBAHaRw8BAQdAzFDYGgoEuElcEWWcAa9zdip/B5+zSb1Z
+      jL/VcwEDLUnNAMKPBBAWCgAgBQJhvjvaBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQU6EkWaQ3OWgWIQRPrqzZP2flpj3NGx9ToSRZpDc5aIPqAPwN
+      /nZt97A5TsoUWs+czgc5D5iaJe1y7wLsyPDOIrfBgAD/WOa1bHxePOH7vA6E
+      J+Ji+YxPpVJeQekk+gtEik7+3gc=
+      =vbAr
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
