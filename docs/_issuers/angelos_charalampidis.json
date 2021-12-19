@@ -1,0 +1,26 @@
+---
+slug: angelos_charalampidis
+page: 1
+
+issuer_name: ANGELOS_CHARALAMPIDIS
+issuer_phone: "+306986612764"
+issuer_email: aggelos.haralabidis@gmail.com
+issuer_website: null
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYb8QexYJKwYBBAHaRw8BAQdAMzaJCL8ahm2cOj4sUG4/nN0xjngJx34z
+      fBMxYl21XRPNAMKPBBAWCgAgBQJhvxB7BgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQCRWO6cRZBlwWIQQj4b8RDq6efH18oD4JFY7pxFkGXM/fAPkA
+      V8X1kTeeFSLvsHsfB+BxVXFW+vtwQJjONaZzemTXDwD/Y3xaKhtOUL44wrP9
+      IzB5BvYS43QIdAhr2bTRMUbg0gM=
+      =RlOq
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
