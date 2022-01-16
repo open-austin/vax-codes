@@ -1,0 +1,26 @@
+---
+slug: mobilecovid19rapidtest
+page: 1
+
+issuer_name: SSB Mobile Covid19 Testing Lab
+issuer_phone: null
+issuer_email: arnaldoberon@gmail.com
+issuer_website: https://mobilecovid19rapidtest.com/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYeNFThYJKwYBBAHaRw8BAQdAnebzB45r5bDQOH8ifZMBav28TQmk0Jyf
+      CIew6TfGM57NAMKPBBAWCgAgBQJh40VOBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQ9pe6fNQbDccWIQRAamMjsuzpCHfzp7/2l7p81BsNx3eqAP0Y
+      ZykRKAINrTPdVeHjk9UPASSRTwIqai6h1BZ4MPCvGgEAt3lqdDuAtjcLfUru
+      QNa6YBvzJiHzy02qGRAxGgA6bQE=
+      =fb05
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
