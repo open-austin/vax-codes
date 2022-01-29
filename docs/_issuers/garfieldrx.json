@@ -1,0 +1,26 @@
+---
+slug: garfieldrx
+page: 1
+
+issuer_name: Garfield Pharmacy - Beverly Hills
+issuer_phone: 310-274-0144
+issuer_email: rx@garfieldrx.com
+issuer_website: https://www.garfieldrx.com/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYfSqVBYJKwYBBAHaRw8BAQdA3JJ24pGhu8Wre5sFmhrfCwKHuXI0It2X
+      itT5qEd2L6XNAMKPBBAWCgAgBQJh9KpUBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQD0MnKGu6pOIWIQRVrbWaIB7y6QebUSwPQycoa7qk4m6BAP9z
+      6cZUV/D4+Dz+cjlgyyX7DC5LarHl6FgWTpfm24N31AEAiH4rHy9u0X3rLHxj
+      xGz/rvCuOkQBx7dCuHRX0wIYtQs=
+      =dcnr
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
