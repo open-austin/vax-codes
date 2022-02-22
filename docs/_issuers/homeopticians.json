@@ -1,0 +1,26 @@
+---
+slug: homeopticians
+page: 1
+
+issuer_name: Home Opticians
+issuer_phone: 07598443479
+issuer_email: info@homeopticians.co.uk
+issuer_website: https://homeopticians.co.uk/
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYhU89xYJKwYBBAHaRw8BAQdAoRvxhRyQzM1TX3gRIZTr+5nZ35brMmaQ
+      nlrt4o71NzjNAMKPBBAWCgAgBQJiFTz3BgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQ1ojGMS+clHkWIQSuI5ihdxzFoiUV3PPWiMYxL5yUeQUbAP9b
+      z3QHYnL+HnHVxAHI5JuYQcbahePb4XWRsaKSl1dIYQEA4xPzupgJWqeZnG91
+      BR19nNSfls7t+U7PqrPLi/RruQM=
+      =mldr
+      -----END PGP PUBLIC KEY BLOCK-----
+---
+
