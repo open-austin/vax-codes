@@ -1,0 +1,25 @@
+---
+slug: parita704
+page: 1
+
+issuer_name: Parita Patel
+issuer_phone: 813-391-3184
+issuer_email: parita704@gmail.com
+issuer_website: null
+
+issuer_keys:
+
+  # public key
+  - pubkey: |
+      -----BEGIN PGP PUBLIC KEY BLOCK-----
+      Version: OpenPGP.js v4.10.10
+      Comment: https://openpgpjs.org
+
+      xjMEYquYhRYJKwYBBAHaRw8BAQdAfzZxWmuxAnM29P9jRsrS9KxStBJrj2/J
+      ERsqlm+Qh8jNAMKPBBAWCgAgBQJiq5iFBgsJBwgDAgQVCAoCBBYCAQACGQEC
+      GwMCHgEAIQkQRhVm6gPSAKYWIQRecTjF3vthjSmO/vpGFWbqA9IApj7NAPoC
+      wGQ0QjHFwcetDoZ5LnDVsxiuoLmDWdf8RXR6yO/sDAD/XXSc+qGD3gXgOAHL
+      4mG3J3IKP0KtQbevV41+6/K04wY=
+      =c3Si
+      -----END PGP PUBLIC KEY BLOCK-----
+---
